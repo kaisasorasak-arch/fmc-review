@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FMC Software — ระบบประเมินผลงานพนักงาน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== VIEW: LOGIN ===== -->
+  <div id="view-login" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <span class="login-logo">FM</span>
+        <h1 class="login-title">FMC Software</h1>
+        <p class="login-sub">ระบบประเมินผลงานพนักงาน</p>
+      </div>
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-field">
+          <label class="field-label">ชื่อผู้ใช้</label>
+          <input type="text" id="login-username" class="field-input" placeholder="กรอก username" autocomplete="username" required>
+        </div>
+        <div class="form-field">
+          <label class="field-label">รหัสผ่าน</label>
+          <input type="password" id="login-password" class="field-input" placeholder="กรอก password" autocomplete="current-password" required>
+        </div>
+        <p class="login-error hidden" id="login-error">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
+        <button type="submit" class="btn-primary btn-full" id="login-btn">เข้าสู่ระบบ</button>
+      </form>
+      <p class="login-version">v2.0 · ปี 2026</p>
+    </div>
+  </div>
+
+  <!-- ===== APP SHELL ===== -->
+  <div id="app-shell" class="app-shell hidden">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-logo">FM</span>
+        <div>
+          <div class="brand-name">FMC Software</div>
+          <div class="brand-sub">ระบบประเมินผล</div>
+        </div>
+      </div>
+
+      <div class="user-badge">
+        <div class="user-avatar" id="user-avatar">—</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name">—</div>
+          <div class="user-meta" id="user-meta">—</div>
+        </div>
+        <span class="role-tag" id="role-tag">—</span>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+
+      <div class="eval-progress hidden" id="eval-progress">
+        <div class="progress-label">ความคืบหน้าวงรอบ</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-text" id="progress-text">0 / 0 คน</div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+        <div class="sync-status" id="sync-status">พร้อมใช้งาน</div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+      <!-- ===== VIEW: Employee Dashboard ===== -->
+      <div id="view-emp-dashboard" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">สวัสดี, <span id="emp-greet-name">—</span></h2>
+            <p class="page-desc">ตรวจสอบสถานะการประเมินของคุณ &nbsp;·&nbsp; กลุ่ม <span id="emp-group-label">—</span> &nbsp;·&nbsp; แผนก <span id="emp-dept-label">—</span></p>
+          </div>
+          <span class="period-badge" id="emp-period-badge">—</span>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-label">Self-Evaluation</div>
+            <div class="stat-value" id="emp-self-status">ยังไม่กรอก</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Manager Evaluation</div>
+            <div class="stat-value" id="emp-mgr-status">รอประเมิน</div>
+          </div>
+        </div>
+
+        <!-- Action card -->
+        <div class="action-card" id="emp-action-card">
+          <div class="action-card-text">
+            <div class="action-card-title" id="emp-action-title">กรอก Self-Evaluation</div>
+            <div class="action-card-desc" id="emp-action-desc">ยังไม่ได้ประเมินตัวเอง — กรุณากรอกก่อนวันสิ้นสุดรอบ</div>
+          </div>
+          <button class="btn-primary" id="emp-action-btn" onclick="showView('self-eval')">เริ่มประเมิน</button>
+        </div>
+
+      </div>
+
+      <!-- ===== VIEW: Manager Dashboard ===== -->
+      <div id="view-mgr-dashboard" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Dashboard — หัวหน้างาน</h2>
+            <p class="page-desc">รายชื่อลูกน้องที่รับผิดชอบ</p>
+          </div>
+          <span class="period-badge" id="mgr-period-badge">—</span>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card">
+            <div class="stat-label">พนักงานทั้งหมด</div>
+            <div class="stat-value" id="mgr-total">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">ประเมินแล้ว</div>
+            <div class="stat-value" id="mgr-done">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">รอประเมิน</div>
+            <div class="stat-value text-warn" id="mgr-pending">—</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-header-row">
+            <h3 class="table-title">รายชื่อพนักงาน</h3>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ชื่อ–นามสกุล</th>
+                <th>แผนก</th>
+                <th>ตำแหน่ง</th>
+                <th>ประเภท</th>
+                <th>Self-Eval</th>
+                <th>เอกสาร</th>
+                <th>Manager Eval</th>
+                <th>Grade</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="mgr-employee-list"></tbody>
+          </table>
+          <div class="empty-state hidden" id="mgr-empty">ไม่มีข้อมูลพนักงาน</div>
+        </div>
+
+      </div>
+
+      <!-- ===== VIEW: Executive Dashboard ===== -->
+      <div id="view-exec-dashboard" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title" id="exec-dashboard-title">Dashboard — ผู้บริหาร</h2>
+            <p class="page-desc">ภาพรวมการประเมินทุกกลุ่ม</p>
+          </div>
+          <div class="header-actions">
+            <!-- Period Selector -->
+            <div class="period-selector" id="period-selector">
+              <button class="period-btn active" id="btn-q1" onclick="setPeriod(null,'Q1')">Q1 มิ.ย.</button>
+              <button class="period-btn" id="btn-q2" onclick="setPeriod(null,'Q2')">Q2 ธ.ค.</button>
+              <select class="period-year-select" id="period-year-select" onchange="setPeriod(this.value,null)"></select>
+            </div>
+            <select class="field-select" id="exec-filter-group" onchange="filterExecTable()">
+              <option value="">ทุกกลุ่ม</option>
+              <option>FMC</option><option>ISEC</option><option>PPP</option>
+              <option>BNT</option><option>NSP</option>
+            </select>
+            <select class="field-select" id="exec-filter-dept" onchange="filterExecTable()">
+              <option value="">ทุกแผนก</option>
+            </select>
+          </div>
+        </div>
+        <div class="group-stat-row" id="group-stat-row"></div>
+        <div class="table-card">
+          <div class="table-header-row">
+            <h3 class="table-title">รายชื่อพนักงานทั้งหมด</h3>
+            <button class="btn-outline" onclick="showView('export')">↓ Export</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ชื่อ–นามสกุล</th>
+                <th>กลุ่ม</th>
+                <th>แผนก</th>
+                <th>ตำแหน่ง</th>
+                <th>ประเภท</th>
+                <th>Self</th>
+                <th>Manager</th>
+                <th>Grade</th>
+                <th>ข้อเสนอแนะ</th>
+                <th>Director</th>
+              </tr>
+            </thead>
+            <tbody id="exec-employee-list"></tbody>
+          </table>
+          <div class="empty-state hidden" id="exec-empty">ไม่มีข้อมูล</div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: Admin / HR (จัดการพนักงาน) ===== -->
+      <div id="view-admin" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">จัดการพนักงาน</h2>
+            <p class="page-desc">เพิ่ม แก้ไข ลบ และนำเข้าข้อมูลพนักงาน</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-outline" onclick="exportEmployeeTemplate()">↓ Template Excel</button>
+            <button class="btn-outline" onclick="document.getElementById('import-file-input').click()">↑ Import Excel</button>
+            <input type="file" id="import-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="importEmployees(event)">
+            <button class="btn-primary" onclick="openEmployeeModal()">+ เพิ่มพนักงาน</button>
+          </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="filter-bar">
+          <select class="field-select filter-select" id="admin-filter-group" onchange="renderAdminTable()">
+            <option value="">ทุกกลุ่ม</option>
+            <option>FMC</option><option>ISEC</option><option>PPP</option>
+            <option>BNT</option><option>NSP</option>
+          </select>
+          <select class="field-select filter-select" id="admin-filter-role" onchange="renderAdminTable()">
+            <option value="">ทุก Role</option>
+            <option value="employee">พนักงาน</option>
+            <option value="manager">หัวหน้า</option>
+            <option value="hr">HR</option>
+            <option value="executive">ผู้บริหาร</option>
+          </select>
+          <input type="text" class="field-input filter-search" id="admin-search" placeholder="ค้นหาชื่อ..." oninput="renderAdminTable()">
+        </div>
+
+        <div class="table-card">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ชื่อ–นามสกุล</th>
+                <th>กลุ่ม</th>
+                <th>ตำแหน่ง</th>
+                <th>ประเภท</th>
+                <th>Role</th>
+                <th>Username</th>
+                <th>หัวหน้า</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="admin-employee-list"></tbody>
+          </table>
+          <div class="empty-state hidden" id="admin-empty">ไม่มีข้อมูลพนักงาน</div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: Self-Evaluation Form ===== -->
+      <div id="view-self-eval" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Self-Evaluation</h2>
+            <p class="page-desc" id="self-eval-subtitle">ประเมินผลงานของตัวเอง</p>
+          </div>
+          <button class="btn-outline" onclick="goBack()">← กลับ</button>
+        </div>
+        <!-- JS สร้าง layout ทั้งหมดตาม position_type -->
+        <div id="self-eval-layout"></div>
+      </div>
+
+      <!-- ===== VIEW: Manager Evaluation Form ===== -->
+      <div id="view-mgr-eval" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Manager Evaluation</h2>
+            <p class="page-desc">ประเมิน: <strong id="mgr-eval-emp-name">—</strong></p>
+          </div>
+          <button class="btn-outline" onclick="goBack()">← กลับ</button>
+        </div>
+        <!-- JS สร้าง layout ทั้งหมดตาม position_type ของพนักงาน -->
+        <div id="mgr-eval-layout"></div>
+      </div>
+
+      <!-- ===== VIEW: Report รายบุคคล ===== -->
+      <div id="view-report" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">รายงานรายบุคคล</h2>
+            <p class="page-desc">เปรียบเทียบ Self vs Manager</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-outline" onclick="printReport()">↓ PDF</button>
+            <button class="btn-outline" onclick="goBack()">← กลับ</button>
+          </div>
+        </div>
+        <div id="report-content" class="report-content"></div>
+      </div>
+
+      <!-- ===== VIEW: Export ===== -->
+      <div id="view-export" class="view hidden">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Export ข้อมูล</h2>
+            <p class="page-desc">ส่งออกรายงานการประเมิน</p>
+          </div>
+          <button class="btn-outline" onclick="goBack()">← กลับ</button>
+        </div>
+        <div class="export-grid">
+          <div class="export-option-card">
+            <div class="export-icon">📄</div>
+            <div class="export-label">PDF รายบุคคล</div>
+            <p class="export-desc">พิมพ์รายงานของพนักงานแต่ละคน</p>
+            <div class="form-field">
+              <label class="field-label">เลือกกลุ่ม</label>
+              <select class="field-select" id="pdf-group-select">
+                <option value="">ทุกกลุ่ม</option>
+                <option>FMC</option><option>ISEC</option><option>PPP</option>
+                <option>BNT</option><option>NSP</option>
+              </select>
+            </div>
+            <button class="btn-primary btn-full mt-16" onclick="exportPDF()">พิมพ์ PDF</button>
+          </div>
+          <div class="export-option-card">
+            <div class="export-icon">📊</div>
+            <div class="export-label">Excel รายกลุ่ม</div>
+            <p class="export-desc">ดาวน์โหลดข้อมูลทั้งหมดเป็น Excel</p>
+            <div class="form-field">
+              <label class="field-label">เลือกกลุ่ม</label>
+              <select class="field-select" id="excel-group-select">
+                <option value="">ทุกกลุ่ม</option>
+                <option>FMC</option><option>ISEC</option><option>PPP</option>
+                <option>BNT</option><option>NSP</option>
+              </select>
+            </div>
+            <button class="btn-primary btn-full mt-16" onclick="exportExcel()">ดาวน์โหลด Excel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: คู่มือการใช้งาน ===== -->
+      <div id="view-manual" class="view hidden">
+        <div class="page-header no-print">
+          <div>
+            <h2 class="page-title">คู่มือการใช้งาน</h2>
+            <p class="page-desc">ขั้นตอนการใช้งานระบบ FMC Software</p>
+          </div>
+          <button class="btn-primary" onclick="printManual()">🖨 พิมพ์ / บันทึก PDF</button>
+        </div>
+        <div id="manual-content"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== MODAL: เพิ่ม/แก้ไขพนักงาน ===== -->
+  <div class="modal-overlay hidden" id="modal-employee" onclick="closeModalOutside(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">เพิ่มพนักงาน</h3>
+        <button class="modal-close" onclick="closeEmployeeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="form-field">
+            <label class="field-label">ชื่อ–นามสกุล *</label>
+            <input type="text" id="modal-name" class="field-input" placeholder="คุณชื่อ นามสกุล">
+          </div>
+          <div class="form-field">
+            <label class="field-label">กลุ่ม *</label>
+            <select id="modal-group" class="field-select" onchange="onModalGroupChange()">
+              <option value="">— เลือกกลุ่ม —</option>
+              <option>FMC</option><option>ISEC</option><option>PPP</option>
+              <option>BNT</option><option>NSP</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="field-label">แผนก</label>
+            <select id="modal-dept" class="field-select">
+              <option value="">— เลือกกลุ่มก่อน —</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="field-label">ตำแหน่ง *</label>
+            <input type="text" id="modal-position" class="field-input" placeholder="เช่น Engineer, Manager">
+          </div>
+          <div class="form-field">
+            <label class="field-label">ประเภทตำแหน่ง *</label>
+            <select id="modal-position-type" class="field-select">
+              <option value="">— เลือกประเภท —</option>
+              <option value="staff">Staff</option>
+              <option value="senior">Senior</option>
+              <option value="manager">Manager / Asst.Manager</option>
+              <option value="director">Director / BU Director</option>
+              <option value="admin">Admin / Administrative Officer</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="field-label">Role *</label>
+            <select id="modal-role" class="field-select">
+              <option value="">— เลือก Role —</option>
+              <option value="employee">พนักงาน</option>
+              <option value="manager">หัวหน้า</option>
+              <option value="hr">HR</option>
+              <option value="executive">ผู้บริหาร</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="field-label">หัวหน้า (Manager)</label>
+            <select id="modal-manager" class="field-select">
+              <option value="">— ไม่มี / เลือกภายหลัง —</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="field-label">Username *</label>
+            <input type="text" id="modal-username" class="field-input" placeholder="ใช้ login เข้าระบบ">
+          </div>
+          <div class="form-field">
+            <label class="field-label">Password *</label>
+            <input type="text" id="modal-password" class="field-input" placeholder="รหัสผ่านเริ่มต้น">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="closeEmployeeModal()">ยกเลิก</button>
+        <button class="btn-primary" onclick="saveEmployee()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay hidden" id="loading-overlay">
+    <div class="loading-spinner">⟳</div>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

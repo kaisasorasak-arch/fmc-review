@@ -1,0 +1,3677 @@
+// ============================================================
+// APEX REVIEW v2 — app.js
+// ============================================================
+
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4UWRy7EKgDUFht-4aLHNioePl0sMCX-1VYd29lGtNfk_ssX0WxznLO6A8X-1cDFy4Fw/exec';
+
+// ========== พฤติกรรม 10 หัวข้อ สำหรับ Staff / Senior ==========
+const BEHAVIOR_LIST = [
+  { key:'discipline',       no:1,  name:'ความมีระเบียบวินัย',               eng:'Discipline',
+    desc:'ปฏิบัติตามนโยบาย ระเบียบข้อบังคับ และประพฤติตนเป็นตัวอย่างที่ดี' },
+  { key:'integrity',        no:2,  name:'การเป็นคำพูดและให้เกียรติคำพูด',   eng:'Integrity',
+    desc:'ปฏิบัติตามเป้าหมายหรือข้อตกลงภารกิจ ตรงกำหนดเวลา ด้วยความถูกต้องครบถ้วน' },
+  { key:'proactive',        no:3,  name:'การเลือกตอบสนอง',                  eng:'Be Proactive',
+    desc:'มุ่งมั่นทำงานให้สำเร็จ ยอมรับผล พร้อมปรับตัวเข้ากับสถานการณ์' },
+  { key:'goal_setting',     no:4,  name:'การกำหนดเป้าหมาย',                 eng:'Goal Setting',
+    desc:'มีวัตถุประสงค์ ตัวชี้วัดความสำเร็จ และทบทวนเป้าหมายอยู่เสมอ' },
+  { key:'planning',         no:5,  name:'การวางแผนและจัดลำดับความสำคัญ',   eng:'Planning',
+    desc:'คาดการณ์และกำหนดกิจกรรมก่อน-หลัง ให้สอดคล้องกับเป้าหมาย' },
+  { key:'collaboration',    no:6,  name:'การทำงานร่วมกับผู้อื่น',           eng:'Collaboration',
+    desc:'มีส่วนร่วม ให้ความช่วยเหลือ แลกเปลี่ยนความคิดเห็นเพื่อให้ภารกิจสำเร็จ' },
+  { key:'problem_solving',  no:7,  name:'ทักษะการแก้ปัญหา',                 eng:'Problem Solving',
+    desc:'รู้และเข้าใจสิ่งที่เกิดขึ้น แสวงหาแนวทางแก้ไขด้วยความรอบคอบและเหมาะสม' },
+  { key:'active_listening', no:8,  name:'ทักษะการรับฟังผู้อื่นอย่างตั้งใจ', eng:'Active Listening',
+    desc:'รับฟังโดยไม่ตัดสิน เข้าใจความต้องการและตอบสนองได้ตรงตามต้องการ' },
+  { key:'presentation',     no:9,  name:'ทักษะการนำเสนอ',                   eng:'Presentation Skill',
+    desc:'สื่อสารด้วยคำพูด น้ำเสียง ภาษา และกิริยาท่าทาง ให้ผู้รับสารเข้าใจชัดเจน' },
+  { key:'knowledge',        no:10, name:'ความรู้เกี่ยวกับภารกิจของงาน',     eng:'Knowledge',
+    desc:'เรียนรู้งาน รอบรู้ เข้าใจวิธีการและกระบวนการ แสวงหาความรู้เพิ่มเติมอยู่เสมอ' },
+];
+
+// ========== Admin Form — ส่วนที่ 1: Position Competencies (10 หัวข้อ) ==========
+const ADMIN_COMPETENCY_LIST = [
+  { key:'doc_mgmt', no:1, name:'การบริหารจัดการเอกสารและระบบข้อมูล', eng:'Document & Data Management',
+    question:'ในปีที่ผ่านมา คุณมีความถูกต้องและรวดเร็วในการจัดเก็บ คัดแยก และค้นหาเอกสารของสำนักงาน (ทั้งระบบเอกสารจริงและระบบไฟล์ดิจิทัล) ในระดับใด?',
+    options:['จัดเก็บเอกสารแยกหมวดหมู่เป็นระบบสมบูรณ์ 100% มีไฟล์สำรองบนระบบคลาวด์/ดิจิทัล สามารถค้นหาและส่งมอบได้ทันทีภายใน 1-3 นาที และไม่มีประวัติเอกสารสูญหายหรือผิดพลาดเลยตลอดทั้งปี','จัดเก็บเอกสารแยกหมวดหมู่ชัดเจน ค้นหาได้รวดเร็วภายใน 5 นาที เอกสารมีความถูกต้อง เกือบไม่พบข้อผิดพลาดในการจัดเก็บ','จัดเก็บเอกสารตามมาตรฐานทั่วไปของบริษัท ค้นหาได้ตามเวลาปกติ แต่อาจมีเอกสารสะสมรอกระบวนการจัดเก็บบ้างในบางช่วงที่งานโหลด','จัดเก็บเอกสารล่าช้า บ่อยครั้งที่ต้องใช้เวลาค้นหานาน (เกิน 15 นาที) หรือจัดเก็บสลับหมวดหมู่จนต้องเสียเวลารื้อระบบใหม่','เอกสารไม่เป็นระบบ กองสับสนบนโต๊ะ มีกรณีเอกสารสำคัญชำรุดหรือสูญหาย ส่งผลกระทบทำให้งานของผู้อื่นติดขัด'] },
+  { key:'task_priority', no:2, name:'การจัดลำดับความสำคัญและการจัดการภาระงาน', eng:'Task Prioritization',
+    question:'เมื่อต้องรับผิดชอบงานธุรการหลายอย่างพร้อมกันในเวลาเดียวกัน คุณสามารถจัดลำดับความสำคัญและส่งมอบงานได้ทันกำหนดในระดับใด?',
+    options:['บริหารเวลาได้อย่างยอดเยี่ยม งานรูทีนไม่เคยเลท งานด่วนแทรกสามารถเคลียร์เสร็จทันกำหนด 100% โดยไม่มีอาการลนลานหรือส่งผลกระทบต่องานส่วนอื่น','วางแผนงานล่วงหน้าได้ดี แยกแยะงานด่วน-งานสำคัญได้ชัดเจน งานส่วนใหญ่เสร็จทันกำหนด มีส่วนน้อยมากที่ต้องเลื่อน','ทำงานเสร็จทันตามกำหนดมาตรฐาน แต่อาจมีบางครั้งที่รู้สึกโหลดหรือจัดการไม่ทันเมื่อมีงานด่วนเข้ามาแทรกพร้อมกันหลายงาน','มักทำงานตามความชอบหรือทำงานที่อยู่ตรงหน้าก่อน จนทำให้งานสำคัญหรืองานที่มีกำหนดส่ง (Deadline) หลุดหรือเลทบ่อยครั้ง','ไม่สามารถจัดการงานที่รุมเร้าได้ ทำงานไม่ทันกำหนดเป็นประจำ ส่งผลให้ระบบงานของสำนักงานหรือแผนกอื่นต้องสะดุด'] },
+  { key:'coordination', no:3, name:'การประสานงานและการติดตามงาน', eng:'Coordination & Follow-up',
+    question:'ในการประสานงานนัดหมาย ประสานงานจัดประชุม หรือติดต่อกับหน่วยงานภายในและภายนอก คุณมีการสื่อสารที่ชัดเจนและติดตามผลจนงานสำเร็จในระดับใด?',
+    options:['ประสานงานได้อย่างมีประสิทธิภาพสูงสุด มีการบันทึกข้อตกลง สรุปข้อมูลชัดเจน และติดตามผลเชิงรุกจนงานจบ 100% โดยที่หัวหน้าไม่ต้องตามซ้ำ','สื่อสารข้อมูลครบถ้วน ชัดเจน มีการติดตามงานตามกำหนดเวลา ทำให้การประสานงานราบรื่นและไม่เกิดความเข้าใจผิด','ประสานงานได้ตามหน้าที่ ส่งสารได้ครบถ้วน แต่อาจเน้นเพียงแค่การส่งต่อข้อมูล แต่ไม่ได้ติดตามผลเชิงรุกจนกว่าจะถึงกำหนด','สื่อสารคลาดเคลื่อนบ่อยครั้ง หรือลืมติดตามผล ทำให้งานประสานงานล่าช้า ต้องให้ผู้เกี่ยวข้องหรือหัวหน้าคอยเตือนบ่อยๆ','ละเลยการประสานงาน สื่อสารข้อมูลผิดพลาดอย่างรุนแรง หรือลืมแจ้งผู้เกี่ยวข้อง จนทำให้งานหรือกิจกรรมของบริษัทเกิดความเสียหาย'] },
+  { key:'attention', no:4, name:'การใส่ใจในรายละเอียดของงาน', eng:'Attention to Detail',
+    question:'คุณมีความรอบคอบในการตรวจสอบความถูกต้องของข้อมูล ตัวเลข ตัวอักษร ในเอกสารธุรการต่างๆ ก่อนส่งต่อหรือจัดเก็บในระดับใด?',
+    options:['ตรวจสอบงานอย่างถี่ถ้วน 100% ไม่เคยมีคำผิด ตัวเลขสลับ หรือข้อมูลผิดพลาดหลุดไปถึงหัวหน้าหรือผู้บริหารเลย','มีความรอบคอบสูง ตรวจพบและแก้ไขจุดผิดพลาดได้ด้วยตนเองก่อนส่งงาน มีคำผิดหรือข้อผิดพลาดหลุดไปน้อยมาก (น้อยกว่า 5%)','ทำงานได้ถูกต้องตามมาตรฐานทั่วไป แต่ยังมีข้อผิดพลาดเล็กๆ น้อยๆ เช่น พิมพ์ผิด หรือลืมแนบไฟล์หลุดไปให้หัวหน้าต้องทักท้วงอยู่บ้าง','ทำงานเร็วแต่ขาดความรอบคอบ มักส่งงานที่มีข้อมูลผิด ตัวเลขไม่ตรง หรือเอกสารไม่ครบ ทำให้ต้องนำกลับมาแก้ไขบ่อยครั้ง','ทำงานสะเพร่า ไม่เคยตรวจสอบงานก่อนส่ง ปล่อยให้ข้อมูลที่ผิดพลาดร้ายแรงผ่านไป จนส่งผลกระทบต่อการอนุมัติหรือความน่าเชื่อถือ'] },
+  { key:'service_mind', no:5, name:'การบริการด้วยใจ', eng:'Service Mind',
+    question:'ในปีที่ผ่านมา คุณแสดงออกถึงความกระตือรือร้น ความสุภาพ และความเต็มใจในการให้บริการและช่วยเหลือผู้มาติดต่อในระดับใด?',
+    options:['ให้บริการด้วยความยิ้มแย้ม สุภาพ และกระตือรือร้นเป็นเลิศ ได้รับคำชมเชยจากผู้มาติดต่ออย่างสม่ำเสมอ เป็นที่พึ่งของคนในออฟฟิศได้ทุกเรื่อง','มีจิตสำนึกบริการที่ดี ช่วยเหลือผู้มาติดต่ออย่างเต็มใจและสุภาพเรียบร้อย สามารถจัดการคำขอต่างๆ ได้อย่างราบรื่น','ให้บริการตามหน้าที่และมาตรฐานที่กำหนด พูดจาสุภาพเรียบร้อย แต่อาจไม่ได้แสดงความกระตือรือร้นเป็นพิเศษ','ให้บริการตามอารมณ์ บางครั้งแสดงสีหน้าเหนื่อยล้า บึ้งตึง หรือน้ำเสียงไม่ต้อนรับเมื่อติดงานยุ่ง ทำให้ผู้มาติดต่อรู้สึกเกรงใจหรืออึดอัด','ปฏิเสธการช่วยเหลือ ชักสีหน้า หรือพูดจาไม่สุภาพกับผู้มาติดต่อ จนได้รับการร้องเรียน (Complaint) เกี่ยวกับพฤติกรรมการบริการ'] },
+  { key:'problem_solving', no:6, name:'การแก้ไขปัญหาเฉพาะหน้า', eng:'Problem Solving',
+    question:'เมื่อเกิดเหตุขัดข้องหรือปัญหาหน้างานที่ไม่คาดคิดในสำนักงาน คุณสามารถจัดการแก้ไขสถานการณ์ได้ดีระดับใด?',
+    options:['มีสติสูง แก้ไขปัญหาได้ทันท่วงทีอย่างมีไหวพริบ โดยหาทางเลือกสำรองมารองรับได้ทันที ทำให้งานไม่สะดุดและไม่มีผลกระทบเชิงลบ','สามารถควบคุมสถานการณ์และแก้ไขปัญหาเฉพาะหน้าได้ดีด้วยตนเองเป็นส่วนใหญ่ มีความพยายามหาทางออกก่อนจะวิ่งไปถามหัวหน้า','เมื่อเจอปัญหาก็สามารถแก้ไขได้ตามขั้นตอนปกติ หรือรีบแจ้งผู้เกี่ยวข้องและหัวหน้าเพื่อขอคำแนะนำทันที','มักตกใจหรือทำอะไรไม่ถูกเมื่อเกิดปัญหาหน้างาน ปล่อยทิ้งไว้ชั่วคราว หรือรอกรรมวิธีตามระบบจนทำให้ปัญหาบานปลาย','ไม่สามารถรับมือกับปัญหาได้เลย โวยวาย หรือหลีกเลี่ยงปัญหา ปล่อยให้สถานการณ์เสียหายโดยไม่มีการแอ็กชันใดๆ'] },
+  { key:'inventory', no:7, name:'การบริหารคลังอุปกรณ์สำนักงาน', eng:'Inventory & Asset Management',
+    question:'คุณมีความสามารถในการควบคุม ดูแล และจัดสรรคลังอุปกรณ์สำนักงาน ไม่ให้เกิดปัญหาของขาดคลังหรือของเหลือตกค้างจนเสื่อมสภาพในระดับใด?',
+    options:['มีระบบบันทึกรับ-จ่าย (Stock) ที่แม่นยำ 100% ตัวเลขตรงกับของจริงเสมอ มีการวางแผนสั่งซื้อล่วงหน้า ของไม่เคยขาดคลังและไม่เคยมีของหมดอายุ','ดูแลสต็อกได้ดี มีการเช็กยอดเป็นประจำก่อนของหมด สั่งซื้อได้ทันเวลา สินค้าในคลังจัดเป็นระเบียบเรียบร้อย หยิบง่าย','บริหารคลังได้ตามมาตรฐานทั่วไป ของมีเพียงพอใช้งานเป็นส่วนใหญ่ แต่อาจมีบางครั้งที่ของหมดกะทันหันต้องวิ่งซื้อด่วนบ้างนานๆ ครั้ง','ขาดการบันทึกสต็อกที่สม่ำเสมอ บ่อยครั้งที่ปล่อยให้ของหมดคลังพนักงานไม่มีใช้ หรือสั่งมาเยอะเกินไปจนเสื่อมสภาพคาตู้','คลังอุปกรณ์ไร้ระเบียบ ไม่เคยเช็กยอด ปล่อยให้ของหายบ่อยครั้ง และไม่สามารถควบคุมค่าใช้จ่ายในการจัดซื้อได้เลย'] },
+  { key:'adaptability', no:8, name:'ความยืดหยุ่นและการเรียนรู้ระบบใหม่', eng:'Adaptability & Learning',
+    question:'คุณมีความสามารถในการเรียนรู้เทคโนโลยี เครื่องมือ หรือระบบการทำงานใหม่ๆ ของออฟฟิศ และปรับตัวเข้ากับการเปลี่ยนแปลงได้เร็วระดับใด?',
+    options:['เรียนรู้ไวมาก ปรับตัวเข้ากับระบบใหม่ได้ทันที และสามารถทำคู่มือสรุปหรือช่วยสอน/อธิบายให้พนักงานคนอื่นเข้าใจระบบได้ด้วย','เปิดรับและเรียนรู้สิ่งใหม่ๆ ได้อย่างรวดเร็ว พยายามฝึกฝนใช้งานด้วยตนเองจนชำนาญ และใช้งานระบบใหม่ได้ถูกต้องตามกำหนด','ปรับตัวและใช้งานระบบใหม่ได้ตามมาตรฐาน แต่อาจต้องใช้เวลาลองผิดลองถูกหรือคอยสอบถามผู้รู้ในช่วงแรกๆ','ค่อนข้างยึดติดกับวิธีทำงานแบบเดิม รู้สึกกังวลกับการเปลี่ยนแปลง ปรับตัวช้า และมักหลีกเลี่ยงการใช้ระบบใหม่ถ้าไม่บังคับ','ต่อต้านการเปลี่ยนแปลง ไม่ยอมเรียนรู้ระบบใหม่ และยังคงใช้วิธีเดิมๆ ที่ล้าสมัย ทำให้งานของภาพรวมล่าช้า'] },
+  { key:'confidentiality', no:9, name:'การรักษาความลับและข้อมูลภายใน', eng:'Confidentiality & Discretion',
+    question:'ในฐานะงานธุรการที่ต้องสัมผัสเอกสารสำคัญ คุณมีความรอบคอบในการปกป้องและรักษาความลับของบริษัท/ข้อมูลส่วนบุคคลของพนักงาน ไม่ให้รั่วไหลในระดับใด?',
+    options:['ปฏิบัติตามรักษาความลับขั้นสูงสุด ล็อกหน้าจอคอมพิวเตอร์ ทำลายเอกสารที่ไม่ใช้ด้วยเครื่องย่อยสลาย และไม่เคยนำเรื่องภายในไปพูดคุยเลย 100%','มีความตระหนักเรื่องความลับสูง จัดเก็บเอกสารสำคัญในตู้ล็อกกุญแจมิดชิด ไม่พูดถึงข้อมูลภายในให้บุคคลที่ไม่เกี่ยวข้องฟัง','รักษาความลับได้ดีตามเกณฑ์ทั่วไป แต่อาจมีบางครั้งที่ลืมคว่ำหน้าเอกสารทิ้งไว้บนโต๊ะ หรือลืมล็อกหน้าจอคอมพิวเตอร์ตอนลุกไปห้องน้ำสั้นๆ','ขาดความระมัดระวัง เช่น วางเอกสารเงินเดือนหรือข้อมูลภายในทิ้งไว้บนเครื่องถ่ายเอกสาร หรือหลุดปากพูดคุยเรื่องภายในออฟฟิศในที่สาธารณะ','ปล่อยปละละเลยข้อมูลความลับ นำข้อมูลภายในไปเล่า/แชร์ให้คนนอกหรือแผนกอื่นฟัง ส่งผลกระทบต่อความเชื่อมั่นองค์กร'] },
+  { key:'accountability', no:10, name:'ความรับผิดชอบและดูแลความเรียบร้อยของสำนักงาน', eng:'Accountability & Facility Care',
+    question:'คุณมีความใส่ใจในการดูแลสภาพแวดล้อม ความสะอาด ความปลอดภัย และความพร้อมใช้งานของพื้นที่ส่วนกลางในสำนักงานในระดับใด?',
+    options:['สอดส่องดูแลสำนักงานอย่างเป็นระบบ (มี Check-list) พื้นที่ส่วนกลางพร้อมใช้งานเสมอ ตรวจสอบความปลอดภัยครบถ้วน 100% ก่อนกลับบ้านทุกวัน','มีความรับผิดชอบสูง คอยเดินตรวจความเรียบร้อยของออฟฟิศเป็นประจำ หากเจอจุดชำรุดจะรีบแจ้งซ่อมทันที และปิดออฟฟิศเรียบร้อยดี','ดูแลความเรียบร้อยตามหน้าที่และตารางเวลาที่กำหนด ออฟฟิศสะอาดและปลอดภัยตามเกณฑ์ทั่วไป','ละเลยการตรวจสอบสภาพแวดล้อม ปล่อยให้เครื่องใช้ในออฟฟิศพังชำรุดหลายวันถึงค่อยแจ้งซ่อม หรือบางครั้งลืมปิดไฟ/แอร์ทิ้งไว้ข้ามคืน','ไม่สนใจดูแลความเรียบร้อยของสำนักงาน ปล่อยให้ออฟฟิศรก ชำรุด หรือละเลยเรื่องความปลอดภัยในการเปิด-ปิดออฟฟิศ'] },
+];
+
+// ========== Admin Form — ส่วนที่ 2: Core Behaviors (10 หัวข้อ) ==========
+const ADMIN_BEHAVIOR_LIST = [
+  { key:'punctuality', no:1, name:'การรักษาเวลาและความรับผิดชอบต่อหน้าที่',
+    question:'ฉันเข้าทำงานตรงต่อเวลา ในการนัดหมาย การประชุม และส่งมอบงานในความรับผิดชอบได้ตามกำหนดเวลาที่ตกลงไว้เสมอ',
+    options:['ส่งงานก่อนกำหนดหรือตรงเวลา 100% บริหารความเสี่ยงล่วงหน้าหากรู้ว่างานจะเลท และไม่เคยสายโดยไม่มีเหตุจำเป็นร้ายแรง','ส่งงานตรงเวลาเกือบทั้งหมด (มากกว่า 90%) มาประชุมตรงเวลา หากจะเลทจะแจ้งผู้เกี่ยวข้องล่วงหน้าเสมอ','ส่งงานตรงเวลาเป็นส่วนใหญ่ แต่อาจมีล่าช้าหรือผิดนัดบ้างในบางโครงการที่งานล้นมือ แต่ไม่สร้างความเสียหายร้ายแรง','ส่งงานเลทบ่อยครั้ง ต้องให้หัวหน้างานติดตามทวงถามอยู่เสมอ มาสายในการประชุมหรือนัดหมายหน้างานบางครั้ง','ทำงานล่าช้าเป็นประจำจนส่งผลกระทบต่อ Timeline ภาพรวมของทีมหรือผู้รับเหมา และไม่มีการแจ้งเตือนล่วงหน้า'] },
+  { key:'integrity', no:2, name:'ความซื่อสัตย์ต่อวิชาชีพ ความปลอดภัย และความโปร่งใส',
+    question:'ท่านปฏิบัติงานด้วยความโปร่งใส ตรงไปตรงมา และรักษาข้อมูลสำคัญหรือเอกสารลับของบริษัท/บุคคลอย่างเข้มงวดอย่างไร?',
+    options:['ปฏิบัติงานโปร่งใส ตรวจสอบได้ 100% ปกป้องข้อมูลความลับและเอกสารสำคัญอย่างรัดกุมสูงสุด และกล้าตักเตือนเมื่อเห็นสิ่งไม่ถูกต้อง','รักษาความลับขององค์กรและข้อมูลบุคคลได้อย่างดีเยี่ยม ปฏิบัติตามจรรยาบรรณอย่างเคร่งครัด','ทำงานด้วยความซื่อสัตย์ ปฏิบัติตามระบบการเก็บเอกสารลับตามมาตรฐาน ไม่มีเจตนาปกปิดข้อมูลความผิดพลาด','เคยละเลยการรักษาความลับ (เช่น วางเอกสารสำคัญทิ้งไว้) หรือรายงานข้อมูลไม่ตรงกับความจริงบางส่วน','นำข้อมูลภายในหรือความลับไปเปิดเผย ทำเอกสารสำคัญสูญหาย หรือมีพฤติกรรมทุจริต/ส่อเจตนาไม่โปร่งใส'] },
+  { key:'accountability2', no:3, name:'การยึดมั่นในคำสัญญาและความรับผิดชอบ',
+    question:'เมื่อเกิดข้อผิดพลาดในกระบวนการทำงาน ท่านยอมรับและแสดงความรับผิดชอบ พร้อมทั้งเสนอแนวทางแก้ไขทันทีโดยไม่โยนความผิดให้ผู้อื่นอย่างไร?',
+    options:['เมื่อเกิดปัญหา กล้ายืดอกรับผิดชอบ 100% โดยไม่โทษใคร พร้อมนำเสนอแนวทางแก้ไขและแผนป้องกันระยะยาวทันที','ยอมรับความผิดพลาดของตนเองอย่างตรงไปตรงมา และกระตือรือร้นที่จะแก้ไขให้เสร็จโดยเร็ว','ยอมรับความผิดพลาดเมื่อมีการตรวจสอบพบ และยินดีแก้ไขงานตามที่หัวหน้างานหรือทีมแนะนำ','อิดออดเมื่อทำผิด พยายามหาข้ออ้างปัดความรับผิดชอบ หรือแก้ไขงานแบบแกนๆ ให้ผ่านไป','ปฏิเสธความรับผิดชอบอย่างสิ้นเชิง โยนความผิดให้ผู้อื่น หรือปกปิดความผิดจนเรื่องลุกลามใหญ่โต'] },
+  { key:'proactive', no:4, name:'การเป็นผู้กำหนดเชิงรุกและแก้ปัญหาทันที',
+    question:'เมื่อเผชิญหน้ากับอุปสรรค หน้างานเปลี่ยน หรือระบบมีปัญหา ฉันเลือกที่จะโฟกัสไปที่ "ทางแก้ปัญหา" และลงมือทำทันทีโดยไม่เสียเวลาไปกับการบ่น เฝ้ารอคำสั่ง หรือโทษปัจจัยภายนอก',
+    options:['เมื่อเกิดปัญหาวิกฤตหน้างาน จะเข้าไปควบคุมสถานการณ์ทันที พร้อมเสนอทางเลือกแก้ไข (Solution) รูปแบบ A, B, C ที่คิดมาอย่างรอบด้านให้หัวหน้าเลือก','ไม่รอช้าเมื่อเจอปัญหา เร่งหาข้อมูลที่เกี่ยวข้องและลงมือจัดการในส่วนที่ตัวเองทำได้ โดยไม่เสียเวลาไปกับการบ่นหรือโทษปัจจัยภายนอก','แจ้งปัญหารูปแบบต่างๆ ให้หัวหน้าทราบทันที แต่อาจจะยังเฝ้ารอแนวทางการแก้ไขหรือคำสั่งระบุจากหัวหน้าเป็นหลัก','รับรู้ปัญหาแต่ปล่อยไว้เฉยๆ จนกว่าหัวหน้าจะสั่งการ หรือมักจะบ่นและโทษว่าปัญหาเกิดจากแผนกอื่น/ซัพพลายเออร์ก่อนลงมือทำ','ปล่อยให้ปัญหากระทบจนงานพัง หรือรอให้ลามไปถึงส่วนอื่นก่อนถึงจะพูด และมักคิดว่า "ไม่ใช่หน้าที่ของฉัน"'] },
+  { key:'planning', no:5, name:'การวางแผนงานและปรับตัวอย่างรวดเร็ว',
+    question:'ก่อนเริ่มโครงการหรือทำงานใดๆ ฉันมีการวางแผน ลำดับขั้นตอน มองเห็นภาพรวมของผลลัพธ์ที่ต้องการ และเข้าใจว่างานของตนเองตอบโจทย์เป้าหมายขององค์กรอย่างไร',
+    options:['มีการทำแผนงานระยะยาว ยึดโยงเป้าหมายโครงการเข้ากับเป้าหมายใหญ่ของบริษัท สามารถอธิบายให้ทีมเห็นภาพความสำเร็จเดียวกันได้อย่างชัดเจน','มีการเขียน Checklist และวางแผนงานประจำสัปดาห์/เดือนล่วงหน้าอย่างเป็นระบบ รู้ว่าผลลัพธ์สุดท้ายของงานที่ทำคืออะไร','รู้หน้าที่และเป้าหมายงานในแต่ละวันของตนเอง แต่อาจยังไม่ได้วางแผนล่วงหน้าระยะยาว ทำงานตาม Task ที่ได้รับมอบหมายได้ดี','ทำงานไปวันๆ เริ่มต้นงานโดยไม่มีแผนที่ชัดเจน ทำให้ต้องกลับมาแก้ไขงานบ่อยเพราะเข้าใจผลลัพธ์ไม่ตรงกับหัวหน้า','ไม่มีเป้าหมายหรือแผนงานเลย ทำงานสะเปะสะปะตามแต่จะมีงานด่วนเข้ามาแทรก ไม่เข้าใจว่างานที่ตนเองทำส่งผลอย่างไรต่อภาพรวม'] },
+  { key:'time_mgmt', no:6, name:'การบริหารเวลาและจัดลำดับความสำคัญ',
+    question:'ฉันสามารถแยกแยะงานที่ "สำคัญ" และงานที่ "เร่งด่วน" ได้ดี โดยใช้เวลาส่วนใหญ่ไปกับงานที่มีคุณค่าต่อโครงการ มากกว่าการวิ่งไล่ตามแต่งานด่วนที่ไม่ได้สร้างผลลัพธ์ระยะยาว',
+    options:['แยกแยะงาน "สำคัญ" และ "เร่งด่วน" ได้เด็ดขาด ใช้เวลาส่วนใหญ่ไปกับงานเชิงกลยุทธ์และการวางระบบป้องกันเพื่อไม่ให้เกิดปัญหาซ้ำซาก','บริหารเวลาได้ดี ทำงานที่สร้างผลลัพธ์สูง (High Impact) เสร็จตามกำหนด และปฏิเสธหรือส่งต่อสิ่งที่ไม่จำเป็นได้อย่างเหมาะสม','ทำงานสำคัญเสร็จทันเวลา แต่อาจต้องเสียเวลาและพลังงานไปกับการวิ่งไล่แก้ "งานด่วน" หน้างานค่อนข้างบ่อยจนล้า','มักจมอยู่กับงานเอกสารหรืองานจุกจิกที่ไม่ได้สร้างผลงานหลัก ทำงานสำคัญไม่ทันเพราะมัวแต่ไปทำในส่วนอื่นที่เร่งด่วนกว่า','รู้สึกยุ่งและเหนื่อยตลอดเวลาเหมือนกำลัง "ดับไฟ" หน้างานทุกวัน แต่นึกไม่ออกว่าทำอะไรสำเร็จเป็นชิ้นเป็นอันบ้าง'] },
+  { key:'win_win', no:7, name:'การประสานประโยชน์และหาข้อตกลงร่วมกัน',
+    question:'ในการประสานงานหรือต่อรอง ฉันมุ่งเน้นการหาข้อตกลงที่ได้ประโยชน์ร่วมกันทั้งสองฝ่าย เพื่อรักษาความสัมพันธ์ระยะยาว',
+    options:['เป็นตัวกลางไกล่เกลี่ยผลประโยชน์ระหว่างทีมได้อย่างยอดเยี่ยม โดยสร้างข้อตกลงที่ทุกฝ่ายพึงพอใจและร่วมมือกันระยะยาว','ในการเจรจาหรือทำงานร่วมกัน จะพยายามหาทางออกที่ตอบโจทย์ทั้งเป้าหมายของตนเองและรักษาผลประโยชน์ของอีกฝ่ายเสมอ','เน้นให้งานของตนเองสำเร็จตามเป้าหมายเป็นหลัก แต่อยู่บนพื้นฐานความถูกต้องและไม่ได้ไปเอาเปรียบหรือทำร้ายใคร','มุ่งมั่นจะเอาชนะหรือให้ได้ข้อสรุปตามใจตนเองเป็นหลัก จนบางครั้งยอมหักยอมงอและสร้างความอึดอัดใจให้เพื่อนร่วมงาน','คิดแบบ Win-Lose หรือ Lose-Lose มองแผนกอื่นเป็นคู่แข่ง เอาประโยชน์เข้าตัวเองโดยไม่สนใจว่าภาพรวมบริษัทจะเสียหาย'] },
+  { key:'communication', no:8, name:'การสื่อสารที่มีประสิทธิภาพ',
+    question:'ฉันสามารถสื่อสารข้อมูล (ทั้งการพูด การเขียนรายงาน และการส่งต่อคำสั่งงาน) ได้อย่างชัดเจน กระชับ ตรงประเด็น เลือกใช้ระดับภาษาได้เหมาะสมกับผู้ฟัง และมีการทวนสอบความเข้าใจเพื่อป้องกันความผิดพลาดในการทำงาน',
+    options:['สื่อสารเรื่องต่างๆ ให้เข้าใจง่ายได้ดีเยี่ยม เลือกช่องทางและจังหวะเวลาสื่อสารได้ตรงจุด และมีการทวนสอบความเข้าใจ (Double-check) กับผู้รับสาร 100%','สื่อสารได้ตรงประเด็น กระชับ บันทึกสรุปการคุยงานเป็นลายลักษณ์อักษร เพื่อใช้เป็นหลักฐานอ้างอิงและกันลืมเกือบทุกครั้ง','สื่อสารงานได้เข้าใจถูกต้องตามมาตรฐานทั่วไปในสถานการณ์ปกติ แต่อาจมีบางครั้งที่รีบร้อนจนลืมทวนสอบความเข้าใจ','สื่อสารคลุมเครือ หรือบอกข้อมูลไม่ครบถ้วน ทำให้ทีมงานเข้าใจคลาดเคลื่อนจนต้องกลับมาแก้ไขงานบางส่วน','ไม่สื่อสารข้อมูลสำคัญ สื่อสารด้วยอารมณ์บ่อยครั้ง หรือส่งต่อข้อมูลผิดพลาดอย่างร้ายแรงจนเกิดความเสียหายหน้างาน'] },
+  { key:'teamwork', no:9, name:'การทำงานร่วมกันข้ามสายงานเพื่อผลลัพธ์ที่ดีกว่า',
+    question:'ฉันยินดีทำงานร่วมกับคนที่คิดต่าง มองเห็นว่าความแตกต่างทางทักษะสามารถนำมารวมกันเพื่อสร้างนวัตกรรมหรือผลลัพธ์ที่ดีกว่าเดิมได้',
+    options:['ดึงจุดเด่นและทักษะที่แตกต่างของคนในทีมมารวมกันจนสร้างเป็นนวัตกรรม โซลูชันใหม่ หรือประหยัดต้นทุนให้บริษัทได้มหาศาล','ทำงานข้ามสายงาน (Cross-functional) ได้อย่างราบรื่น ยินดีเปิดรับความต่างและหาจุดร่วมเพื่อรวมพลังทำงานให้สำเร็จ','ทำงานร่วมกับคนอื่นหรือแผนกอื่นได้ตามหน้าที่ที่กำหนดไว้ ไม่ได้สร้างความขัดแย้ง แต่ก็ยังไม่ได้ดึงศักยภาพความต่างมาสร้างมูลค่าเพิ่ม','ค่อนข้างแยกตัว ทำงานเฉพาะในกลุ่มหรือแผนกของตนเอง ไม่อยากข้ามสายงานเพราะรู้สึกว่าคุยกันเข้าใจยากและวุ่นวาย','ปฏิเสธการทำงานร่วมกับคนที่คิดไม่เหมือนกัน ชอบฉายเดี่ยว และแสดงทัศนคติต่อต้านทักษะสายงานอื่น'] },
+  { key:'learning', no:10, name:'การพัฒนาตนเองอย่างต่อเนื่อง แลกเปลี่ยนความรู้และเปิดรับฟีดแบ็ก',
+    question:'ฉันศึกษาหาความรู้เทคโนโลยีหรือวิธีทำงานใหม่ๆ อยู่เสมอ พร้อมทั้งยินดีแชร์ความรู้ให้ทีม และเปิดใจรับฟีดแบ็กเพื่อนำมาปรับปรุงตัวโดยไม่คิดว่าเป็นความล้มเหลว',
+    options:['ขวนขวายเรียนรู้เทคโนโลยีใหม่/ทักษะใหม่ตลอดเวลา (เช่น Smart Solutions, AI, เทคนิค Excel, ระบบ Automation) และนำมาปรับใช้จนงานเร็วและดีขึ้นอย่างเห็นได้ชัด','ชอบเรียนรู้สิ่งใหม่ๆ พัฒนาทักษะตัวเองอยู่เสมอ ยินดีรับฟังคำติชมจากหัวหน้าและเพื่อนร่วมงานเพื่อนำมาปรับปรุงตัวโดยไม่คิดมาก','เข้าร่วมการอบรมที่บริษัทจัดให้ตามหน้าที่ ยอมรับคำวิจารณ์ได้ แต่อาจจะยังไม่ได้ขวนขวายหาความรู้ภายนอกเพิ่มเติมด้วยตนเอง','ทำงานด้วยวิธีเดิมๆ ทำตามความคุ้นเคยเดิมๆ ไม่ค่อยเปิดรับเทคโนโลยีใหม่ และมักจะรู้สึกเสียหน้าหรือแก้ตัวเมื่อได้รับฟีดแบ็กเชิงลบ','ต่อต้านการเรียนรู้ ปฏิเสธการใช้เครื่องมือหรือเทคโนโลยีใหม่ๆ ดึงดันจะทำแบบเดิม แม้จะล้าหลังและช้า'] },
+];
+
+// state สำหรับ Admin Form multi-step
+let adminFormData = {};
+let adminFormStep = 1;
+const ADMIN_TOTAL_STEPS = 4;
+let adminMgrFormStep = 1;
+const ADMIN_MGR_TOTAL_STEPS = 4;
+let adminMgrFormData = {};
+
+// ========== Grade System (ใช้กับ Staff/Senior) ==========
+const GRADE_LIST = [
+  { key:'excellent', label:'ดีเยี่ยม',    color:'#10B981', cls:'selected-excellent' },
+  { key:'good',      label:'ดี',          color:'#E02020', cls:'selected-good' },
+  { key:'medium',    label:'ปานกลาง',     color:'#0EA5E9', cls:'selected-medium' },
+  { key:'fair',      label:'พอใช้',        color:'#F59E0B', cls:'selected-fair' },
+  { key:'improve',   label:'ต้องปรับปรุง',color:'#EF4444', cls:'selected-improve' },
+];
+
+function getGradeInfo(key) {
+  return GRADE_LIST.find(g => g.key === key) || null;
+}
+
+function calcBehaviorAvg(behaviorScores) {
+  if (!behaviorScores) return 0;
+  const vals = BEHAVIOR_LIST.map(b => behaviorScores[b.key] || 0);
+  const filled = vals.filter(v => v > 0);
+  if (!filled.length) return 0;
+  return (filled.reduce((s,v) => s+v, 0) / BEHAVIOR_LIST.length).toFixed(1);
+}
+
+// ========== KPI Definitions (ใช้กับ Manager form เดิมไปก่อน) ==========
+const BASE_KPI = [
+  { key: 'performance',    name: 'ผลการปฏิบัติงาน',  desc: 'ความสำเร็จตามเป้าหมายและคุณภาพงาน' },
+  { key: 'competency',     name: 'ความรู้และทักษะ',   desc: 'ความเชี่ยวชาญและการพัฒนาตัวเอง' },
+  { key: 'teamwork',       name: 'การทำงานเป็นทีม',   desc: 'การร่วมมือและช่วยเหลือทีม' },
+  { key: 'responsibility', name: 'ความรับผิดชอบ',     desc: 'ตรงเวลา รับผิดชอบ และไว้วางใจได้' },
+  { key: 'initiative',     name: 'ความคิดริเริ่ม',    desc: 'เสนอแนวคิดใหม่และแก้ปัญหาเชิงรุก' },
+];
+
+// คืน KPI list ตามประเภทตำแหน่ง พร้อมน้ำหนักเท่ากัน
+function getKpiList(positionType) {
+  const list = BASE_KPI.map(k => ({ ...k }));
+  if (positionType === 'senior') {
+    list.push({ key: 'mentoring', name: 'การ Mentor น้องๆ', desc: 'การถ่ายทอดความรู้และพัฒนาทีมงาน' });
+  } else if (positionType === 'manager') {
+    list.push({ key: 'team_mgmt', name: 'การบริหารทีม', desc: 'การวางแผน มอบหมายงาน และพัฒนาทีม' });
+  }
+  const weight = parseFloat((100 / list.length).toFixed(4));
+  return list.map(k => ({ ...k, weight }));
+}
+
+// คำนวณคะแนนรวม 0–100
+function calcScore(kpiScores, positionType) {
+  const kpiList = getKpiList(positionType || 'staff');
+  if (!kpiScores) return 0;
+  const filled = kpiList.filter(k => (kpiScores[k.key] || 0) > 0);
+  if (filled.length === 0) return 0;
+  const sum = kpiList.reduce((s, k) => s + (kpiScores[k.key] || 0) * k.weight, 0);
+  return Math.round(sum / 5); // หารด้วย 5 (คะแนนสูงสุดต่อหัวข้อ) เพื่อให้ได้ 0-100
+}
+
+// ========== พฤติกรรม 10 หัวข้อ สำหรับ Manager (7 Habits + 2 Delegation/Coaching) ==========
+const MANAGER_BEHAVIOR_LIST = [
+  { key:'integrity',       no:1,  name:'Integrity',                             eng:'Integrity',
+    desc:'ปฏิบัติตามเป้าหมายหรือข้อตกลงภารกิจ ตรงกำหนดเวลา ด้วยความถูกต้องครบถ้วน' },
+  { key:'proactive',       no:2,  name:'Be Proactive',                          eng:'Be Proactive',
+    desc:'วางแผน จัดการ เตรียมการ พร้อมแก้ปัญหา มุ่งมั่นให้บรรลุเป้าหมายแม้เจออุปสรรค' },
+  { key:'begin_end',       no:3,  name:'Begin with the End in Mind',            eng:'Begin with the End in Mind',
+    desc:'รู้ถึงผลที่คาดหวัง กำหนดเป้าหมายให้สอดคล้องกับเป้าหมายองค์กรและหน่วยงาน' },
+  { key:'first_things',    no:4,  name:'Put First Things First',                eng:'Put First Things First',
+    desc:'วางแผนงาน จัดลำดับความสำคัญ กำหนดผลที่คาดหวัง และปรับแผนรองรับการเปลี่ยนแปลง' },
+  { key:'win_win',         no:5,  name:'Think Win-Win',                         eng:'Think Win-Win',
+    desc:'หาข้อตกลงให้ทุกฝ่ายได้รับประโยชน์ร่วมกัน มีแนวทางแสวงหาประโยชน์ร่วมกัน' },
+  { key:'seek_understand', no:6,  name:'Seek First to Understand',              eng:'Seek First to Understand',
+    desc:'จับประเด็นจากการฟัง แสดงความเข้าใจความต้องการของผู้อื่น ตอบกลับได้อย่างเหมาะสม' },
+  { key:'synergize',       no:7,  name:'Synergize',                             eng:'Synergize',
+    desc:'ช่วยเหลือ ให้ความคิดเห็น ส่งเสริมนวัตกรรมและต่อยอดความคิดใหม่ๆ ทั้งภายในและภายนอก' },
+  { key:'sharpen_saw',     no:8,  name:'Sharpen the Saw',                       eng:'Sharpen the Saw',
+    desc:'แสวงหาโอกาสเรียนรู้และพัฒนาความสามารถอยู่เสมอ นำประสบการณ์มาปรับใช้ในการทำงาน' },
+  { key:'delegation',      no:9,  name:'การมอบหมายงานและติดตามงาน',              eng:'Delegation & Follow Up',
+    desc:'มอบหมายงานตามความรู้ความสามารถ ติดตามและประเมินประสิทธิภาพการทำงานอย่างต่อเนื่อง' },
+  { key:'coaching',        no:10, name:'การสอนงานและพัฒนาผู้อื่น',               eng:'Coaching & Developing',
+    desc:'มีเทคนิคการสอนงาน ยกตัวอย่างประสบการณ์ ส่งเสริมบรรยากาศการเรียนรู้และการพัฒนาในทีม' },
+];
+
+function calcBehaviorAvgMgr(scores) {
+  if (!scores) return 0;
+  const vals   = MANAGER_BEHAVIOR_LIST.map(b => scores[b.key] || 0);
+  const filled = vals.filter(v => v > 0);
+  if (!filled.length) return 0;
+  return (filled.reduce((s,v) => s+v, 0) / MANAGER_BEHAVIOR_LIST.length).toFixed(1);
+}
+
+function buildMgrBehaviorBreakdown(scores) {
+  return MANAGER_BEHAVIOR_LIST.map(b => {
+    const val = scores[b.key] || 0;
+    return `
+      <div class="breakdown-row">
+        <span class="breakdown-label" style="font-size:10px">${b.name}</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar-fill" style="width:${(val/5)*100}%"></div>
+        </div>
+        <span class="breakdown-val">${val||'—'}</span>
+      </div>`;
+  }).join('');
+}
+
+function updateMgrBehaviorPanel(scores) {
+  const avg = calcBehaviorAvgMgr(scores);
+  const el  = document.getElementById('behavior-avg-num');
+  if (el) el.textContent = avg || '—';
+  const panel = document.getElementById('behavior-breakdown-panel');
+  if (panel) panel.innerHTML = buildMgrBehaviorBreakdown(scores);
+}
+
+// สร้าง mission block ของ Manager (มีช่อง "ผลลัพธ์" เพิ่มจาก Staff/Senior)
+function buildManagerMissionBlock(idx, mission, readOnly) {
+  const resultMap = { exceed:'selected-exceed', achieve:'selected-achieve', below:'selected-below' };
+  const labels    = [
+    { val:'exceed',  label:'เกินเป้าหมายที่ตั้งไว้' },
+    { val:'achieve', label:'บรรลุเป้าหมายที่ตั้งไว้' },
+    { val:'below',   label:'ต่ำกว่าเป้าหมายที่ตั้งไว้' },
+  ];
+  return `
+    <div class="mission-block">
+      <div class="mission-header">ภารกิจที่ ${idx+1}</div>
+      <div class="mission-body">
+        ${readOnly ? `
+          <div class="self-ref-text" style="margin-bottom:6px"><strong>ภารกิจ:</strong> ${mission.text||'—'}</div>
+          <div class="self-ref-text"><strong>ผลลัพธ์:</strong> ${mission.outcome||'—'}</div>
+        ` : `
+          <textarea class="mission-textarea" id="mgr-mission-text-${idx}"
+            placeholder="อธิบายภารกิจหลักของตำแหน่ง...">${mission.text||''}</textarea>
+          <label class="field-label" style="margin-top:8px;margin-bottom:4px">ผลลัพธ์ของภารกิจหลัก</label>
+          <textarea class="mission-textarea" id="mgr-mission-outcome-${idx}"
+            placeholder="ผลลัพธ์ที่เกิดขึ้นจริงจากภารกิจนี้...">${mission.outcome||''}</textarea>
+        `}
+        <div class="mission-result-label">ผลสัมฤทธิ์ของเป้าหมาย</div>
+        <div class="mission-radios">
+          ${labels.map(l => {
+            const sel = mission.result === l.val ? resultMap[l.val] : '';
+            return readOnly
+              ? `<label class="mission-radio-opt ${sel}" style="cursor:default">
+                   <input type="radio" name="mgr-miss-${idx}" value="${l.val}"
+                     ${mission.result===l.val?'checked':''} disabled> ${l.label}
+                 </label>`
+              : `<label class="mission-radio-opt ${sel}" data-mgridx="${idx}" data-val="${l.val}">
+                   <input type="radio" name="mgr-miss-${idx}" value="${l.val}"
+                     ${mission.result===l.val?'checked':''}> ${l.label}
+                 </label>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+// แสดง Manager Self-Eval แบบ read-only (ใช้ใน boss eval form)
+function buildManagerSelfRefReadOnly(selfEval) {
+  const missions = selfEval.missions || [];
+  const behavior = selfEval.behavior || {};
+  const review   = selfEval.self_review || {};
+  const vision   = selfEval.vision || '';
+  const resultLabel = { exceed:'เกินเป้าหมาย', achieve:'บรรลุเป้าหมาย', below:'ต่ำกว่าเป้าหมาย' };
+
+  return `
+    <div class="self-ref-section">
+      <span class="self-ref-section-title">ส่วนที่ 1 — ภารกิจหลัก</span>
+      ${missions.map((m,i) => `
+        <div style="margin-bottom:8px;font-size:13px">
+          <strong>ภารกิจที่ ${i+1}:</strong> ${m.text||'—'}
+          ${m.outcome ? `<br><span style="color:var(--text-2)">ผลลัพธ์: ${m.outcome}</span>` : ''}
+          <span style="margin-left:8px;color:var(--primary);font-size:12px">[${resultLabel[m.result]||m.result||'—'}]</span>
+        </div>`).join('')}
+    </div>
+    <div class="self-ref-section">
+      <span class="self-ref-section-title">ส่วนที่ 2 — พฤติกรรม (ค่าเฉลี่ย ${calcBehaviorAvgMgr(behavior)}/5.0)</span>
+      ${MANAGER_BEHAVIOR_LIST.map(b => {
+        const val = behavior[b.key] || 0;
+        return `<div class="self-ref-kpi-row"><span>${b.name}</span><span class="self-ref-score">${val||'—'}</span></div>`;
+      }).join('')}
+    </div>
+    ${(review.strengths||review.dev_needs) ? `
+    <div class="self-ref-section">
+      <span class="self-ref-section-title">ส่วนที่ 3 — ทบทวนคุณลักษณะ</span>
+      ${review.strengths ? `<p style="font-size:12px;color:var(--text-2);margin-bottom:4px"><strong>จุดแข็ง:</strong> ${review.strengths}</p>` : ''}
+      ${review.dev_needs ? `<p style="font-size:12px;color:var(--text-2)"><strong>พัฒนา:</strong> ${review.dev_needs}</p>` : ''}
+    </div>` : ''}
+    ${vision ? `
+    <div class="self-ref-section">
+      <span class="self-ref-section-title">ส่วนที่ 4 — วิสัยทัศน์</span>
+      <p style="font-size:12px;color:var(--text-2)">${vision}</p>
+    </div>` : ''}
+  `;
+}
+
+// ========== Grade System ==========
+function getGrade(score) {
+  if (score >= 90) return { grade:'A',  label:'ดีเยี่ยม',    rec:'เลื่อนตำแหน่ง + ขึ้นเงินเดือน', color:'#10B981', chip:'chip-A' };
+  if (score >= 80) return { grade:'B+', label:'ดีมาก',       rec:'ขึ้นเงินเดือน (สูง)',            color:'#E02020', chip:'chip-Bplus' };
+  if (score >= 70) return { grade:'B',  label:'ดี',          rec:'ขึ้นเงินเดือน (ปกติ)',           color:'#0EA5E9', chip:'chip-B' };
+  if (score >= 60) return { grade:'C',  label:'พอใช้',       rec:'ยังไม่ขึ้น',                    color:'#F59E0B', chip:'chip-C' };
+  return               { grade:'D',  label:'ต้องปรับปรุง', rec:'ต้องพัฒนา (PIP)',               color:'#EF4444', chip:'chip-D' };
+}
+
+// ========== Period Q1/Q2 ==========
+function getCurrentPeriod() {
+  const saved = localStorage.getItem('apex_period');
+  if (saved) return JSON.parse(saved);
+  const month = new Date().getMonth() + 1; // 1-12
+  return { year: new Date().getFullYear(), quarter: month <= 6 ? 'Q1' : 'Q2' };
+}
+
+function setPeriod(year, quarter) {
+  const current = getCurrentPeriod();
+  const next = {
+    year:    year    ? parseInt(year)  : current.year,
+    quarter: quarter ? quarter         : current.quarter,
+  };
+  localStorage.setItem('apex_period', JSON.stringify(next));
+  updatePeriodUI();
+}
+
+function periodLabel() {
+  const p = getCurrentPeriod();
+  const monthTH = p.quarter === 'Q1' ? 'มิถุนายน' : 'ธันวาคม';
+  return `${p.quarter} / ${monthTH} พ.ศ. ${p.year + 543}`;
+}
+
+function updatePeriodUI() {
+  const p = getCurrentPeriod();
+  // อัปเดต period badges ทุก view
+  document.querySelectorAll('[id$="-period-badge"]').forEach(el => {
+    el.textContent = periodLabel();
+  });
+  // อัปเดต period selector buttons
+  const btnQ1 = document.getElementById('btn-q1');
+  const btnQ2 = document.getElementById('btn-q2');
+  if (btnQ1) btnQ1.classList.toggle('active', p.quarter === 'Q1');
+  if (btnQ2) btnQ2.classList.toggle('active', p.quarter === 'Q2');
+  // อัปเดต year dropdown
+  const sel = document.getElementById('period-year-select');
+  if (sel) sel.value = p.year;
+}
+
+function initPeriodYearSelect() {
+  const sel = document.getElementById('period-year-select');
+  if (!sel) return;
+  const current = new Date().getFullYear();
+  sel.innerHTML = '';
+  for (let y = current - 1; y <= current + 1; y++) {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = `พ.ศ. ${y + 543}`;
+    sel.appendChild(opt);
+  }
+  sel.value = getCurrentPeriod().year;
+}
+
+// ========== State ==========
+let currentUser        = null;
+let currentEvalEmployeeId = null;
+
+// เปรียบ id แบบ case-insensitive (Sheet เก็บ lowercase, REAL_EMPLOYEES เก็บ uppercase)
+function sameId(a, b) { return String(a).toLowerCase() === String(b).toLowerCase(); }
+let viewHistory        = [];
+let editingEmployeeId  = null;
+let allData = { employees: [], selfEvals: [], managerEvals: [], execDecisions: [] };
+let selfScores    = {};
+let mgrScores     = {};
+let currentMgrBehavior = {}; // คะแนนพฤติกรรมที่หัวหน้าให้ (ใช้ใน Manager Eval form)
+
+// ========== Init ==========
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = sessionStorage.getItem('apex_user');
+  if (saved) { currentUser = JSON.parse(saved); enterApp(); }
+});
+
+// ========== LOGIN ==========
+async function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-btn');
+  errEl.classList.add('hidden');
+  btn.textContent = 'กำลังเข้าสู่ระบบ...';
+  btn.disabled    = true;
+  try {
+    const user = await apiGet({ action:'login', username, password });
+    if (!user || !user.id) throw new Error('invalid');
+    currentUser = user;
+    sessionStorage.setItem('apex_user', JSON.stringify(user));
+    enterApp();
+  } catch {
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.textContent = 'เข้าสู่ระบบ';
+    btn.disabled    = false;
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('apex_user');
+  currentUser = null;
+  viewHistory = [];
+  document.getElementById('view-login').classList.remove('hidden');
+  document.getElementById('app-shell').classList.add('hidden');
+  document.getElementById('login-username').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+// ========== ENTER APP ==========
+async function enterApp() {
+  document.getElementById('view-login').classList.add('hidden');
+  document.getElementById('app-shell').classList.remove('hidden');
+  initPeriodYearSelect();
+  renderSidebar();
+  showLoading(true);
+  await loadAllData();
+  showLoading(false);
+  goDashboard();
+}
+
+function renderSidebar() {
+  const u = currentUser;
+  const roleLabel = { employee:'พนักงาน', manager:'หัวหน้า', executive:'ผู้บริหาร', hr:'HR' }[u.role] || u.role;
+  document.getElementById('user-avatar').textContent = (u.name || '?').charAt(0).toUpperCase();
+  document.getElementById('user-name').textContent   = u.name;
+  document.getElementById('user-meta').textContent   = `${u.group} · ${u.position || ''}`;
+  document.getElementById('role-tag').textContent    = roleLabel;
+
+  const navDefs = {
+    employee:  [
+      { icon:'◉', label:'Dashboard',       view:'emp-dashboard' },
+      { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
+    ],
+    manager:   [
+      { icon:'◉', label:'Dashboard',       view:'mgr-dashboard' },
+      { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
+      { icon:'?', label:'คู่มือการใช้งาน', view:'manual' },
+    ],
+    executive: [
+      { icon:'◉', label:'Dashboard',       view:'exec-dashboard' },
+      { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
+      { icon:'↓', label:'Export',          view:'export' },
+      { icon:'?', label:'คู่มือการใช้งาน', view:'manual' },
+    ],
+    hr:        [
+      { icon:'◉', label:'Dashboard',       view:'exec-dashboard' },
+      { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
+      { icon:'⚙', label:'จัดการพนักงาน',  view:'admin' },
+      { icon:'?', label:'คู่มือการใช้งาน', view:'manual' },
+    ],
+  };
+
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = '';
+  (navDefs[u.role] || []).forEach(item => {
+    const btn = document.createElement('button');
+    btn.className    = 'nav-item';
+    btn.dataset.view = item.view;
+    btn.innerHTML    = `<span class="nav-icon">${item.icon}</span>${item.label}`;
+    btn.onclick      = () => showView(item.view);
+    nav.appendChild(btn);
+  });
+
+  if (u.role === 'manager' || u.role === 'executive') {
+    document.getElementById('eval-progress').classList.remove('hidden');
+  }
+}
+
+// ========== DATA ==========
+async function loadAllData() {
+  try {
+    const data = await apiGet({ action:'getAllData', userId:currentUser.id, role:currentUser.role, group:currentUser.group });
+    allData = data;
+  } catch {
+    const cached = sessionStorage.getItem('apex_data');
+    if (cached) allData = JSON.parse(cached);
+  }
+  if (allData) sessionStorage.setItem('apex_data', JSON.stringify(allData));
+  updateProgressBar();
+}
+
+function updateProgressBar() {
+  const u = currentUser;
+  let pool = [];
+  if (u.role === 'manager')   pool = allData.employees.filter(e => sameId(e.manager_id, u.id) && (e.role === 'employee' || e.role === 'manager'));
+  if (u.role === 'executive') pool = allData.employees.filter(e => e.role === 'employee' || e.role === 'manager');
+  if (!pool.length) return;
+  const done = pool.filter(e => allData.managerEvals.some(m => sameId(m.employee_id, e.id))).length;
+  document.getElementById('progress-fill').style.width  = `${Math.round(done/pool.length*100)}%`;
+  document.getElementById('progress-text').textContent  = `${done} / ${pool.length} คน`;
+}
+
+// ========== VIEW ROUTING ==========
+function showView(viewName, options = {}) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(`view-${viewName}`);
+  if (!el) return;
+  el.classList.remove('hidden');
+  el.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === viewName);
+  });
+
+  viewHistory.push(viewName);
+
+  const renders = {
+    'emp-dashboard':  renderEmpDashboard,
+    'mgr-dashboard':  renderMgrDashboard,
+    'exec-dashboard': renderExecDashboard,
+    'self-eval':      () => renderSelfEvalForm(options),
+    'mgr-eval':       () => renderMgrEvalForm(options),
+    'report':         () => renderReport(options),
+    'admin':          renderAdminView,
+    'export':         () => {},
+    'manual':         renderManual,
+  };
+
+  if (renders[viewName]) renders[viewName]();
+  updatePeriodUI();
+}
+
+function goDashboard() {
+  const map = { employee:'emp-dashboard', manager:'mgr-dashboard', executive:'exec-dashboard', hr:'exec-dashboard' };
+  showView(map[currentUser.role] || 'emp-dashboard');
+}
+
+function goBack() {
+  viewHistory.pop();
+  const prev = viewHistory.pop();
+  if (prev) showView(prev);
+  else goDashboard();
+}
+
+// ========== EMPLOYEE DASHBOARD ==========
+function renderEmpDashboard() {
+  const u    = currentUser;
+  const uid  = String(u.id).toLowerCase();
+  const self = allData.selfEvals.find(s => String(s.employee_id).toLowerCase() === uid);
+  const mgr  = allData.managerEvals.find(m => String(m.employee_id).toLowerCase() === uid);
+  // grade จาก manager overall_grade (Staff/Senior) หรือ calcScore (Manager)
+  let gradeLabel = '—';
+  if (mgr) {
+    if (mgr.overall_grade) {
+      gradeLabel = GRADE_LIST.find(g => g.key === mgr.overall_grade)?.label || mgr.overall_grade;
+    } else if (mgr.kpi_scores) {
+      const score = calcScore(mgr.kpi_scores, u.position_type);
+      gradeLabel = score > 0 ? getGrade(score).grade : '—';
+    }
+  }
+
+  document.getElementById('emp-greet-name').textContent   = u.name;
+  document.getElementById('emp-group-label').textContent  = u.group || '—';
+  document.getElementById('emp-dept-label').textContent   = u.department || '—';
+  document.getElementById('emp-period-badge').textContent  = periodLabel();
+  document.getElementById('emp-self-status').textContent   = self ? '✓ กรอกแล้ว' : 'ยังไม่กรอก';
+  document.getElementById('emp-mgr-status').textContent    = mgr ? '✓ ประเมินแล้ว' : 'รอประเมิน';
+  document.getElementById('emp-grade').textContent         = gradeLabel;
+  document.getElementById('emp-action-title').textContent = self ? 'แก้ไข Self-Evaluation' : 'กรอก Self-Evaluation';
+  document.getElementById('emp-action-desc').textContent  = self
+    ? 'คุณกรอกแล้ว — สามารถแก้ไขได้ก่อนปิดรอบ'
+    : 'ยังไม่ได้ประเมินตัวเอง — กรุณากรอกก่อนวันสิ้นสุดรอบ';
+
+  // แสดงเฉพาะ Form ที่ตรงกับ position_type ของพนักงานคนนั้น
+  const posType  = u.position_type || 'staff';
+  const posLabel = { staff:'Staff', senior:'Senior', manager:'Manager' }[posType] || posType;
+  const isStaffSenior = posType === 'staff' || posType === 'senior';
+  document.querySelector('.form-download-grid').innerHTML = `
+    <div class="form-download-card" onclick="downloadForm('${posType}')">
+      <span class="form-icon">📄</span>
+      <div class="form-label">แบบฟอร์ม — ${posLabel}</div>
+      <div class="form-sub">${isStaffSenior ? 'คลิกเพื่อเปิด PDF ต้นฉบับ' : 'คลิกเพื่อดาวน์โหลด'}</div>
+    </div>
+  `;
+
+  // แสดงไฟล์ที่อัปโหลดไว้แล้ว
+  renderUploadPreview('emp', u.id);
+}
+
+// ========== MANAGER DASHBOARD ==========
+function renderMgrDashboard() {
+  const myTeam = allData.employees.filter(e => sameId(e.manager_id, currentUser.id) && (e.role === 'employee' || e.role === 'manager'));
+  const done   = myTeam.filter(e => allData.managerEvals.some(m => sameId(m.employee_id, e.id)));
+
+  document.getElementById('mgr-period-badge').textContent = periodLabel();
+  document.getElementById('mgr-total').textContent   = myTeam.length;
+  document.getElementById('mgr-done').textContent    = done.length;
+  document.getElementById('mgr-pending').textContent = myTeam.length - done.length;
+
+  const tbody = document.getElementById('mgr-employee-list');
+  const empty = document.getElementById('mgr-empty');
+  tbody.innerHTML = '';
+
+  if (myTeam.length === 0) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  myTeam.forEach(emp => {
+    const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, emp.id));
+    const mgrEval  = allData.managerEvals.find(m => sameId(m.employee_id, emp.id));
+    const hasDoc   = !!getUploadedFile(emp.id);
+    // grade label: ใช้ overall_grade (staff/senior) หรือ calcScore (manager)
+    let gradeChip = '—';
+    if (mgrEval) {
+      if (mgrEval.overall_grade) {
+        const gi = GRADE_LIST.find(g => g.key === mgrEval.overall_grade);
+        gradeChip = gi ? `<span style="font-size:12px;font-weight:600;color:${gi.color}">${gi.label}</span>` : mgrEval.overall_grade;
+      } else if (mgrEval.kpi_scores) {
+        const sc = calcScore(mgrEval.kpi_scores, emp.position_type);
+        if (sc > 0) { const gi = getGrade(sc); gradeChip = `<span class="chip ${gi.chip}">${gi.grade}</span>`; }
+      }
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${emp.name}</strong></td>
+      <td><span style="font-size:12px;color:var(--text-2)">${emp.department || '—'}</span></td>
+      <td>${emp.position || '—'}</td>
+      <td>${posTypeBadge(emp.position_type)}</td>
+      <td class="${selfEval ? 'status-done' : 'status-pending'}">${selfEval ? '✓' : '—'}</td>
+      <td class="${hasDoc ? 'status-done' : 'status-pending'}">${hasDoc ? '📎' : '—'}</td>
+      <td class="${mgrEval ? 'status-done' : 'status-pending'}">${mgrEval ? '✓' : '—'}</td>
+      <td>${gradeChip}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-outline btn-sm" onclick="openMgrEval('${emp.id}')">ประเมิน</button>
+        ${mgrEval ? `<button class="btn-outline btn-sm" onclick="openReport('${emp.id}')">รายงาน</button>` : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+}
+
+function openMgrEval(empId) { currentEvalEmployeeId = empId; showView('mgr-eval'); }
+function openReport(empId)  { currentEvalEmployeeId = empId; showView('report'); }
+
+// ========== แบบฟอร์มของ Manager เอง (download + upload) ==========
+function renderMgrSelfFormSection() {
+  const section = document.getElementById('mgr-self-form-section');
+  if (!section) return;
+  const file = getUploadedFile(currentUser.id);
+  section.innerHTML = `
+    <div class="section-divider">แบบฟอร์มประเมิน (กรอกมือ)</div>
+    <div class="form-download-grid">
+      <div class="form-download-card" onclick="downloadForm('manager')">
+        <span class="form-icon">📄</span>
+        <div class="form-label">แบบฟอร์ม — Manager / Asst.Manager</div>
+        <div class="form-sub">คลิกเพื่อเปิด PDF ต้นฉบับ</div>
+      </div>
+    </div>
+    <div class="section-divider">อัปโหลดแบบฟอร์มที่กรอกแล้ว</div>
+    <div class="upload-zone" id="mgr-self-upload-zone"
+         onclick="document.getElementById('mgr-self-file-input').click()">
+      <input type="file" id="mgr-self-file-input" accept="image/*,.pdf"
+             style="display:none" onchange="handleMgrSelfFileUpload(event)">
+      <div class="upload-icon">↑</div>
+      <div class="upload-label">คลิกหรือลากไฟล์มาวางที่นี่</div>
+      <div class="upload-hint">รองรับ JPG, PNG, PDF · ขนาดไม่เกิน 5MB</div>
+    </div>
+    <div class="upload-preview ${file ? '' : 'hidden'}" id="mgr-self-upload-preview">
+      <div class="upload-preview-header">
+        <span id="mgr-self-upload-filename">${file?.name||'—'}</span>
+        <button class="btn-outline btn-sm" onclick="removeMgrSelfUpload()">ลบ</button>
+      </div>
+      <img id="mgr-self-upload-img" class="upload-preview-img ${file&&file.type!=='pdf'?'':'hidden'}"
+           src="${file&&file.type!=='pdf'?file.data:''}" alt="แบบฟอร์ม">
+      <div id="mgr-self-upload-pdf-msg" class="upload-pdf-msg ${file&&file.type==='pdf'?'':'hidden'}">
+        ${file&&file.type==='pdf'
+          ? `📄 ${file.name} — <a href="${file.data}" target="_blank" style="color:var(--primary)">เปิดดู PDF</a>`
+          : ''}
+      </div>
+    </div>
+  `;
+}
+
+function handleMgrSelfFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('ไฟล์ใหญ่เกิน 5MB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const isPdf = file.type === 'application/pdf';
+    storeUploadedFile(currentUser.id, { name: file.name, type: isPdf?'pdf':'image', data: e.target.result });
+    renderMgrSelfFormSection();
+    showToast('อัปโหลดไฟล์สำเร็จ', 'success');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function removeMgrSelfUpload() {
+  const p = getCurrentPeriod();
+  localStorage.removeItem(`apex_upload_${currentUser.id}_${p.year}_${p.quarter}`);
+  renderMgrSelfFormSection();
+  showToast('ลบไฟล์แล้ว', 'success');
+}
+
+// ========== EXECUTIVE DASHBOARD ==========
+function renderExecDashboard() {
+  // ปรับ title ตาม role
+  const titleEl = document.getElementById('exec-dashboard-title');
+  if (titleEl) titleEl.textContent = currentUser.role === 'hr' ? 'Dashboard HR' : 'Dashboard — ผู้บริหาร';
+
+  const groups = ['FMC','ISEC','PPP','BNT','NSP'];
+  const emps   = allData.employees.filter(e => e.role === 'employee' || e.role === 'manager');
+
+  const statRow = document.getElementById('group-stat-row');
+  statRow.innerHTML = '';
+  groups.forEach(grp => {
+    const ge   = emps.filter(e => e.group === grp);
+    const done = ge.filter(e => allData.managerEvals.some(m => sameId(m.employee_id, e.id)));
+    const card = document.createElement('div');
+    card.className = 'group-stat-card';
+    card.innerHTML = `
+      <div class="group-stat-name">${grp}</div>
+      <div class="group-stat-num">${ge.length}</div>
+      <div class="group-stat-sub">${done.length} ประเมินแล้ว</div>
+    `;
+    statRow.appendChild(card);
+  });
+
+  // populate dept filter dropdown จาก departments จริงในข้อมูล
+  const deptSel = document.getElementById('exec-filter-dept');
+  if (deptSel) {
+    const depts = [...new Set(emps.map(e => e.department).filter(Boolean))].sort();
+    deptSel.innerHTML = '<option value="">ทุกแผนก</option>' +
+      depts.map(d => `<option value="${d}">${d}</option>`).join('');
+  }
+
+  renderExecTable(emps);
+}
+
+function filterExecTable() {
+  const grp     = document.getElementById('exec-filter-group').value;
+  const deptSel = document.getElementById('exec-filter-dept');
+
+  // กรองตาม group ก่อน เพื่อ rebuild dept list
+  const byGroup = allData.employees.filter(e =>
+    (e.role === 'employee' || e.role === 'manager') &&
+    (!grp || e.group === grp)
+  );
+
+  // rebuild dept dropdown ให้ตรงกับ group ที่เลือก — คงค่าที่เลือกไว้ถ้ายังมีอยู่
+  if (deptSel) {
+    const prevDept = deptSel.value;
+    const depts = [...new Set(byGroup.map(e => e.department).filter(Boolean))].sort();
+    deptSel.innerHTML = '<option value="">ทุกแผนก</option>' +
+      depts.map(d => `<option value="${d}"${d === prevDept ? ' selected' : ''}>${d}</option>`).join('');
+    // ถ้าแผนกที่เคยเลือกไม่มีใน group ใหม่ → reset
+    if (prevDept && !depts.includes(prevDept)) deptSel.value = '';
+  }
+
+  const dept = deptSel?.value || '';
+  const emps = byGroup.filter(e => !dept || e.department === dept);
+  renderExecTable(emps);
+}
+
+function renderExecTable(employees) {
+  const tbody = document.getElementById('exec-employee-list');
+  const empty = document.getElementById('exec-empty');
+  tbody.innerHTML = '';
+  if (!employees.length) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  const recMap = { promote:'เลื่อนตำแหน่ง+ขึ้น', 'raise-high':'ขึ้นสูง', raise:'ขึ้นปกติ', hold:'ยังไม่ขึ้น', pip:'PIP' };
+
+  employees.forEach(emp => {
+    const self = allData.selfEvals.find(s => sameId(s.employee_id, emp.id));
+    const mgr  = allData.managerEvals.find(m => sameId(m.employee_id, emp.id));
+    const exec = allData.execDecisions.find(d => sameId(d.employee_id, emp.id));
+    const gi   = mgr?.overall_grade ? GRADE_LIST.find(g => g.key === mgr.overall_grade) : null;
+    const gradeHtml = gi
+      ? `<span style="font-size:12px;font-weight:600;color:${gi.color}">${gi.label}</span>`
+      : '—';
+    const decLabel = { promote:'เลื่อน+ขึ้น', 'raise-high':'ขึ้นสูง', raise:'ขึ้นปกติ', hold:'ยังไม่ขึ้น', pip:'PIP' };
+    const execHtml = exec
+      ? `<span style="font-size:11px;font-weight:600;color:#10B981">✓ ${decLabel[exec.decision]||'—'}</span>`
+      : '<span style="font-size:11px;color:var(--text-3)">—</span>';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${emp.name}</strong></td>
+      <td><span style="font-size:12px;color:var(--text-2)">${emp.group}</span></td>
+      <td><span style="font-size:12px;color:var(--text-2)">${emp.department || '—'}</span></td>
+      <td>${emp.position || '—'}</td>
+      <td>${posTypeBadge(emp.position_type)}</td>
+      <td class="${self ? 'status-done':'status-pending'}">${self ? '✓':'—'}</td>
+      <td class="${mgr  ? 'status-done':'status-pending'}">${mgr  ? '✓':'—'}</td>
+      <td>${gradeHtml}</td>
+      <td style="font-size:12px">${mgr?.recommendation ? (recMap[mgr.recommendation]||'—') : '—'}</td>
+      <td>
+        ${currentUser.role !== 'hr' ? execHtml : ''}
+        <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+          ${currentUser.role === 'executive' ? `<button class="btn-outline btn-sm" onclick="openReport('${emp.id}')">ดู / ตัดสินใจ</button>` : ''}
+          ${currentUser.role === 'hr' && mgr ? `<button class="btn-outline btn-sm" onclick="openReport('${emp.id}')">รายงาน</button>` : ''}
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ========== ADMIN / HR VIEW ==========
+function renderAdminView() {
+  renderAdminTable();
+  // โหลด manager list สำหรับ dropdown ใน modal
+  populateManagerDropdown();
+}
+
+function renderAdminTable() {
+  const grp    = document.getElementById('admin-filter-group')?.value || '';
+  const role   = document.getElementById('admin-filter-role')?.value  || '';
+  const search = (document.getElementById('admin-search')?.value || '').toLowerCase();
+
+  let list = allData.employees.filter(e => {
+    if (grp  && e.group !== grp)  return false;
+    if (role && e.role  !== role) return false;
+    if (search && !e.name.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('admin-employee-list');
+  const empty = document.getElementById('admin-empty');
+  tbody.innerHTML = '';
+  if (!list.length) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+
+  const roleLabel = { employee:'พนักงาน', manager:'หัวหน้า', hr:'HR', executive:'ผู้บริหาร' };
+
+  list.forEach(emp => {
+    const mgr = allData.employees.find(e => sameId(e.id, emp.manager_id));
+    const tr  = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${emp.name}</strong></td>
+      <td>${emp.group}</td>
+      <td>${emp.position || '—'}</td>
+      <td>${posTypeBadge(emp.position_type)}</td>
+      <td><span style="font-size:12px;color:var(--text-2)">${roleLabel[emp.role] || emp.role}</span></td>
+      <td><code style="font-size:12px">${emp.username}</code></td>
+      <td style="font-size:12px;color:var(--text-2)">${mgr ? mgr.name : '—'}</td>
+      <td style="display:flex;gap:6px">
+        <button class="btn-outline btn-sm" onclick="openEmployeeModal('${emp.id}')">แก้ไข</button>
+        <button class="btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="deleteEmployee('${emp.id}')">ลบ</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function populateManagerDropdown() {
+  const sel = document.getElementById('modal-manager');
+  if (!sel) return;
+  // รวม manager + executive ทั้งหมด เพราะ executive สามารถเป็นหัวหน้า director ได้
+  const mgrs = allData.employees.filter(e => e.role === 'manager' || e.role === 'executive');
+  sel.innerHTML = '<option value="">— ไม่มี / เลือกภายหลัง —</option>';
+  mgrs.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = `${m.name} (${m.group})`;
+    sel.appendChild(opt);
+  });
+}
+
+// populate dept dropdown ตาม group ที่เลือก
+function onModalGroupChange() {
+  const grp     = document.getElementById('modal-group').value;
+  const deptSel = document.getElementById('modal-dept');
+  if (!deptSel) return;
+  if (!grp) {
+    deptSel.innerHTML = '<option value="">— เลือกกลุ่มก่อน —</option>';
+    return;
+  }
+  // รวบรวม dept จากพนักงานในกลุ่มนั้น
+  const depts = [...new Set(
+    allData.employees
+      .filter(e => e.group === grp && e.department)
+      .map(e => e.department)
+  )].sort();
+  const current = deptSel.value;
+  deptSel.innerHTML = '<option value="">— เลือกแผนก —</option>' +
+    depts.map(d => `<option value="${d}"${d === current ? ' selected' : ''}>${d}</option>`).join('');
+}
+
+function openEmployeeModal(empId = null) {
+  editingEmployeeId = empId;
+  document.getElementById('modal-title').textContent = empId ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงาน';
+
+  // เคลียร์ฟอร์ม
+  ['modal-name','modal-position','modal-username','modal-password'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  ['modal-group','modal-position-type','modal-role','modal-manager'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  // reset dept dropdown
+  const deptSel = document.getElementById('modal-dept');
+  if (deptSel) deptSel.innerHTML = '<option value="">— เลือกกลุ่มก่อน —</option>';
+
+  // ถ้าแก้ไข — โหลดข้อมูลเดิม
+  if (empId) {
+    const emp = allData.employees.find(e => sameId(e.id, empId));
+    if (emp) {
+      document.getElementById('modal-name').value          = emp.name         || '';
+      document.getElementById('modal-group').value         = emp.group        || '';
+      document.getElementById('modal-position').value      = emp.position     || '';
+      document.getElementById('modal-position-type').value = emp.position_type|| '';
+      document.getElementById('modal-role').value          = emp.role         || '';
+      document.getElementById('modal-username').value      = emp.username     || '';
+      document.getElementById('modal-password').value      = emp.password     || '';
+      document.getElementById('modal-manager').value       = emp.manager_id   || '';
+      // โหลด dept options แล้ว set ค่าเดิม
+      onModalGroupChange();
+      if (deptSel && emp.department) deptSel.value = emp.department;
+    }
+  }
+
+  populateManagerDropdown();
+  document.getElementById('modal-employee').classList.remove('hidden');
+}
+
+function closeEmployeeModal() {
+  document.getElementById('modal-employee').classList.add('hidden');
+  editingEmployeeId = null;
+}
+
+function closeModalOutside(e) {
+  if (e.target.id === 'modal-employee') closeEmployeeModal();
+}
+
+async function saveEmployee() {
+  const name         = document.getElementById('modal-name').value.trim();
+  const group        = document.getElementById('modal-group').value;
+  const department   = document.getElementById('modal-dept')?.value || '';
+  const position     = document.getElementById('modal-position').value.trim();
+  const position_type= document.getElementById('modal-position-type').value;
+  const role         = document.getElementById('modal-role').value;
+  const username     = document.getElementById('modal-username').value.trim();
+  const password     = document.getElementById('modal-password').value.trim();
+  const manager_id   = document.getElementById('modal-manager').value;
+
+  if (!name || !group || !position_type || !role || !username) {
+    showToast('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', 'error');
+    return;
+  }
+
+  const payload = {
+    action:        editingEmployeeId ? 'updateEmployee' : 'addEmployee',
+    id:            editingEmployeeId || `emp_${Date.now()}`,
+    name, group, department, position, position_type, role, username, password, manager_id,
+  };
+
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    const idx = allData.employees.findIndex(e => sameId(e.id, payload.id));
+    if (idx >= 0) allData.employees[idx] = { ...payload };
+    else          allData.employees.push({ ...payload });
+    persistEmployees();
+    closeEmployeeModal();
+    renderAdminTable();
+    showToast(editingEmployeeId ? 'แก้ไขข้อมูลสำเร็จ' : 'เพิ่มพนักงานสำเร็จ', 'success');
+  } catch {
+    showToast('เกิดข้อผิดพลาด', 'error');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function deleteEmployee(empId) {
+  const emp = allData.employees.find(e => sameId(e.id, empId));
+  if (!emp) return;
+  if (!confirm(`ยืนยันลบ "${emp.name}" ออกจากระบบ?`)) return;
+
+  showLoading(true);
+  try {
+    await apiPost({ action:'deleteEmployee', id:empId });
+    allData.employees = allData.employees.filter(e => e.id !== empId);
+    persistEmployees();
+    renderAdminTable();
+    showToast('ลบพนักงานสำเร็จ', 'success');
+  } catch {
+    showToast('เกิดข้อผิดพลาด', 'error');
+  } finally {
+    showLoading(false);
+  }
+}
+
+// ========== IMPORT EMPLOYEES FROM EXCEL ==========
+function importEmployees(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const wb   = XLSX.read(e.target.result, { type:'binary' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
+
+      showLoading(true);
+      // กรองเฉพาะคนที่ยังไม่มีใน Google Sheets
+      const existingIds = new Set(allData.employees.map(e => e.id));
+      const toImport = REAL_EMPLOYEES.filter(e => !existingIds.has(e.id));
+      let added = 0;
+      try {
+        // ส่งทีเดียว batch เดียว
+        const res = await apiPost({ action:'batchImport', employees: toImport });
+        added = res?.data?.added || toImport.length;
+        toImport.forEach(emp => allData.employees.push({ ...emp }));
+      } catch (err) {
+        showToast('Import ไม่สำเร็จ: ' + err.message, 'error');
+      }
+
+      persistEmployees();
+      renderAdminTable();
+      showToast(`Import สำเร็จ ${added} รายการ`, 'success');
+    } catch (err) {
+      showToast('ไม่สามารถอ่านไฟล์ได้: ' + err.message, 'error');
+    } finally {
+      showLoading(false);
+      event.target.value = '';
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+// ========== EXPORT EMPLOYEE TEMPLATE ==========
+function exportEmployeeTemplate() {
+  const headers = [['ชื่อ-นามสกุล','กลุ่ม','ตำแหน่ง','ประเภท (staff/senior/manager)','role (employee/manager/hr/executive)','username','password','manager_id']];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(headers);
+  // ตัวอย่าง 1 แถว
+  XLSX.utils.sheet_add_aoa(ws, [['คุณตัวอย่าง นามสกุล','FMC','Engineer','staff','employee','emp_xx','1234','']], { origin:'A2' });
+  XLSX.utils.book_append_sheet(wb, ws, 'Employees');
+  XLSX.writeFile(wb, 'employee-template.xlsx');
+  showToast('ดาวน์โหลด Template สำเร็จ', 'success');
+}
+
+// ========== SELF-EVAL FORM ==========
+function renderSelfEvalForm() {
+  const posType = currentUser.position_type || 'staff';
+  const layout  = document.getElementById('self-eval-layout');
+
+  if (isManagerType(posType)) {
+    document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Manager / Director Form)';
+    renderOldSelfEvalLayout(layout);
+  } else if (isAdminType(posType)) {
+    document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Admin Form)';
+    renderAdminSelfEvalLayout(layout, currentUser.id, false, 1);
+  } else {
+    document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — ส่วนที่ 1–3';
+    renderStaffSeniorSelfEvalLayout(layout, currentUser.id, false);
+  }
+}
+
+// ========== Staff/Senior Self-Eval Layout ==========
+function renderStaffSeniorSelfEvalLayout(container, empId, readOnly) {
+  const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const d = existing || {};
+  const missions = d.missions || [{},{},{}];
+  const leave     = d.leave    || {};
+  const behavior  = d.behavior || {};
+  const review    = d.self_review || {};
+  const isOwn     = !readOnly;
+
+  container.innerHTML = `
+    <div class="eval-layout">
+      <div class="eval-form-col" id="ss-form-col">
+
+        <!-- ข้อมูลการลา -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ข้อมูลการใช้สิทธิ์การลา</h3>
+            <span class="period-badge" style="font-size:12px">${periodLabel()}</span>
+          </div>
+          <div class="leave-grid">
+            <div class="leave-item">
+              <div class="leave-name">ลาป่วย</div>
+              <div class="leave-fields">
+                <span class="leave-quota">สิทธิ์ 30 วัน · ใช้ไป</span>
+                <input type="number" class="leave-input" id="leave-sick" min="0" max="30"
+                  value="${leave.sick_used||0}" ${readOnly?'disabled':''}>
+                <span class="leave-quota">วัน</span>
+              </div>
+            </div>
+            <div class="leave-item">
+              <div class="leave-name">ลากิจ</div>
+              <div class="leave-fields">
+                <span class="leave-quota">สิทธิ์ 6 วัน · ใช้ไป</span>
+                <input type="number" class="leave-input" id="leave-personal" min="0" max="6"
+                  value="${leave.personal_used||0}" ${readOnly?'disabled':''}>
+                <span class="leave-quota">วัน</span>
+              </div>
+            </div>
+            <div class="leave-item">
+              <div class="leave-name">ลาพักร้อน</div>
+              <div class="leave-fields">
+                <span class="leave-quota">ใช้ไป</span>
+                <input type="number" class="leave-input" id="leave-vacation" min="0"
+                  value="${leave.vacation_used||0}" ${readOnly?'disabled':''}>
+                <span class="leave-quota">วัน</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ส่วนที่ 1: ภารกิจหลัก -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 1 — ภารกิจหลักของตำแหน่ง</h3>
+            <span class="ref-badge">Performance Evaluation</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">
+            อธิบายภารกิจหลัก และทำเครื่องหมาย ✓ ในช่องผลสัมฤทธิ์ที่ตรงกับความเป็นจริง
+          </p>
+          ${[0,1,2].map(i => buildMissionBlock(i, missions[i]||{}, readOnly)).join('')}
+        </div>
+
+        <!-- ส่วนที่ 2: พฤติกรรม -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 2 — การประเมินผลพฤติกรรม</h3>
+            <span class="ref-badge">Behavior Evaluation</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">
+            ระดับ 1 (ต้องปรับปรุง) · 2 (พอใช้) · 3 (ดี) · 4 (ดีมาก) · 5 (ยอดเยี่ยม)
+          </p>
+          ${BEHAVIOR_LIST.map(b => buildBehaviorRow(b, behavior[b.key]||0, readOnly, 'self')).join('')}
+        </div>
+
+        <!-- ส่วนที่ 3: ทบทวนตนเอง -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 3 — ทบทวนคุณลักษณะและศักยภาพของตนเอง</h3>
+          </div>
+          <div class="self-review-grid">
+            <div class="self-review-field">
+              <label class="field-label">จุดแข็ง</label>
+              ${readOnly
+                ? `<div class="self-ref-text">${review.strengths||'—'}</div>`
+                : `<textarea id="review-strengths" class="field-textarea" placeholder="จุดแข็งสำคัญของคุณในการทำงาน...">${review.strengths||''}</textarea>`
+              }
+            </div>
+            <div class="self-review-field">
+              <label class="field-label">สิ่งที่ต้องการพัฒนา</label>
+              ${readOnly
+                ? `<div class="self-ref-text">${review.dev_needs||'—'}</div>`
+                : `<textarea id="review-devneeds" class="field-textarea" placeholder="มีด้านใดที่ต้องการพัฒนา หรือมีแผนพัฒนาตนเองอย่างไร...">${review.dev_needs||''}</textarea>`
+              }
+            </div>
+            <div class="self-review-field">
+              <label class="field-label">สิ่งที่ต้องการให้ผู้จัดการหรือองค์กรสนับสนุน</label>
+              ${readOnly
+                ? `<div class="self-ref-text">${review.support_needed||'—'}</div>`
+                : `<textarea id="review-support" class="field-textarea" placeholder="มีอะไรบ้างที่ต้องการให้ผู้จัดการหรือองค์กรสนับสนุน...">${review.support_needed||''}</textarea>`
+              }
+            </div>
+            <div class="self-review-field">
+              <label class="field-label">เป้าหมายภารกิจใน 6 เดือนข้างหน้า</label>
+              ${readOnly
+                ? `<div class="self-ref-text">${review.goals_6months||'—'}</div>`
+                : `<textarea id="review-goals" class="field-textarea" placeholder="สิ่งที่ต้องการทำให้เกิดขึ้นในอีก 6 เดือนข้างหน้า...">${review.goals_6months||''}</textarea>`
+              }
+            </div>
+          </div>
+        </div>
+
+        ${!readOnly ? `
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitStaffSeniorSelfEval()">บันทึก Self-Evaluation</button>
+          <button class="btn-outline" onclick="goBack()">ยกเลิก</button>
+        </div>` : ''}
+
+      </div><!-- /form col -->
+
+      <!-- Score Panel -->
+      <aside class="score-panel">
+        <div class="score-card">
+          <div class="behavior-avg-display">
+            <div style="font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:8px">ค่าเฉลี่ยพฤติกรรม</div>
+            <div><span class="behavior-avg-num" id="behavior-avg-num">${calcBehaviorAvg(behavior)||'—'}</span><span class="behavior-avg-max"> /5.0</span></div>
+            <div class="behavior-avg-label">ส่วนที่ 2 · ${BEHAVIOR_LIST.length} หัวข้อ</div>
+          </div>
+        </div>
+        <div class="score-breakdown-card" id="behavior-breakdown-panel">
+          ${buildBehaviorBreakdown(behavior)}
+        </div>
+        <div class="grade-guide-card">
+          <div class="guide-title">เกณฑ์การให้คะแนนพฤติกรรม</div>
+          <div class="guide-row"><span class="dot dot-5">●</span> 5 — ยอดเยี่ยม</div>
+          <div class="guide-row"><span class="dot dot-4">●</span> 4 — ดีมาก</div>
+          <div class="guide-row"><span class="dot dot-3">●</span> 3 — ดี</div>
+          <div class="guide-row"><span class="dot dot-2">●</span> 2 — พอใช้</div>
+          <div class="guide-row"><span class="dot dot-1">●</span> 1 — ต้องปรับปรุง</div>
+        </div>
+      </aside>
+    </div><!-- /eval-layout -->
+  `;
+
+  // ผูก event behavior ratings
+  if (!readOnly) {
+    BEHAVIOR_LIST.forEach(b => {
+      document.querySelectorAll(`[data-bkey="${b.key}"]`).forEach(btn => {
+        btn.addEventListener('click', () => {
+          const val = parseInt(btn.dataset.val);
+          behavior[b.key] = val;
+          document.querySelectorAll(`[data-bkey="${b.key}"]`).forEach(x =>
+            x.classList.toggle('selected', parseInt(x.dataset.val) === val)
+          );
+          updateBehaviorPanel(behavior);
+        });
+      });
+    });
+
+    // ผูก event mission radios
+    document.querySelectorAll('.mission-radio-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const idx  = opt.dataset.idx;
+        const val  = opt.dataset.val;
+        // ลบ selected class ทุก option ในกลุ่มเดียวกัน
+        document.querySelectorAll(`.mission-radio-opt[data-idx="${idx}"]`).forEach(o => {
+          o.classList.remove('selected-exceed','selected-achieve','selected-below');
+          o.querySelector('input').checked = false;
+        });
+        // เพิ่ม selected class ให้ option ที่คลิก
+        const cls = val==='exceed'?'selected-exceed':val==='achieve'?'selected-achieve':'selected-below';
+        opt.classList.add(cls);
+        opt.querySelector('input').checked = true;
+      });
+    });
+  }
+}
+
+function buildMissionBlock(idx, mission, readOnly) {
+  const resultMap = { exceed:'selected-exceed', achieve:'selected-achieve', below:'selected-below' };
+  const labels    = [
+    { val:'exceed',  label:'เกินเป้าหมายที่ตั้งไว้' },
+    { val:'achieve', label:'บรรลุเป้าหมายที่ตั้งไว้' },
+    { val:'below',   label:'ต่ำกว่าเป้าหมายที่ตั้งไว้' },
+  ];
+  return `
+    <div class="mission-block">
+      <div class="mission-header">ภารกิจที่ ${idx+1}</div>
+      <div class="mission-body">
+        ${readOnly
+          ? `<div class="self-ref-text" style="margin-bottom:10px">${mission.text||'—'}</div>`
+          : `<textarea class="mission-textarea" id="mission-text-${idx}" placeholder="อธิบายภารกิจหลักของตำแหน่ง...">${mission.text||''}</textarea>`
+        }
+        <div class="mission-result-label">ผลสัมฤทธิ์ของเป้าหมาย</div>
+        <div class="mission-radios">
+          ${labels.map(l => {
+            const sel = mission.result === l.val ? resultMap[l.val] : '';
+            if (readOnly) {
+              return `<label class="mission-radio-opt ${sel}" style="cursor:default">
+                <input type="radio" name="mission-${idx}" value="${l.val}" ${mission.result===l.val?'checked':''} disabled>
+                ${l.label}
+              </label>`;
+            }
+            return `<label class="mission-radio-opt ${sel}" data-idx="${idx}" data-val="${l.val}">
+              <input type="radio" name="mission-${idx}" value="${l.val}" ${mission.result===l.val?'checked':''}>
+              ${l.label}
+            </label>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildBehaviorRow(b, score, readOnly, prefix) {
+  return `
+    <div class="behavior-row">
+      <div class="behavior-no">${b.no}</div>
+      <div class="behavior-info">
+        <span class="behavior-name">${b.name}</span>
+        <span class="behavior-eng">${b.eng}</span>
+        <span class="behavior-desc">${b.desc}</span>
+      </div>
+      <div class="rating-group">
+        ${[1,2,3,4,5].map(n => `
+          <button class="rating-btn ${score===n?'selected':''}"
+            data-bkey="${b.key}" data-val="${n}" ${readOnly?'disabled':''}>
+            ${n}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function buildBehaviorBreakdown(behavior) {
+  return BEHAVIOR_LIST.map(b => {
+    const val = behavior[b.key] || 0;
+    return `
+      <div class="breakdown-row">
+        <span class="breakdown-label" style="font-size:11px">${b.name}</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar-fill" style="width:${(val/5)*100}%"></div>
+        </div>
+        <span class="breakdown-val">${val||'—'}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateBehaviorPanel(behavior) {
+  const avg = calcBehaviorAvg(behavior);
+  const avgEl = document.getElementById('behavior-avg-num');
+  if (avgEl) avgEl.textContent = avg || '—';
+  const panel = document.getElementById('behavior-breakdown-panel');
+  if (panel) panel.innerHTML = buildBehaviorBreakdown(behavior);
+}
+
+async function submitStaffSeniorSelfEval() {
+  // ดึงข้อมูลภารกิจ
+  const missions = [0,1,2].map(i => ({
+    text:   document.getElementById(`mission-text-${i}`)?.value.trim() || '',
+    result: document.querySelector(`input[name="mission-${i}"]:checked`)?.value || '',
+  }));
+
+  // ดึงข้อมูลการลา
+  const leave = {
+    sick_used:     parseInt(document.getElementById('leave-sick')?.value)     || 0,
+    personal_used: parseInt(document.getElementById('leave-personal')?.value) || 0,
+    vacation_used: parseInt(document.getElementById('leave-vacation')?.value) || 0,
+  };
+
+  // ดึงคะแนนพฤติกรรม
+  const behavior = {};
+  BEHAVIOR_LIST.forEach(b => {
+    const checked = document.querySelector(`[data-bkey="${b.key}"].selected`);
+    if (checked) behavior[b.key] = parseInt(checked.dataset.val);
+  });
+
+  const missingBehavior = BEHAVIOR_LIST.filter(b => !behavior[b.key]);
+  if (missingBehavior.length > 0) {
+    showToast(`กรุณาให้คะแนนพฤติกรรมทุกหัวข้อ (เหลืออีก ${missingBehavior.length} หัวข้อ)`, 'error');
+    return;
+  }
+
+  // ดึงข้อมูลทบทวนตนเอง
+  const self_review = {
+    strengths:    document.getElementById('review-strengths')?.value.trim()  || '',
+    dev_needs:    document.getElementById('review-devneeds')?.value.trim()   || '',
+    support_needed: document.getElementById('review-support')?.value.trim() || '',
+    goals_6months: document.getElementById('review-goals')?.value.trim()    || '',
+  };
+
+  const payload = {
+    action:      'submitSelfEval',
+    employee_id: currentUser.id,
+    form_type:   'staff_senior',
+    missions, leave, behavior, self_review,
+    year:        getCurrentPeriod().year,
+    quarter:     getCurrentPeriod().quarter,
+  };
+
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    await loadAllData();
+    showToast('บันทึก Self-Evaluation สำเร็จ', 'success');
+    goBack();
+    renderEmpDashboard();
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+function buildKpiForm(containerId, scores, positionType, onChangeCallback) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const kpiList = getKpiList(positionType);
+
+  kpiList.forEach(kpi => {
+    const row = document.createElement('div');
+    row.className = 'kpi-row';
+    row.innerHTML = `
+      <div class="kpi-info">
+        <span class="kpi-weight">${kpi.weight.toFixed(1)}%</span>
+        <span class="kpi-name">${kpi.name}</span>
+        <span class="kpi-desc">${kpi.desc}</span>
+      </div>
+      <div class="rating-group" data-key="${kpi.key}">
+        ${[1,2,3,4,5].map(n => `
+          <button class="rating-btn ${scores[kpi.key] === n ? 'selected' : ''}" data-val="${n}">${n}</button>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(row);
+
+    row.querySelectorAll('.rating-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        scores[kpi.key] = parseInt(btn.dataset.val);
+        row.querySelectorAll('.rating-btn').forEach(b =>
+          b.classList.toggle('selected', parseInt(b.dataset.val) === scores[kpi.key])
+        );
+        onChangeCallback();
+      });
+    });
+  });
+}
+
+function buildBreakdown(containerId, scores, positionType) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  getKpiList(positionType || 'staff').forEach(kpi => {
+    const val = scores[kpi.key] || 0;
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    row.innerHTML = `
+      <span class="breakdown-label">${kpi.name}</span>
+      <div class="breakdown-bar-wrap">
+        <div class="breakdown-bar-fill" style="width:${(val/5)*100}%"></div>
+      </div>
+      <span class="breakdown-val">${val || '—'}</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function updateSelfScore() {
+  const posType = currentUser.position_type || 'staff';
+  const score   = calcScore(selfScores, posType);
+  document.getElementById('self-score-num').textContent = score > 0 ? score : '—';
+  const gradeEl = document.getElementById('self-grade-badge');
+  if (score > 0) { const g = getGrade(score); gradeEl.textContent = g.grade; gradeEl.style.color = g.color; }
+  else           { gradeEl.textContent = '—'; gradeEl.style.color = ''; }
+  buildBreakdown('self-breakdown', selfScores, posType);
+}
+
+async function submitSelfEval() {
+  const posType = currentUser.position_type || 'staff';
+  const kpiList = getKpiList(posType);
+  const missing = kpiList.filter(k => !(selfScores[k.key] > 0));
+  if (missing.length) { showToast('กรุณากรอกคะแนนทุกหัวข้อก่อนบันทึก', 'error'); return; }
+
+  const payload = {
+    action:'submitSelfEval', employee_id:currentUser.id,
+    kpi_scores:selfScores, comment:document.getElementById('self-comment').value.trim(),
+    year:getCurrentPeriod().year, quarter:getCurrentPeriod().quarter,
+  };
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    const idx = allData.selfEvals.findIndex(s => sameId(s.employee_id, currentUser.id));
+    const rec = { ...payload, submitted_at:new Date().toISOString() };
+    if (idx >= 0) allData.selfEvals[idx] = rec; else allData.selfEvals.push(rec);
+    sessionStorage.setItem('apex_data', JSON.stringify(allData));
+    showToast('บันทึก Self-Evaluation สำเร็จ', 'success');
+    goBack();
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+// ========== Admin Self-Eval Form (Multi-step) ==========
+function renderAdminSelfEvalLayout(container, empId, readOnly, step) {
+  adminFormStep = step || 1;
+  const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  if (existing && existing.admin_data) {
+    // โหลดข้อมูลที่กรอกไว้แล้วเข้า state
+    Object.assign(adminFormData, existing.admin_data);
+  }
+  renderAdminStep(container, empId, readOnly);
+}
+
+function renderAdminStep(container, empId, readOnly) {
+  const step = adminFormStep;
+  const stepTitles = [
+    'ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน (Position Competencies)',
+    'ส่วนที่ 2 — พฤติกรรมหลัก (Core Behaviors)',
+    'ส่วนที่ 3 — ภารกิจหลักของตำแหน่ง',
+    'ส่วนที่ 4 — ทบทวนคุณลักษณะและศักยภาพของตนเอง',
+  ];
+
+  // progress bar 4 ส่วน
+  const progressHTML = `
+    <div class="admin-form-progress">
+      ${[1,2,3,4].map(i => `
+        <div class="admin-step-item ${i===step?'active':i<step?'done':''}">
+          <div class="admin-step-circle">${i<step?'✓':i}</div>
+          <div class="admin-step-label">ส่วนที่ ${i}</div>
+        </div>
+        ${i<4?'<div class="admin-step-line '+(i<step?'done':'')+'"></div>':''}
+      `).join('')}
+    </div>
+    <h3 class="admin-step-title">${stepTitles[step-1]}</h3>
+  `;
+
+  let bodyHTML = '';
+  if (step === 1) bodyHTML = renderAdminStep1(readOnly);
+  else if (step === 2) bodyHTML = renderAdminStep2(readOnly);
+  else if (step === 3) bodyHTML = renderAdminStep3(readOnly);
+  else if (step === 4) bodyHTML = renderAdminStep4(readOnly);
+
+  const backBtn  = step > 1 ? `<button class="btn-outline" onclick="adminFormNav(${step-1},'${empId}',${readOnly})">← ย้อนกลับ</button>` : '';
+  const nextBtn  = step < 4 ? `<button class="btn-primary" onclick="adminFormNav(${step+1},'${empId}',${readOnly})">ถัดไป →</button>` : '';
+  const submitBtn= step === 4 && !readOnly ? `<button class="btn-primary" onclick="submitAdminSelfEval('${empId}')">ส่งแบบประเมิน</button>` : '';
+
+  container.innerHTML = `
+    <div class="form-card">
+      ${progressHTML}
+      <div class="admin-step-body">${bodyHTML}</div>
+      <div class="form-actions" style="justify-content:space-between;margin-top:24px">
+        <div>${backBtn}</div>
+        <div style="display:flex;gap:12px">${nextBtn}${submitBtn}</div>
+      </div>
+    </div>
+  `;
+}
+
+function adminFormNav(toStep, empId, readOnly) {
+  // บันทึก input ปัจจุบันก่อน navigate
+  saveAdminStepData(adminFormStep);
+  adminFormStep = toStep;
+  const container = document.getElementById('self-eval-layout');
+  renderAdminStep(container, empId, readOnly);
+}
+
+function saveAdminStepData(step) {
+  if (step === 1) {
+    ADMIN_COMPETENCY_LIST.forEach(c => {
+      const checked = document.querySelector(`input[name="comp_${c.key}"]:checked`);
+      if (checked) adminFormData[`comp_${c.key}`] = parseInt(checked.value);
+      const ev = document.getElementById(`comp_ev_${c.key}`);
+      if (ev) adminFormData[`comp_ev_${c.key}`] = ev.value;
+    });
+  } else if (step === 2) {
+    ADMIN_BEHAVIOR_LIST.forEach(b => {
+      const checked = document.querySelector(`input[name="beh_${b.key}"]:checked`);
+      if (checked) adminFormData[`beh_${b.key}`] = parseInt(checked.value);
+      const ev = document.getElementById(`beh_ev_${b.key}`);
+      if (ev) adminFormData[`beh_ev_${b.key}`] = ev.value;
+    });
+  } else if (step === 3) {
+    [1,2].forEach(i => {
+      ['title','target','result'].forEach(f => {
+        const el = document.getElementById(`mission${i}_${f}`);
+        if (el) adminFormData[`mission${i}_${f}`] = el.value;
+      });
+    });
+  } else if (step === 4) {
+    ['strengths','dev_needs','goals'].forEach(f => {
+      const el = document.getElementById(`review_${f}`);
+      if (el) adminFormData[`review_${f}`] = el.value;
+    });
+  }
+}
+
+function renderAdminRadioGroup(name, options, savedVal, readOnly) {
+  // options = array of 5 strings (คะแนน 5→1)
+  return options.map((opt, idx) => {
+    const score = 5 - idx; // 5,4,3,2,1
+    const checked = savedVal === score ? 'checked' : '';
+    const disabled = readOnly ? 'disabled' : '';
+    return `
+      <label class="admin-radio-label ${savedVal===score?'admin-radio-selected':''}">
+        <input type="radio" name="${name}" value="${score}" ${checked} ${disabled}
+          onchange="this.closest('.admin-radio-group').querySelectorAll('.admin-radio-label').forEach(l=>l.classList.remove('admin-radio-selected'));this.closest('.admin-radio-label').classList.add('admin-radio-selected')">
+        <span class="admin-radio-score">${score}</span>
+        <span class="admin-radio-text">${opt}</span>
+      </label>
+    `;
+  }).join('');
+}
+
+function renderAdminStep1(readOnly) {
+  return ADMIN_COMPETENCY_LIST.map(c => `
+    <div class="admin-competency-block">
+      <div class="admin-comp-header">
+        <span class="admin-comp-no">${c.no}</span>
+        <div>
+          <div class="admin-comp-name">${c.name}</div>
+          <div class="admin-comp-eng">${c.eng}</div>
+        </div>
+      </div>
+      <div class="admin-comp-question">${c.question}</div>
+      <div class="admin-radio-group">
+        ${renderAdminRadioGroup('comp_'+c.key, c.options, adminFormData['comp_'+c.key], readOnly)}
+      </div>
+      <div class="admin-evidence-wrap">
+        <label class="field-label">ตัวอย่างเหตุการณ์จริง / ผลงานที่จับต้องได้ในรอบ 6 เดือน (โปรดระบุ)</label>
+        <textarea id="comp_ev_${c.key}" class="field-textarea" rows="2" placeholder="ระบุตัวอย่างเหตุการณ์จริง..." ${readOnly?'readonly':''}>${adminFormData['comp_ev_'+c.key]||''}</textarea>
+      </div>
+    </div>
+  `).join('<hr class="admin-divider">');
+}
+
+function renderAdminStep2(readOnly) {
+  const groups = [
+    { label:'หมวดที่ 1: ด้านวินัยแห่งตน ความซื่อสัตย์สุจริต และความรับผิดชอบต่อหน้าที่', items: ADMIN_BEHAVIOR_LIST.slice(0,3) },
+    { label:'หมวดที่ 2: ลักษณะนิสัยของการเป็นผู้มีประสิทธิผลสูง (Habits of Highly Effective People)', items: ADMIN_BEHAVIOR_LIST.slice(3) },
+  ];
+  return groups.map(g => `
+    <div class="admin-group-header">${g.label}</div>
+    ${g.items.map(b => `
+      <div class="admin-competency-block">
+        <div class="admin-comp-header">
+          <span class="admin-comp-no">${b.no}</span>
+          <div class="admin-comp-name">${b.name}</div>
+        </div>
+        <div class="admin-comp-question">${b.question}</div>
+        <div class="admin-radio-group">
+          ${renderAdminRadioGroup('beh_'+b.key, b.options, adminFormData['beh_'+b.key], readOnly)}
+        </div>
+        <div class="admin-evidence-wrap">
+          <label class="field-label">ตัวอย่างเหตุการณ์จริง / ผลงานที่จับต้องได้ในรอบ 6 เดือน (โปรดระบุ)</label>
+          <textarea id="beh_ev_${b.key}" class="field-textarea" rows="2" placeholder="ระบุตัวอย่างเหตุการณ์จริง..." ${readOnly?'readonly':''}>${adminFormData['beh_ev_'+b.key]||''}</textarea>
+        </div>
+      </div>
+    `).join('<hr class="admin-divider">')}
+  `).join('');
+}
+
+function renderAdminStep3(readOnly) {
+  return [1,2].map(i => `
+    <div class="admin-mission-block">
+      <div class="admin-comp-header">
+        <span class="admin-comp-no">${i}</span>
+        <div class="admin-comp-name">ภารกิจหลักของตำแหน่ง (เรื่องที่ต้องทำในหน้าที่ ไม่ใช่งานช่วย) ภารกิจที่ ${i}</div>
+      </div>
+      <textarea id="mission${i}_title" class="field-textarea" rows="2" placeholder="ระบุภารกิจหลัก..." ${readOnly?'readonly':''}>${adminFormData['mission'+i+'_title']||''}</textarea>
+      <div class="admin-mission-grid">
+        <div class="form-field">
+          <label class="field-label">เป้าหมายที่ตั้งไว้ / เป้าหมายที่ตกลงกันไว้ (Target)</label>
+          <textarea id="mission${i}_target" class="field-textarea" rows="3" placeholder="ระบุเป้าหมาย..." ${readOnly?'readonly':''}>${adminFormData['mission'+i+'_target']||''}</textarea>
+        </div>
+        <div class="form-field">
+          <label class="field-label">ผลลัพธ์ที่ทำได้จริง (โปรดระบุผลงานจริงและตัวเลขที่ทำได้)</label>
+          <textarea id="mission${i}_result" class="field-textarea" rows="3" placeholder="ระบุผลลัพธ์จริง..." ${readOnly?'readonly':''}>${adminFormData['mission'+i+'_result']||''}</textarea>
+        </div>
+      </div>
+    </div>
+  `).join('<hr class="admin-divider">');
+}
+
+function renderAdminStep4(readOnly) {
+  const fields = [
+    { key:'strengths', label:'1. จุดแข็งหรือสิ่งที่เป็นความภาคภูมิใจของคุณ', hint:'ให้ลองนึกถึงคำชมที่เคยได้รับจากหัวหน้า เพื่อนร่วมงาน หรือปัญหายากๆ ที่เราแก้ได้สำเร็จ' },
+    { key:'dev_needs', label:'2. โอกาสในการพัฒนาตนเอง', hint:'ไม่ใช่แค่การบอกข้อเสียของตัวเอง แต่เป็นการบอกว่า "ถ้าฉันเก่งเรื่อง........นี้เพิ่มขึ้น งานของทีมจะปังกว่านี้แน่นอน"' },
+    { key:'goals', label:'3. เป้าหมายและสิ่งใหม่ที่ท่านตั้งใจจะทำให้สำเร็จใน 6 เดือนข้างหน้า', hint:'ลองใช้หลัก SMART Goal (จับต้องได้ มีตัวเลข หรือมีระยะเวลาที่ชัดเจน)' },
+  ];
+  return fields.map(f => `
+    <div class="admin-review-block">
+      <label class="field-label" style="font-weight:600;font-size:14px">${f.label}</label>
+      <div class="admin-hint">${f.hint}</div>
+      <textarea id="review_${f.key}" class="field-textarea" rows="4" placeholder="กรอกรายละเอียด..." ${readOnly?'readonly':''}>${adminFormData['review_'+f.key]||''}</textarea>
+    </div>
+  `).join('');
+}
+
+function renderAdminStep5(empId, readOnly) {
+  // สรุปคะแนนส่วนที่ 1 และ 2
+  const comp1Scores = ADMIN_COMPETENCY_LIST.map(c => adminFormData['comp_'+c.key] || 0);
+  const comp2Scores = ADMIN_BEHAVIOR_LIST.map(b => adminFormData['beh_'+b.key] || 0);
+  const sum1 = comp1Scores.reduce((a,b)=>a+b,0);
+  const sum2 = comp2Scores.reduce((a,b)=>a+b,0);
+  const pct1 = sum1 > 0 ? ((sum1/50)*100).toFixed(1) : '—';
+  const pct2 = sum2 > 0 ? ((sum2/50)*100).toFixed(1) : '—';
+
+  const missing1 = ADMIN_COMPETENCY_LIST.filter(c => !adminFormData['comp_'+c.key]).length;
+  const missing2 = ADMIN_BEHAVIOR_LIST.filter(b => !adminFormData['beh_'+b.key]).length;
+  const warn = (missing1+missing2) > 0
+    ? `<div class="admin-warn">⚠️ ยังกรอกไม่ครบ — ส่วนที่ 1 ขาด ${missing1} ข้อ, ส่วนที่ 2 ขาด ${missing2} ข้อ</div>`
+    : `<div class="admin-ok">✅ กรอกครบทุกส่วนแล้ว พร้อมส่ง</div>`;
+
+  return `
+    ${warn}
+    <table class="admin-summary-table">
+      <thead><tr><th>หัวข้อการประเมิน</th><th>คะแนนรวม / คะแนนเต็ม</th><th>คิดเป็น %</th></tr></thead>
+      <tbody>
+        <tr><td>ส่วนที่ 1: สมรรถนะตามตำแหน่งงาน</td><td>${sum1} / 50</td><td>${pct1}%</td></tr>
+        <tr><td>ส่วนที่ 2: พฤติกรรมหลัก</td><td>${sum2} / 50</td><td>${pct2}%</td></tr>
+        <tr style="font-weight:700"><td>รวมคะแนน</td><td>${sum1+sum2} / 100</td><td>${sum1+sum2>0?((sum1+sum2)/100*100).toFixed(1)+'%':'—'}</td></tr>
+      </tbody>
+    </table>
+    <div class="admin-review-block" style="margin-top:16px">
+      <div class="field-label" style="font-weight:600">ตรวจสอบข้อมูลก่อนส่ง</div>
+      <ul style="font-size:13px;color:var(--text-2);margin:8px 0 0 16px;line-height:1.8">
+        <li>ส่วนที่ 1 — สมรรถนะ: ${50-missing1}/10 ข้อ ที่กรอกแล้ว</li>
+        <li>ส่วนที่ 2 — พฤติกรรม: ${50-missing2*5}/10 ข้อ ที่กรอกแล้ว</li>
+        <li>ส่วนที่ 3 — ภารกิจ: ${adminFormData.mission1_title?'✓':'✗'} ภารกิจที่ 1, ${adminFormData.mission2_title?'✓':'✗'} ภารกิจที่ 2</li>
+        <li>ส่วนที่ 4 — ทบทวนตนเอง: ${adminFormData.review_strengths?'✓':'✗'} จุดแข็ง, ${adminFormData.review_dev_needs?'✓':'✗'} พัฒนา, ${adminFormData.review_goals?'✓':'✗'} เป้าหมาย</li>
+      </ul>
+    </div>
+  `;
+}
+
+async function submitAdminSelfEval(empId) {
+  // บันทึก step ปัจจุบันก่อน submit
+  saveAdminStepData(adminFormStep);
+
+  const missing1 = ADMIN_COMPETENCY_LIST.filter(c => !adminFormData['comp_'+c.key]).length;
+  const missing2 = ADMIN_BEHAVIOR_LIST.filter(b => !adminFormData['beh_'+b.key]).length;
+  if (missing1 + missing2 > 0) {
+    showToast(`กรุณากรอกให้ครบ — ส่วนที่ 1 ขาด ${missing1} ข้อ, ส่วนที่ 2 ขาด ${missing2} ข้อ`, 'error');
+    return;
+  }
+
+  const payload = {
+    action:      'submitSelfEval',
+    employee_id: empId || currentUser.id,
+    form_type:   'admin',
+    admin_data:  { ...adminFormData },
+    year:        getCurrentPeriod().year,
+    quarter:     getCurrentPeriod().quarter,
+  };
+
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    await loadAllData();
+    adminFormData = {};
+    showToast('ส่งแบบประเมินสำเร็จ', 'success');
+    goBack();
+    renderEmpDashboard();
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+// ========== Admin Manager Eval Form (Multi-step) ==========
+function renderAdminMgrStep(container, empId) {
+  const step = adminMgrFormStep;
+  const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const selfData = selfEval?.admin_data || {};
+
+  const stepTitles = [
+    'ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน (Position Competencies)',
+    'ส่วนที่ 2 — พฤติกรรมหลัก (Core Behaviors)',
+    'ส่วนที่ 3 — ภารกิจหลักของตำแหน่ง',
+    'ส่วนที่ 4 — ทบทวนคุณลักษณะและศักยภาพ + สรุป',
+  ];
+
+  const progressHTML = `
+    <div class="admin-form-progress">
+      ${[1,2,3,4].map(i => `
+        <div class="admin-step-item ${i===step?'active':i<step?'done':''}">
+          <div class="admin-step-circle">${i<step?'✓':i}</div>
+          <div class="admin-step-label">ส่วนที่ ${i}</div>
+        </div>
+        ${i<4?'<div class="admin-step-line '+(i<step?'done':'')+'"></div>':''}
+      `).join('')}
+    </div>
+    <h3 class="admin-step-title">${stepTitles[step-1]}</h3>
+  `;
+
+  let bodyHTML = '';
+  if (step === 1) bodyHTML = renderAdminMgrStep1(empId, selfData);
+  else if (step === 2) bodyHTML = renderAdminMgrStep2(empId, selfData);
+  else if (step === 3) bodyHTML = renderAdminMgrStep3(empId, selfData);
+  else if (step === 4) bodyHTML = renderAdminMgrStep4(empId, selfData);
+
+  const backBtn   = step > 1 ? `<button class="btn-outline" onclick="adminMgrFormNav(${step-1},'${empId}')">← ย้อนกลับ</button>` : '';
+  const nextBtn   = step < 4 ? `<button class="btn-primary" onclick="adminMgrFormNav(${step+1},'${empId}')">ถัดไป →</button>` : '';
+  const submitBtn = step === 4 ? `<button class="btn-primary" onclick="submitAdminMgrEval('${empId}')">บันทึกการประเมิน</button>` : '';
+
+  container.innerHTML = `
+    <div class="form-card">
+      ${progressHTML}
+      <div class="admin-step-body">${bodyHTML}</div>
+      <div class="form-actions" style="justify-content:space-between;margin-top:24px">
+        <div>${backBtn}</div>
+        <div style="display:flex;gap:12px">${nextBtn}${submitBtn}</div>
+      </div>
+    </div>
+  `;
+}
+
+function adminMgrFormNav(toStep, empId) {
+  saveAdminMgrStepData(adminMgrFormStep);
+  adminMgrFormStep = toStep;
+  const container = document.getElementById('mgr-eval-layout');
+  renderAdminMgrStep(container, empId);
+}
+
+function saveAdminMgrStepData(step) {
+  if (step === 1) {
+    ADMIN_COMPETENCY_LIST.forEach(c => {
+      const checked = document.querySelector(`input[name="mgr_comp_${c.key}"]:checked`);
+      if (checked) adminMgrFormData[`comp_${c.key}`] = parseInt(checked.value);
+    });
+  } else if (step === 2) {
+    ADMIN_BEHAVIOR_LIST.forEach(b => {
+      const checked = document.querySelector(`input[name="mgr_beh_${b.key}"]:checked`);
+      if (checked) adminMgrFormData[`beh_${b.key}`] = parseInt(checked.value);
+    });
+  } else if (step === 3) {
+    [1,2].forEach(i => {
+      const el = document.getElementById(`mgr_mission${i}_comment`);
+      if (el) adminMgrFormData[`mission${i}_comment`] = el.value;
+      const sc = document.querySelector(`input[name="mgr_mission${i}_score"]:checked`);
+      if (sc) adminMgrFormData[`mission${i}_score`] = parseInt(sc.value);
+    });
+  } else if (step === 4) {
+    const el = document.getElementById('mgr_review_comment');
+    if (el) adminMgrFormData.review_comment = el.value;
+    const sc = document.querySelector('input[name="mgr_review_score"]:checked');
+    if (sc) adminMgrFormData.review_score = parseInt(sc.value);
+    const ov = document.getElementById('mgr_overall_comment');
+    if (ov) adminMgrFormData.overall_comment = ov.value;
+    const rec = document.querySelector('input[name="mgr_recommendation"]:checked');
+    if (rec) adminMgrFormData.recommendation = rec.value;
+    const career = document.querySelector('input[name="mgr_career"]:checked');
+    if (career) adminMgrFormData.career = career.value;
+    const devPlan = document.getElementById('mgr_dev_plan');
+    if (devPlan) adminMgrFormData.dev_plan = devPlan.value;
+  }
+}
+
+// render คะแนน self ของพนักงาน + ช่องให้หัวหน้าให้คะแนน
+function renderAdminMgrScoreRow(namePrefix, list, selfData, prefix) {
+  return list.map(item => {
+    const selfScore = selfData[`${prefix}_${item.key}`] || 0;
+    const mgrScore  = adminMgrFormData[`${prefix}_${item.key}`] || 0;
+    const selfEv    = selfData[`${prefix}_ev_${item.key}`] || '—';
+    return `
+      <div class="admin-competency-block">
+        <div class="admin-comp-header">
+          <span class="admin-comp-no">${item.no}</span>
+          <div>
+            <div class="admin-comp-name">${item.name}</div>
+            ${item.eng ? `<div class="admin-comp-eng">${item.eng}</div>` : ''}
+          </div>
+        </div>
+        <div class="admin-comp-question">${item.question}</div>
+        <!-- พนักงานให้คะแนนตัวเอง -->
+        <div style="background:var(--bg);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;font-size:12px">
+          <span style="color:var(--text-3)">Self-Eval พนักงาน:</span>
+          <strong style="color:var(--primary);margin-left:8px">${selfScore || '—'} / 5</strong>
+          <div style="color:var(--text-3);margin-top:4px;font-style:italic">Evidence: ${selfEv}</div>
+        </div>
+        <!-- หัวหน้าให้คะแนน -->
+        <div style="margin-bottom:6px;font-size:12px;font-weight:600;color:var(--text-2)">คะแนนจากหัวหน้า:</div>
+        <div class="admin-mgr-score-row">
+          ${[5,4,3,2,1].map(n => `
+            <label class="admin-mgr-score-btn ${mgrScore===n?'selected':''}">
+              <input type="radio" name="${namePrefix}_${item.key}" value="${n}" ${mgrScore===n?'checked':''}
+                onchange="this.closest('.admin-mgr-score-row').querySelectorAll('.admin-mgr-score-btn').forEach(b=>b.classList.remove('selected'));this.closest('.admin-mgr-score-btn').classList.add('selected')">
+              ${n}
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('<hr class="admin-divider">');
+}
+
+function renderAdminMgrStep1(empId, selfData) {
+  return `
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:16px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
+      ส่วนที่ 1 คะแนนเต็ม 25 คะแนน — ให้คะแนนแต่ละหัวข้อ 1-5 (รวม 10 หัวข้อ × 5 = 50 → คิดเป็น 25 คะแนน)
+    </div>
+    ${renderAdminMgrScoreRow('mgr_comp', ADMIN_COMPETENCY_LIST, selfData, 'comp')}
+  `;
+}
+
+function renderAdminMgrStep2(empId, selfData) {
+  const groups = [
+    { label:'หมวดที่ 1: ด้านวินัยแห่งตน ความซื่อสัตย์สุจริต และความรับผิดชอบต่อหน้าที่', items: ADMIN_BEHAVIOR_LIST.slice(0,3) },
+    { label:'หมวดที่ 2: ลักษณะนิสัยของการเป็นผู้มีประสิทธิผลสูง', items: ADMIN_BEHAVIOR_LIST.slice(3) },
+  ];
+  return `
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:16px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
+      ส่วนที่ 2 คะแนนเต็ม 25 คะแนน — ให้คะแนนแต่ละหัวข้อ 1-5 (รวม 10 หัวข้อ × 5 = 50 → คิดเป็น 25 คะแนน)
+    </div>
+    ${groups.map(g => `
+      <div class="admin-group-header">${g.label}</div>
+      ${renderAdminMgrScoreRow('mgr_beh', g.items, selfData, 'beh')}
+    `).join('')}
+  `;
+}
+
+function renderAdminMgrStep3(empId, selfData) {
+  return [1,2].map(i => {
+    const title  = selfData[`mission${i}_title`]  || '—';
+    const target = selfData[`mission${i}_target`] || '—';
+    const result = selfData[`mission${i}_result`] || '—';
+    const mgrComment = adminMgrFormData[`mission${i}_comment`] || '';
+    const mgrScore   = adminMgrFormData[`mission${i}_score`]   || 0;
+    return `
+      <div class="admin-mission-block">
+        <div class="admin-comp-header">
+          <span class="admin-comp-no">${i}</span>
+          <div class="admin-comp-name">ภารกิจที่ ${i}</div>
+        </div>
+        <!-- พนักงานกรอก -->
+        <div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;font-size:13px">
+          <div style="font-weight:600;margin-bottom:6px">ภารกิจ: ${title}</div>
+          <div class="admin-mission-grid">
+            <div><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">เป้าหมาย (Target)</div><div>${target}</div></div>
+            <div><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">ผลลัพธ์จริง</div><div>${result}</div></div>
+          </div>
+        </div>
+        <!-- หัวหน้ากรอก -->
+        <div class="form-field">
+          <label class="field-label">ข้อเสนอแนะ/ความเห็นจากหัวหน้างาน</label>
+          <textarea id="mgr_mission${i}_comment" class="field-textarea" rows="3" placeholder="กรอกข้อเสนอแนะ...">${mgrComment}</textarea>
+        </div>
+        <div style="margin-bottom:6px;font-size:12px;font-weight:600;color:var(--text-2)">คะแนนส่วนที่ 3 ภารกิจที่ ${i} (1-5):</div>
+        <div class="admin-mgr-score-row">
+          ${[5,4,3,2,1].map(n => `
+            <label class="admin-mgr-score-btn ${mgrScore===n?'selected':''}">
+              <input type="radio" name="mgr_mission${i}_score" value="${n}" ${mgrScore===n?'checked':''}
+                onchange="this.closest('.admin-mgr-score-row').querySelectorAll('.admin-mgr-score-btn').forEach(b=>b.classList.remove('selected'));this.closest('.admin-mgr-score-btn').classList.add('selected')">
+              ${n}
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('<hr class="admin-divider">');
+}
+
+function renderAdminMgrStep4(empId, selfData) {
+  const strengths = selfData['review_strengths'] || '—';
+  const devNeeds  = selfData['review_dev_needs']  || '—';
+  const goals     = selfData['review_goals']      || '—';
+  const mgrReviewComment = adminMgrFormData.review_comment  || '';
+  const mgrReviewScore   = adminMgrFormData.review_score    || 0;
+  const mgrOverallComment= adminMgrFormData.overall_comment || '';
+  const mgrRec           = adminMgrFormData.recommendation  || '';
+  const mgrCareer        = adminMgrFormData.career          || '';
+  const mgrDevPlan       = adminMgrFormData.dev_plan        || '';
+
+  // คำนวณคะแนนรวมจากส่วนที่ 1-3
+  const comp1 = ADMIN_COMPETENCY_LIST.map(c => adminMgrFormData[`comp_${c.key}`]||0).reduce((a,b)=>a+b,0);
+  const comp2 = ADMIN_BEHAVIOR_LIST.map(b => adminMgrFormData[`beh_${b.key}`]||0).reduce((a,b)=>a+b,0);
+  const m1    = adminMgrFormData.mission1_score||0;
+  const m2    = adminMgrFormData.mission2_score||0;
+  const part1 = Math.round(comp1/50*25);
+  const part2 = Math.round(comp2/50*25);
+  const part3 = Math.round((m1+m2)/10*25);
+
+  const recOptions = [
+    { value:'merit',    label:'ปรับขึ้นเงินเดือนกรณีพิเศษ (Merit Increase)' },
+    { value:'standard', label:'ปรับขึ้นเงินเดือนตามเกณฑ์มาตรฐาน (Standard Annual Increase)' },
+    { value:'hold',     label:'คงอัตราเงินเดือนเดิม / ชะลอการปรับขึ้น' },
+  ];
+  const careerOptions = [
+    { value:'promote',  label:'เสนอปรับเลื่อนตำแหน่ง (Promotion)' },
+    { value:'enrich',   label:'เสนอปรับขยายขอบเขตความรับผิดชอบ (Job Enrichment)' },
+    { value:'maintain', label:'เสนอให้ปฏิบัติหน้าที่ในตำแหน่งเดิมต่อไป' },
+  ];
+
+  return `
+    <!-- ทบทวนตนเองของพนักงาน -->
+    <div style="background:var(--bg);border-radius:var(--radius);padding:14px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--text-1)">ทบทวนตนเองของพนักงาน (อ่านอย่างเดียว)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
+        <div><div style="color:var(--text-3);margin-bottom:4px">จุดแข็ง</div><div>${strengths}</div></div>
+        <div><div style="color:var(--text-3);margin-bottom:4px">โอกาสพัฒนา</div><div>${devNeeds}</div></div>
+        <div><div style="color:var(--text-3);margin-bottom:4px">เป้าหมาย 6 เดือน</div><div>${goals}</div></div>
+      </div>
+    </div>
+    <!-- หัวหน้าให้คะแนนส่วนที่ 4 -->
+    <div class="form-field">
+      <label class="field-label">ข้อเสนอแนะ/ความเห็นจากหัวหน้างาน (ส่วนที่ 4)</label>
+      <textarea id="mgr_review_comment" class="field-textarea" rows="3" placeholder="กรอกข้อเสนอแนะ...">${mgrReviewComment}</textarea>
+    </div>
+    <div style="margin-bottom:6px;font-size:12px;font-weight:600;color:var(--text-2)">คะแนนส่วนที่ 4 ทบทวนตนเอง (1-25):</div>
+    <div class="admin-mgr-score-row" style="flex-wrap:wrap">
+      ${Array.from({length:25},(_,i)=>i+1).map(n => `
+        <label class="admin-mgr-score-btn ${mgrReviewScore===n?'selected':''}" style="min-width:36px">
+          <input type="radio" name="mgr_review_score" value="${n}" ${mgrReviewScore===n?'checked':''}
+            onchange="this.closest('.admin-mgr-score-row').querySelectorAll('.admin-mgr-score-btn').forEach(b=>b.classList.remove('selected'));this.closest('.admin-mgr-score-btn').classList.add('selected')">
+          ${n}
+        </label>
+      `).join('')}
+    </div>
+
+    <hr class="admin-divider" style="margin:20px 0">
+
+    <!-- สรุปคะแนนรวม -->
+    <div style="font-weight:700;font-size:14px;margin-bottom:12px">สรุปการประเมิน</div>
+    <table class="admin-summary-table">
+      <thead><tr><th>หัวข้อการประเมิน</th><th>คะแนนที่ได้</th><th>คะแนนเต็ม</th></tr></thead>
+      <tbody>
+        <tr><td>ส่วนที่ 1: สมรรถนะตามตำแหน่งงาน</td><td id="sum-p1">${part1}</td><td>25</td></tr>
+        <tr><td>ส่วนที่ 2: พฤติกรรมหลัก</td><td id="sum-p2">${part2}</td><td>25</td></tr>
+        <tr><td>ส่วนที่ 3: ภารกิจหลัก</td><td id="sum-p3">${part3}</td><td>25</td></tr>
+        <tr><td>ส่วนที่ 4: ทบทวนตนเอง</td><td>${mgrReviewScore||'—'}</td><td>25</td></tr>
+        <tr style="font-weight:700"><td>รวมคะแนน</td><td>${part1+part2+part3+(mgrReviewScore||0)}</td><td>100</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="admin-divider" style="margin:20px 0">
+
+    <!-- Overall Commentary -->
+    <div class="form-field">
+      <label class="field-label">สรุปความเห็นเกี่ยวกับภาพรวมการปฏิบัติงาน (Overall Performance Commentary)</label>
+      <textarea id="mgr_overall_comment" class="field-textarea" rows="3" placeholder="กรอกสรุปความเห็น...">${mgrOverallComment}</textarea>
+    </div>
+
+    <!-- Recommendation -->
+    <div class="form-field">
+      <label class="field-label">ข้อเสนอแนะเพื่อการปรับอัตราผลตอบแทน / รางวัล</label>
+      ${recOptions.map(r => `
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;font-size:13px;${mgrRec===r.value?'border-color:var(--primary);background:rgba(224,32,32,0.05)':''}">
+          <input type="radio" name="mgr_recommendation" value="${r.value}" ${mgrRec===r.value?'checked':''}> ${r.label}
+        </label>
+      `).join('')}
+    </div>
+
+    <!-- Career Advancement -->
+    <div class="form-field">
+      <label class="field-label">ข้อเสนอแนะเพื่อการปรับตำแหน่งงาน / การขยายขอบเขตหน้าที่</label>
+      ${careerOptions.map(c => `
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;font-size:13px;${mgrCareer===c.value?'border-color:var(--primary);background:rgba(224,32,32,0.05)':''}">
+          <input type="radio" name="mgr_career" value="${c.value}" ${mgrCareer===c.value?'checked':''}> ${c.label}
+        </label>
+      `).join('')}
+    </div>
+
+    <!-- Development Plan -->
+    <div class="form-field">
+      <label class="field-label">แผนการพัฒนาต่อเนื่องและการเตรียมความพร้อม (Development Action Plan)</label>
+      <textarea id="mgr_dev_plan" class="field-textarea" rows="3" placeholder="ระบุแผนพัฒนา...">${mgrDevPlan}</textarea>
+    </div>
+  `;
+}
+
+async function submitAdminMgrEval(empId) {
+  saveAdminMgrStepData(adminMgrFormStep);
+
+  const comp1 = ADMIN_COMPETENCY_LIST.map(c => adminMgrFormData[`comp_${c.key}`]||0).reduce((a,b)=>a+b,0);
+  const comp2 = ADMIN_BEHAVIOR_LIST.map(b => adminMgrFormData[`beh_${b.key}`]||0).reduce((a,b)=>a+b,0);
+  const m1    = adminMgrFormData.mission1_score||0;
+  const m2    = adminMgrFormData.mission2_score||0;
+  const part4 = adminMgrFormData.review_score||0;
+  const part1 = Math.round(comp1/50*25);
+  const part2 = Math.round(comp2/50*25);
+  const part3 = Math.round((m1+m2)/10*25);
+  const total = part1+part2+part3+part4;
+
+  if (!adminMgrFormData.recommendation) {
+    showToast('กรุณาเลือกข้อเสนอแนะการปรับเงินเดือน', 'error'); return;
+  }
+
+  const payload = {
+    action:          'submitManagerEval',
+    manager_id:      currentUser.id,
+    employee_id:     empId,
+    form_type:       'admin',
+    overall_grade:   total >= 90?'excellent':total>=75?'good':total>=60?'medium':total>=50?'fair':'improve',
+    recommendation:  adminMgrFormData.recommendation,
+    manager_comment: adminMgrFormData.overall_comment || '',
+    admin_mgr_data:  { ...adminMgrFormData, part1, part2, part3, part4, total },
+    year:            getCurrentPeriod().year,
+    quarter:         getCurrentPeriod().quarter,
+  };
+
+  const emp = allData.employees.find(e => sameId(e.id, empId));
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    await loadAllData();
+    adminMgrFormData = {};
+    showToast(`บันทึกการประเมิน ${emp?.name||''} สำเร็จ`, 'success');
+    goBack();
+    renderMgrDashboard();
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+// ========== MANAGER EVAL FORM ==========
+function renderMgrEvalForm() {
+  const empId  = currentEvalEmployeeId;
+  const emp    = allData.employees.find(e => sameId(e.id, empId));
+  if (!emp) return;
+  document.getElementById('mgr-eval-emp-name').textContent = emp.name;
+  const layout  = document.getElementById('mgr-eval-layout');
+  const posType = emp.position_type || 'staff';
+
+  if (isManagerType(posType)) {
+    renderOldMgrEvalLayout(layout, empId);
+  } else if (isAdminType(posType)) {
+    adminMgrFormStep = 1;
+    adminMgrFormData = {};
+    renderAdminMgrStep(layout, empId);
+  } else {
+    renderStaffSeniorMgrEvalLayout(layout, empId);
+  }
+}
+
+// Staff/Senior Manager Eval Layout
+function renderStaffSeniorMgrEvalLayout(container, empId) {
+  const emp      = allData.employees.find(e => sameId(e.id, empId));
+  const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const existing = allData.managerEvals.find(m => sameId(m.employee_id, empId));
+  // โหลดคะแนนพฤติกรรมที่หัวหน้าเคยให้ไว้ ลง global variable
+  currentMgrBehavior = { ...(existing?.mgr_behavior || {}) };
+  const uploaded = getUploadedFile(empId);
+
+  container.innerHTML = `
+    <div class="eval-layout">
+      <div class="eval-form-col">
+
+        <!-- เอกสารที่พนักงานอัปโหลด -->
+        ${uploaded ? `
+        <div class="form-card doc-viewer-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">📎 เอกสารแบบฟอร์มที่พนักงานส่งมา</h3>
+            <span class="ref-badge">อ้างอิง</span>
+          </div>
+          ${uploaded.type==='pdf'
+            ? `<div class="upload-pdf-msg">📄 ${uploaded.name} — <a href="${uploaded.data}" target="_blank" style="color:var(--primary)">เปิดดู PDF</a></div>`
+            : `<img src="${uploaded.data}" style="max-width:100%;max-height:400px;object-fit:contain;display:block;margin:0 auto;border-radius:8px">`
+          }
+        </div>` : ''}
+
+        <!-- Self-eval ของพนักงาน (อ่านอย่างเดียว) -->
+        <div class="form-card self-ref-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">Self-Evaluation ของ ${emp?.name||''}</h3>
+            <span class="ref-badge">อ้างอิง</span>
+          </div>
+          ${selfEval
+            ? buildSelfRefReadOnly(selfEval)
+            : '<p style="color:var(--text-3);font-size:13px">พนักงานยังไม่ได้กรอก Self-Evaluation</p>'
+          }
+        </div>
+
+        <!-- ส่วนที่ 4: ความเห็นหัวหน้า -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 4 — ความเห็นและผลการประเมินโดยรวม</h3>
+          </div>
+          <label class="field-label" style="margin-bottom:10px;display:block">สรุปผลการประเมินโดยรวม</label>
+          <div class="grade-picker" id="grade-picker">
+            ${GRADE_LIST.map(g => `
+              <button class="grade-pick-btn ${existing?.overall_grade===g.key ? g.cls : ''}"
+                data-grade="${g.key}" onclick="selectGrade('${g.key}')">
+                ${g.label}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="form-card">
+          <label class="field-label">ข้อเสนอแนะเพิ่มเติม</label>
+          <textarea id="mgr-ss-comment" class="field-textarea" placeholder="บันทึกความเห็น จุดแข็ง จุดที่ต้องพัฒนา...">${existing?.manager_comment||''}</textarea>
+        </div>
+
+        <div class="form-card">
+          <label class="field-label">ข้อเสนอแนะ (Recommendation)</label>
+          <div class="rec-options">
+            <label class="rec-option"><input type="radio" name="rec" value="promote"    ${existing?.recommendation==='promote'   ?'checked':''}> เลื่อนตำแหน่ง + ขึ้นเงินเดือน</label>
+            <label class="rec-option"><input type="radio" name="rec" value="raise-high" ${existing?.recommendation==='raise-high'?'checked':''}> ขึ้นเงินเดือน (สูง)</label>
+            <label class="rec-option"><input type="radio" name="rec" value="raise"      ${existing?.recommendation==='raise'     ?'checked':''}> ขึ้นเงินเดือน (ปกติ)</label>
+            <label class="rec-option"><input type="radio" name="rec" value="hold"       ${existing?.recommendation==='hold'      ?'checked':''}> ยังไม่ขึ้น</label>
+            <label class="rec-option"><input type="radio" name="rec" value="pip"        ${existing?.recommendation==='pip'       ?'checked':''}> ต้องพัฒนา (PIP)</label>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitStaffSeniorMgrEval()">บันทึก Manager Evaluation</button>
+          <button class="btn-outline" onclick="goBack()">ยกเลิก</button>
+        </div>
+
+      </div><!-- /form col -->
+
+      <!-- Score Panel — ให้คะแนนพฤติกรรม (หัวหน้า) -->
+      <aside class="score-panel">
+        <div class="score-card">
+          <div class="behavior-avg-display">
+            <div style="font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:8px">ผลการประเมินโดยรวม</div>
+            <div id="mgr-selected-grade-label" style="font-size:20px;font-weight:700;color:#fff">
+              ${existing?.overall_grade ? (GRADE_LIST.find(g=>g.key===existing.overall_grade)?.label||'—') : '— เลือกผลการประเมิน'}
+            </div>
+          </div>
+        </div>
+
+        <!-- ให้คะแนนพฤติกรรม (หัวหน้า) — interactive -->
+        <div class="score-breakdown-card">
+          <div style="font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">ให้คะแนนพฤติกรรม (หัวหน้า)</div>
+          <div style="font-size:20px;font-weight:700;color:var(--primary);text-align:center;margin-bottom:10px" id="mgr-behavior-avg-num">
+            ${calcBehaviorAvg(currentMgrBehavior)||'—'} / 5.0
+          </div>
+          ${BEHAVIOR_LIST.map(b => `
+            <div style="margin-bottom:8px">
+              <div style="font-size:10px;color:var(--text-2);margin-bottom:3px;display:flex;justify-content:space-between">
+                <span>${b.no}. ${b.name}</span>
+                ${selfEval?.behavior ? `<span style="color:var(--text-3)">S:${selfEval.behavior[b.key]||'—'}</span>` : ''}
+              </div>
+              <div style="display:flex;gap:3px">
+                ${[1,2,3,4,5].map(n => `
+                  <button class="mgr-beh-btn ${currentMgrBehavior[b.key]===n?'mgr-beh-selected':''}"
+                    data-bkey="${b.key}" data-val="${n}"
+                    style="flex:1;height:24px;font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:${currentMgrBehavior[b.key]===n?'var(--primary)':'transparent'};color:${currentMgrBehavior[b.key]===n?'#fff':'var(--text-2)'}">
+                    ${n}
+                  </button>`).join('')}
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <div class="grade-guide-card">
+          <div class="guide-title">เกณฑ์ผลการประเมิน</div>
+          ${GRADE_LIST.map(g => `
+            <div class="guide-row">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${g.color};margin-right:4px"></span>
+              ${g.label}
+            </div>`).join('')}
+        </div>
+      </aside>
+    </div>
+  `;
+
+  // ผูก event behavior rating ของหัวหน้า
+  container.querySelectorAll('.mgr-beh-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bkey = btn.dataset.bkey;
+      const val  = parseInt(btn.dataset.val);
+      currentMgrBehavior[bkey] = val;
+      // อัปเดต style ปุ่มในกลุ่มเดียวกัน
+      container.querySelectorAll(`.mgr-beh-btn[data-bkey="${bkey}"]`).forEach(b => {
+        const selected = parseInt(b.dataset.val) === val;
+        b.style.background = selected ? 'var(--primary)' : 'transparent';
+        b.style.color       = selected ? '#fff' : 'var(--text-2)';
+        b.style.border      = '1px solid var(--border)';
+      });
+      // อัปเดตค่าเฉลี่ย
+      const avgEl = document.getElementById('mgr-behavior-avg-num');
+      if (avgEl) avgEl.textContent = `${calcBehaviorAvg(currentMgrBehavior)||'—'} / 5.0`;
+    });
+  });
+}
+
+function buildSelfRefReadOnly(selfEval) {
+  const missions = selfEval.missions || [];
+  const behavior = selfEval.behavior || {};
+  const review   = selfEval.self_review || {};
+  const resultLabel = { exceed:'เกินเป้าหมาย', achieve:'บรรลุเป้าหมาย', below:'ต่ำกว่าเป้าหมาย' };
+
+  return `
+    <div class="self-ref-section">
+      <span class="self-ref-section-title">ส่วนที่ 1 — ภารกิจหลัก</span>
+      ${missions.map((m,i) => `
+        <div style="margin-bottom:8px;font-size:13px">
+          <strong>ภารกิจที่ ${i+1}:</strong> ${m.text||'—'}
+          <span style="margin-left:8px;color:var(--primary);font-size:12px">[${resultLabel[m.result]||m.result||'—'}]</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="self-ref-section">
+      <span class="self-ref-section-title">ส่วนที่ 2 — พฤติกรรม (ค่าเฉลี่ย ${calcBehaviorAvg(behavior)}/5.0)</span>
+      ${BEHAVIOR_LIST.map(b => {
+        const val = behavior[b.key] || 0;
+        const cls = val>=4?'score-high':val>=3?'score-mid':'score-low';
+        return `<div class="self-ref-kpi-row"><span>${b.name}</span><span class="self-ref-score">${val||'—'}</span></div>`;
+      }).join('')}
+    </div>
+    ${(review.strengths||review.dev_needs) ? `
+    <div class="self-ref-section" style="margin-top:10px">
+      <span class="self-ref-section-title">ส่วนที่ 3 — ทบทวนตนเอง</span>
+      ${review.strengths ? `<p style="font-size:12px;color:var(--text-2);margin-bottom:4px"><strong>จุดแข็ง:</strong> ${review.strengths}</p>` : ''}
+      ${review.dev_needs ? `<p style="font-size:12px;color:var(--text-2)"><strong>พัฒนา:</strong> ${review.dev_needs}</p>` : ''}
+    </div>` : ''}
+  `;
+}
+
+function selectGrade(gradeKey) {
+  document.querySelectorAll('.grade-pick-btn').forEach(btn => {
+    const g = GRADE_LIST.find(x => x.key === btn.dataset.grade);
+    btn.className = `grade-pick-btn ${btn.dataset.grade === gradeKey ? g?.cls||'' : ''}`;
+  });
+  const found = GRADE_LIST.find(g => g.key === gradeKey);
+  const label = document.getElementById('mgr-selected-grade-label');
+  if (label && found) { label.textContent = found.label; label.style.color = found.color; }
+}
+
+async function submitStaffSeniorMgrEval() {
+  const empId   = currentEvalEmployeeId;
+  const emp     = allData.employees.find(e => sameId(e.id, empId));
+  const selGrade = document.querySelector('.grade-pick-btn[class*="selected"]');
+
+  // หา grade ที่ selected
+  let overall_grade = '';
+  GRADE_LIST.forEach(g => {
+    if (document.querySelector(`.grade-pick-btn.${g.cls}`)) overall_grade = g.key;
+  });
+
+  if (!overall_grade) { showToast('กรุณาเลือกผลการประเมินโดยรวมก่อนบันทึก', 'error'); return; }
+
+  const rec = document.querySelector('input[name="rec"]:checked');
+  if (!rec) { showToast('กรุณาเลือก Recommendation', 'error'); return; }
+
+  // ใช้ currentMgrBehavior ที่อัปเดตระหว่างกรอกฟอร์ม
+  const mgr_behavior = { ...currentMgrBehavior };
+
+  const payload = {
+    action:          'submitManagerEval',
+    manager_id:      currentUser.id,
+    employee_id:     empId,
+    form_type:       'staff_senior',
+    overall_grade,
+    mgr_behavior,
+    manager_comment: document.getElementById('mgr-ss-comment')?.value.trim() || '',
+    recommendation:  rec.value,
+    year:            getCurrentPeriod().year,
+    quarter:         getCurrentPeriod().quarter,
+  };
+
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    await loadAllData();
+    showToast(`บันทึกการประเมิน ${emp?.name||''} สำเร็จ`, 'success');
+    goBack();
+    renderMgrDashboard();
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+// ========== Manager Eval Layout — หัวหน้ากรอกส่วนที่ 5 (ประเมิน Manager) ==========
+function renderOldMgrEvalLayout(container, empId) {
+  const emp      = allData.employees.find(e => sameId(e.id, empId));
+  const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const existing = allData.managerEvals.find(m => sameId(m.employee_id, empId));
+  const uploaded = getUploadedFile(empId);
+
+  container.innerHTML = `
+    <div class="eval-layout">
+      <div class="eval-form-col">
+
+        ${uploaded ? `
+        <div class="form-card doc-viewer-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">📎 เอกสารแบบฟอร์มที่พนักงานส่งมา</h3>
+            <span class="ref-badge">อ้างอิง</span>
+          </div>
+          ${uploaded.type==='pdf'
+            ? `<div class="upload-pdf-msg">📄 ${uploaded.name} — <a href="${uploaded.data}" target="_blank" style="color:var(--primary)">เปิดดู PDF</a></div>`
+            : `<img src="${uploaded.data}" style="max-width:100%;max-height:400px;object-fit:contain;display:block;margin:0 auto;border-radius:8px">`
+          }
+        </div>` : ''}
+
+        <!-- Self-Eval อ่านอย่างเดียว -->
+        <div class="form-card self-ref-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">Self-Evaluation ของ ${emp?.name||''}</h3>
+            <span class="ref-badge">อ้างอิง</span>
+          </div>
+          ${selfEval
+            ? buildManagerSelfRefReadOnly(selfEval)
+            : '<p style="color:var(--text-3);font-size:13px">พนักงานยังไม่ได้กรอก Self-Evaluation</p>'
+          }
+        </div>
+
+        <!-- ส่วนที่ 5: สรุปผลและข้อเสนอแนะโดยผู้บังคับบัญชา -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 5 — ความเห็นและผลการประเมินโดยรวม</h3>
+            <span class="ref-badge">กรอกโดยผู้บังคับบัญชา</span>
+          </div>
+          <label class="field-label" style="margin-bottom:10px;display:block">สรุปผลการประเมินโดยรวม</label>
+          <div class="grade-picker" id="grade-picker">
+            ${GRADE_LIST.map(g => `
+              <button class="grade-pick-btn ${existing?.overall_grade===g.key ? g.cls : ''}"
+                data-grade="${g.key}" onclick="selectGrade('${g.key}')">
+                ${g.label}
+              </button>`).join('')}
+          </div>
+        </div>
+
+        <div class="form-card">
+          <label class="field-label">ข้อเสนอแนะเพิ่มเติม</label>
+          <textarea id="mgr-ss-comment" class="field-textarea"
+            placeholder="บันทึกความเห็น จุดแข็ง จุดที่ต้องพัฒนาในฐานะผู้นำ...">${existing?.manager_comment||''}</textarea>
+        </div>
+
+        <div class="form-card">
+          <label class="field-label">ข้อเสนอแนะ (Recommendation)</label>
+          <div class="rec-options">
+            ${[
+              { val:'promote',    label:'เลื่อนตำแหน่ง + ขึ้นเงินเดือน' },
+              { val:'raise-high', label:'ขึ้นเงินเดือน (สูง)' },
+              { val:'raise',      label:'ขึ้นเงินเดือน (ปกติ)' },
+              { val:'hold',       label:'ยังไม่ขึ้นเงินเดือน' },
+              { val:'pip',        label:'ต้องพัฒนา (PIP)' },
+            ].map(r => `
+              <label class="rec-option">
+                <input type="radio" name="rec" value="${r.val}"
+                  ${existing?.recommendation===r.val?'checked':''}> ${r.label}
+              </label>`).join('')}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitStaffSeniorMgrEval()">บันทึกการประเมิน</button>
+          <button class="btn-outline" onclick="goBack()">← กลับ</button>
+        </div>
+
+      </div><!-- /form col -->
+
+      <!-- Grade Panel -->
+      <aside class="score-panel">
+        <div class="score-card">
+          <div style="font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:12px">ผลการประเมิน</div>
+          <div id="mgr-selected-grade-label" style="font-size:20px;font-weight:700;color:#fff">
+            ${existing?.overall_grade ? (GRADE_LIST.find(g=>g.key===existing.overall_grade)?.label||'—') : '— เลือกผลการประเมิน'}
+          </div>
+        </div>
+        <div class="grade-guide-card">
+          <div class="guide-title">เกณฑ์ผลการประเมิน</div>
+          ${GRADE_LIST.map(g => `
+            <div class="guide-row">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${g.color};margin-right:4px"></span>
+              ${g.label}
+            </div>`).join('')}
+        </div>
+        ${selfEval?.behavior ? `
+        <div class="score-breakdown-card">
+          <div style="font-size:10px;color:var(--text-2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">ค่าเฉลี่ยพฤติกรรม Self</div>
+          <div style="font-size:24px;font-weight:700;color:var(--primary);text-align:center;margin-bottom:10px">${calcBehaviorAvgMgr(selfEval.behavior)} / 5.0</div>
+          ${buildMgrBehaviorBreakdown(selfEval.behavior)}
+        </div>` : ''}
+      </aside>
+    </div>
+  `;
+}
+
+// ========== Manager Self-Eval Form (5 ส่วน ตาม PDF จริง) ==========
+function renderOldSelfEvalLayout(container) {
+  const empId    = currentUser.id;
+  const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const d        = existing || {};
+  const missions = d.missions || [{},{},{}];
+  const leave    = d.leave    || {};
+  const behavior = { ...(d.behavior || {}) };
+  const review   = d.self_review || {};
+  const vision   = d.vision || '';
+
+  document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Manager Form) — ส่วนที่ 1–4';
+
+  container.innerHTML = `
+    <div class="eval-layout">
+      <div class="eval-form-col" id="mgr-self-form-col">
+
+        <!-- ข้อมูลการลา -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ข้อมูลการใช้สิทธิ์การลา</h3>
+            <span class="period-badge" style="font-size:12px">${periodLabel()}</span>
+          </div>
+          <div class="leave-grid">
+            <div class="leave-item">
+              <div class="leave-name">ลาป่วย</div>
+              <div class="leave-fields">
+                <span class="leave-quota">สิทธิ์ 30 วัน · ใช้ไป</span>
+                <input type="number" class="leave-input" id="leave-sick" min="0" max="30" value="${leave.sick_used||0}">
+                <span class="leave-quota">วัน</span>
+              </div>
+            </div>
+            <div class="leave-item">
+              <div class="leave-name">ลากิจ</div>
+              <div class="leave-fields">
+                <span class="leave-quota">สิทธิ์ 6 วัน · ใช้ไป</span>
+                <input type="number" class="leave-input" id="leave-personal" min="0" max="6" value="${leave.personal_used||0}">
+                <span class="leave-quota">วัน</span>
+              </div>
+            </div>
+            <div class="leave-item">
+              <div class="leave-name">ลาพักร้อน</div>
+              <div class="leave-fields">
+                <span class="leave-quota">ใช้ไป</span>
+                <input type="number" class="leave-input" id="leave-vacation" min="0" value="${leave.vacation_used||0}">
+                <span class="leave-quota">วัน</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ส่วนที่ 1: ภารกิจหลัก -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 1 — ภารกิจหลักของตำแหน่ง</h3>
+            <span class="ref-badge">Performance Evaluation</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">
+            อธิบายภารกิจหลัก ผลลัพธ์ที่เกิดขึ้นจริง และทำเครื่องหมาย ✓ ในช่องผลสัมฤทธิ์
+          </p>
+          ${[0,1,2].map(i => buildManagerMissionBlock(i, missions[i]||{}, false)).join('')}
+        </div>
+
+        <!-- ส่วนที่ 2: พฤติกรรม Manager -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 2 — การประเมินผลพฤติกรรม</h3>
+            <span class="ref-badge">Behavior Evaluation</span>
+          </div>
+          <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">
+            ระดับ 1 (ต้องปรับปรุง) · 2 (พอใช้) · 3 (ดี) · 4 (ดีมาก) · 5 (ยอดเยี่ยม)
+          </p>
+          ${MANAGER_BEHAVIOR_LIST.map(b => buildBehaviorRow(b, behavior[b.key]||0, false, 'mgr-self')).join('')}
+        </div>
+
+        <!-- ส่วนที่ 3: ทบทวนคุณลักษณะผู้นำ -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 3 — ทบทวนคุณลักษณะและศักยภาพด้านการบริหาร</h3>
+          </div>
+          <div class="self-review-grid">
+            <div class="self-review-field">
+              <label class="field-label">จุดแข็งหลักในฐานะผู้นำ</label>
+              <textarea id="mgr-review-strengths" class="field-textarea"
+                placeholder="จุดแข็งที่โดดเด่นในการบริหารจัดการทีมงาน...">${review.strengths||''}</textarea>
+            </div>
+            <div class="self-review-field">
+              <label class="field-label">สิ่งที่ต้องการพัฒนา</label>
+              <textarea id="mgr-review-devneeds" class="field-textarea"
+                placeholder="ด้านใดที่ต้องการพัฒนาเพื่อเพิ่มประสิทธิภาพในฐานะผู้นำ...">${review.dev_needs||''}</textarea>
+            </div>
+            <div class="self-review-field">
+              <label class="field-label">แผนการพัฒนา</label>
+              <textarea id="mgr-review-devplan" class="field-textarea"
+                placeholder="มีแผนพัฒนาตนเองอย่างไร เพื่อเสริมสร้างศักยภาพผู้นำ...">${review.dev_plan||''}</textarea>
+            </div>
+            <div class="self-review-field">
+              <label class="field-label">เป้าหมายภารกิจใน 6 เดือนข้างหน้า</label>
+              <textarea id="mgr-review-goals" class="field-textarea"
+                placeholder="สิ่งที่ต้องการทำให้เกิดขึ้นในอีก 6 เดือน...">${review.goals_6months||''}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ส่วนที่ 4: วิสัยทัศน์ -->
+        <div class="form-card">
+          <div class="card-header-row">
+            <h3 class="card-section-title">ส่วนที่ 4 — วิสัยทัศน์และแนวทางการวางแผนกลยุทธ์ 6 เดือนข้างหน้า</h3>
+          </div>
+          <textarea id="mgr-vision" class="field-textarea" style="min-height:100px"
+            placeholder="วิสัยทัศน์และกลยุทธ์การบริหารทีมในอีก 6 เดือนข้างหน้า...">${vision}</textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-primary" onclick="submitManagerSelfEval()">บันทึก Self-Evaluation</button>
+          <button class="btn-outline" onclick="goBack()">ยกเลิก</button>
+        </div>
+
+      </div><!-- /form col -->
+
+      <!-- Score Panel -->
+      <aside class="score-panel">
+        <div class="score-card">
+          <div class="behavior-avg-display">
+            <div style="font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:8px">ค่าเฉลี่ยพฤติกรรม</div>
+            <div><span class="behavior-avg-num" id="behavior-avg-num">${calcBehaviorAvgMgr(behavior)||'—'}</span><span class="behavior-avg-max"> /5.0</span></div>
+            <div class="behavior-avg-label">ส่วนที่ 2 · ${MANAGER_BEHAVIOR_LIST.length} หัวข้อ</div>
+          </div>
+        </div>
+        <div class="score-breakdown-card" id="behavior-breakdown-panel">
+          ${buildMgrBehaviorBreakdown(behavior)}
+        </div>
+        <div class="grade-guide-card">
+          <div class="guide-title">เกณฑ์การให้คะแนนพฤติกรรม</div>
+          <div class="guide-row"><span class="dot dot-5">●</span> 5 — ยอดเยี่ยม</div>
+          <div class="guide-row"><span class="dot dot-4">●</span> 4 — ดีมาก</div>
+          <div class="guide-row"><span class="dot dot-3">●</span> 3 — ดี</div>
+          <div class="guide-row"><span class="dot dot-2">●</span> 2 — พอใช้</div>
+          <div class="guide-row"><span class="dot dot-1">●</span> 1 — ต้องปรับปรุง</div>
+        </div>
+      </aside>
+    </div>
+  `;
+
+  // ผูก event behavior ratings
+  MANAGER_BEHAVIOR_LIST.forEach(b => {
+    document.querySelectorAll(`[data-bkey="${b.key}"]`).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.dataset.val);
+        behavior[b.key] = val;
+        document.querySelectorAll(`[data-bkey="${b.key}"]`).forEach(x =>
+          x.classList.toggle('selected', parseInt(x.dataset.val) === val)
+        );
+        updateMgrBehaviorPanel(behavior);
+      });
+    });
+  });
+
+  // ผูก event mission radios
+  document.querySelectorAll('.mission-radio-opt[data-mgridx]').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const idx = opt.dataset.mgridx;
+      const val = opt.dataset.val;
+      document.querySelectorAll(`.mission-radio-opt[data-mgridx="${idx}"]`).forEach(o => {
+        o.classList.remove('selected-exceed','selected-achieve','selected-below');
+        o.querySelector('input').checked = false;
+      });
+      const cls = val==='exceed'?'selected-exceed':val==='achieve'?'selected-achieve':'selected-below';
+      opt.classList.add(cls);
+      opt.querySelector('input').checked = true;
+    });
+  });
+}
+
+async function submitManagerSelfEval() {
+  const leave = {
+    sick_used:     parseInt(document.getElementById('leave-sick')?.value)     || 0,
+    personal_used: parseInt(document.getElementById('leave-personal')?.value) || 0,
+    vacation_used: parseInt(document.getElementById('leave-vacation')?.value) || 0,
+  };
+
+  const missions = [0,1,2].map(i => ({
+    text:    document.getElementById(`mgr-mission-text-${i}`)?.value.trim()    || '',
+    outcome: document.getElementById(`mgr-mission-outcome-${i}`)?.value.trim() || '',
+    result:  document.querySelector(`input[name="mgr-miss-${i}"]:checked`)?.value || '',
+  }));
+
+  const behavior = {};
+  MANAGER_BEHAVIOR_LIST.forEach(b => {
+    const checked = document.querySelector(`[data-bkey="${b.key}"].selected`);
+    if (checked) behavior[b.key] = parseInt(checked.dataset.val);
+  });
+
+  const missingBehavior = MANAGER_BEHAVIOR_LIST.filter(b => !behavior[b.key]);
+  if (missingBehavior.length > 0) {
+    showToast(`กรุณาให้คะแนนพฤติกรรมทุกหัวข้อ (เหลืออีก ${missingBehavior.length} หัวข้อ)`, 'error');
+    return;
+  }
+
+  const self_review = {
+    strengths:    document.getElementById('mgr-review-strengths')?.value.trim() || '',
+    dev_needs:    document.getElementById('mgr-review-devneeds')?.value.trim()  || '',
+    dev_plan:     document.getElementById('mgr-review-devplan')?.value.trim()   || '',
+    goals_6months:document.getElementById('mgr-review-goals')?.value.trim()    || '',
+  };
+
+  const vision = document.getElementById('mgr-vision')?.value.trim() || '';
+
+  const payload = {
+    action:      'submitSelfEval',
+    employee_id: currentUser.id,
+    form_type:   'manager',
+    leave, missions, behavior, self_review, vision,
+    year:        getCurrentPeriod().year,
+    quarter:     getCurrentPeriod().quarter,
+  };
+
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    const idx = allData.selfEvals.findIndex(s => sameId(s.employee_id, currentUser.id));
+    const rec = { ...payload, submitted_at: new Date().toISOString() };
+    if (idx >= 0) allData.selfEvals[idx] = rec; else allData.selfEvals.push(rec);
+    sessionStorage.setItem('apex_data', JSON.stringify(allData));
+    showToast('บันทึก Self-Evaluation สำเร็จ', 'success');
+    goBack();
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+async function submitManagerEval() { /* ยังใช้ฟังก์ชัน submitStaffSeniorMgrEval */ }
+
+// ========== FILE UPLOAD ==========
+function handleEmpFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('ไฟล์ใหญ่เกิน 5MB', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const isPdf = file.type === 'application/pdf';
+    const stored = { name:file.name, type:isPdf?'pdf':'image', data:e.target.result };
+    storeUploadedFile(currentUser.id, stored);
+    renderUploadPreview('emp', currentUser.id);
+    showToast('อัปโหลดไฟล์สำเร็จ', 'success');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function storeUploadedFile(empId, fileData) {
+  const p = getCurrentPeriod();
+  localStorage.setItem(`apex_upload_${empId}_${p.year}_${p.quarter}`, JSON.stringify(fileData));
+}
+
+function getUploadedFile(empId) {
+  const p = getCurrentPeriod();
+  const raw = localStorage.getItem(`apex_upload_${empId}_${p.year}_${p.quarter}`);
+  return raw ? JSON.parse(raw) : null;
+}
+
+function removeUpload() {
+  const p = getCurrentPeriod();
+  localStorage.removeItem(`apex_upload_${currentUser.id}_${p.year}_${p.quarter}`);
+  renderUploadPreview('emp', currentUser.id);
+  showToast('ลบไฟล์แล้ว', 'success');
+}
+
+function renderUploadPreview(prefix, empId) {
+  const preview  = document.getElementById(`${prefix}-upload-preview`);
+  const imgEl    = document.getElementById(`${prefix}-upload-img`);
+  const pdfMsg   = document.getElementById(`${prefix}-upload-pdf-msg`);
+  const filename = document.getElementById(`${prefix}-upload-filename`);
+  if (!preview) return;
+
+  const file = getUploadedFile(empId);
+  if (!file) {
+    preview.classList.add('hidden');
+    return;
+  }
+  preview.classList.remove('hidden');
+  filename.textContent = file.name;
+  if (file.type === 'pdf') {
+    imgEl.classList.add('hidden');
+    pdfMsg.classList.remove('hidden');
+    pdfMsg.innerHTML = `📄 ${file.name} — <a href="${file.data}" target="_blank" style="color:var(--primary)">เปิดดู PDF</a>`;
+  } else {
+    pdfMsg.classList.add('hidden');
+    imgEl.classList.remove('hidden');
+    imgEl.src = file.data;
+  }
+}
+
+// ========== DOWNLOAD FORM TEMPLATE ==========
+function downloadForm(positionType) {
+  // Staff และ Senior → เปิด PDF ต้นฉบับจริง
+  if (positionType === 'staff' || positionType === 'senior') {
+    window.open('แบบประเมินผลการปฎิบัติงาน_Staff_Senior.pdf', '_blank');
+    return;
+  }
+  // Manager → เปิด PDF แบบฟอร์ม Manager จริง
+  if (positionType === 'manager') {
+    window.open('แบบประเมินผลการปฎิบัติงาน  (หน.) _Manager_AsstManager.pdf', '_blank');
+    return;
+  }
+  // Fallback
+  const p       = getCurrentPeriod();
+  const kpiList = getKpiList(positionType);
+  const posLabel = { staff:'Staff (พนักงาน)', senior:'Senior', manager:'Manager (หัวหน้า)' }[positionType] || positionType;
+  const periodStr = periodLabel();
+
+  const html = `<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>แบบฟอร์มประเมิน — ${posLabel}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Sarabun',sans-serif; font-size:14px; padding:32px; color:#1A1A2E; }
+    .header { text-align:center; margin-bottom:24px; border-bottom:3px solid #E02020; padding-bottom:16px; }
+    .logo   { font-size:11px; letter-spacing:0.2em; color:#E02020; font-weight:700; }
+    h1      { font-size:18px; font-weight:700; margin:8px 0 4px; }
+    .sub    { font-size:12px; color:#666; }
+    .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+    .field-box { border-bottom:1px solid #ccc; padding:6px 0; }
+    .field-label { font-size:10px; color:#888; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; }
+    .field-line  { height:20px; }
+    table   { width:100%; border-collapse:collapse; margin-bottom:20px; }
+    th,td   { border:1px solid #ddd; padding:10px 12px; font-size:13px; }
+    th      { background:#FEE2E2; color:#E02020; font-weight:700; text-align:center; }
+    .score-cells td { text-align:center; width:50px; }
+    .comment-box { border:1px solid #ddd; min-height:80px; border-radius:6px; padding:10px; margin-bottom:20px; }
+    .sig-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-top:24px; }
+    .sig-box { border-top:1px solid #ccc; padding-top:8px; text-align:center; font-size:12px; color:#666; }
+    @media print { @page { size: A4; margin: 20mm; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">◈ APEX REVIEW</div>
+    <h1>แบบฟอร์มประเมินผลงาน — ${posLabel}</h1>
+    <div class="sub">รอบ ${periodStr} · กรอกด้วยปากกา แล้วส่งคืนหัวหน้า</div>
+  </div>
+  <div class="info-grid">
+    <div class="field-box"><div class="field-label">ชื่อ–นามสกุล</div><div class="field-line"></div></div>
+    <div class="field-box"><div class="field-label">ตำแหน่ง</div><div class="field-line"></div></div>
+    <div class="field-box"><div class="field-label">กลุ่ม</div><div class="field-line"></div></div>
+    <div class="field-box"><div class="field-label">วันที่ประเมิน</div><div class="field-line"></div></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:30px">#</th>
+        <th>หัวข้อการประเมิน</th>
+        <th>น้ำหนัก</th>
+        <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+        <th>หมายเหตุ</th>
+      </tr>
+    </thead>
+    <tbody class="score-cells">
+      ${kpiList.map((k,i) => `
+        <tr>
+          <td style="text-align:center">${i+1}</td>
+          <td>${k.name}<br><span style="font-size:11px;color:#888">${k.desc}</span></td>
+          <td style="text-align:center">${k.weight.toFixed(1)}%</td>
+          <td>□</td><td>□</td><td>□</td><td>□</td><td>□</td>
+          <td></td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+  <div style="font-weight:700;font-size:13px;margin-bottom:8px">ความคิดเห็น / สิ่งที่ต้องการพัฒนา</div>
+  <div class="comment-box"></div>
+  <div class="sig-row">
+    <div class="sig-box">ลายมือชื่อพนักงาน<br><br><br>วันที่ ________</div>
+    <div class="sig-box">ลายมือชื่อหัวหน้างาน<br><br><br>วันที่ ________</div>
+    <div class="sig-box">ลายมือชื่อผู้บริหาร<br><br><br>วันที่ ________</div>
+  </div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 400);
+}
+
+// ========== REPORT VIEW ==========
+function renderReport() {
+  const empId    = currentEvalEmployeeId;
+  const emp      = allData.employees.find(e => sameId(e.id, empId));
+  const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const mgrEval  = allData.managerEvals.find(m => sameId(m.employee_id, empId));
+  const execDec  = allData.execDecisions.find(d => sameId(d.employee_id, empId));
+  if (!emp) return;
+
+  const posType      = emp.position_type || 'staff';
+  const isManager    = isManagerType(posType);
+  const behaviorList = isManager ? MANAGER_BEHAVIOR_LIST : BEHAVIOR_LIST;
+  const calcAvgFn    = isManager ? calcBehaviorAvgMgr : calcBehaviorAvg;
+  const gi           = mgrEval?.overall_grade ? GRADE_LIST.find(g => g.key === mgrEval.overall_grade) : null;
+  const mgrName      = allData.employees.find(e => sameId(e.id, emp.manager_id))?.name || '—';
+
+  const recMap = {
+    promote:     'เลื่อนตำแหน่ง + ขึ้นเงินเดือน',
+    'raise-high':'ขึ้นเงินเดือน (สูง)',
+    raise:       'ขึ้นเงินเดือน (ปกติ)',
+    hold:        'ยังไม่ขึ้นเงินเดือน',
+    pip:         'ต้องพัฒนา (PIP)',
+  };
+  const resultLabel = { exceed:'เกินเป้าหมาย', achieve:'บรรลุเป้าหมาย', below:'ต่ำกว่าเป้าหมาย' };
+  const missions    = selfEval?.missions    || [];
+  const behavior    = selfEval?.behavior    || {};
+  const review      = selfEval?.self_review || {};
+  const behaviorAvg = selfEval ? calcAvgFn(behavior) : '—';
+
+  document.getElementById('report-content').innerHTML = `
+
+    <!-- Header -->
+    <div class="report-header-card">
+      <div style="flex:1">
+        <div class="report-name">${emp.name}</div>
+        <div class="report-meta">${emp.position||'—'} · ${posTypeBadge(posType)} · กลุ่ม ${emp.group} · แผนก ${emp.department||'—'} · ${periodLabel()}</div>
+        <div style="font-size:12px;color:var(--sidebar-muted);margin-top:4px">รหัส: ${emp.id} · หัวหน้า: ${mgrName}</div>
+      </div>
+      <div style="text-align:center;min-width:110px">
+        ${gi
+          ? `<div style="font-size:28px;font-weight:800;color:${gi.color}">${gi.label}</div>
+             <div style="font-size:11px;color:var(--sidebar-muted);margin-top:4px;letter-spacing:0.07em;text-transform:uppercase">ผลการประเมิน</div>`
+          : `<div style="font-size:14px;color:var(--sidebar-muted)">รอประเมิน</div>`
+        }
+      </div>
+    </div>
+
+    <!-- ส่วนที่ 1: ภารกิจหลัก -->
+    <div class="form-card report-section">
+      <div class="card-header-row">
+        <h3 class="card-section-title">ส่วนที่ 1 — ภารกิจหลักของตำแหน่ง</h3>
+        <span class="ref-badge">Self-Evaluation</span>
+      </div>
+      ${missions.length
+        ? missions.map((m, i) => `
+          <div class="report-mission-row">
+            <div class="report-mission-num">${i+1}</div>
+            <div style="flex:1">
+              <div style="font-size:13px;line-height:1.5">${m.text||'—'}</div>
+              ${m.outcome ? `<div style="font-size:12px;color:var(--text-2);margin-top:3px">ผลลัพธ์: ${m.outcome}</div>` : ''}
+            </div>
+            <span class="report-result-chip ${m.result==='exceed'?'chip-exceed':m.result==='achieve'?'chip-achieve':'chip-below'}">
+              ${resultLabel[m.result]||'—'}
+            </span>
+          </div>`).join('')
+        : '<p style="color:var(--text-3);font-size:13px;padding:8px 0">ยังไม่ได้กรอก</p>'
+      }
+    </div>
+
+    <!-- ส่วนที่ 2: พฤติกรรม (แสดงคะแนน Manager + Self เปรียบเทียบ) -->
+    <div class="form-card report-section">
+      <div class="card-header-row">
+        <h3 class="card-section-title">ส่วนที่ 2 — การประเมินผลพฤติกรรม</h3>
+        <span class="ref-badge">
+          ${mgrEval?.mgr_behavior ? `หัวหน้า ${calcBehaviorAvg(mgrEval.mgr_behavior)}/5.0` : ''}
+          ${selfEval?.behavior ? ` · Self ${behaviorAvg}/5.0` : ''}
+        </span>
+      </div>
+      ${(mgrEval?.mgr_behavior || selfEval?.behavior)
+        ? behaviorList.map(b => {
+            const mVal = mgrEval?.mgr_behavior?.[b.key] || 0;
+            const sVal = behavior[b.key] || 0;
+            const displayVal = mVal || sVal; // ใช้คะแนน Manager ถ้ามี มิฉะนั้นใช้ Self
+            const pct = (displayVal/5)*100;
+            const col = displayVal>=4?'#10B981':displayVal>=3?'#E02020':displayVal>=2?'#F59E0B':'#EF4444';
+            return `
+              <div class="report-behavior-row">
+                <span class="report-behavior-no">${b.no}</span>
+                <span class="report-behavior-name">${b.name}</span>
+                <div class="report-bar-wrap">
+                  <div class="report-bar-fill" style="width:${pct}%;background:${col}"></div>
+                </div>
+                <span class="report-behavior-val ${displayVal>=4?'score-high':displayVal>=3?'score-mid':'score-low'}">${displayVal||'—'}</span>
+                ${mVal && sVal ? `<span style="font-size:10px;color:var(--text-3);margin-left:4px">S:${sVal}</span>` : ''}
+              </div>`;
+          }).join('')
+        : '<p style="color:var(--text-3);font-size:13px;padding:8px 0">ยังไม่ได้กรอก</p>'
+      }
+    </div>
+
+    <!-- ส่วนที่ 3: ทบทวนตนเอง -->
+    ${selfEval ? `
+    <div class="form-card report-section">
+      <div class="card-header-row">
+        <h3 class="card-section-title">ส่วนที่ 3 — ทบทวนตนเอง${isManager?' (ผู้นำ)':''}</h3>
+      </div>
+      <div class="report-review-grid">
+        <div class="report-review-cell">
+          <div class="report-review-label">จุดแข็ง${isManager?'ในฐานะผู้นำ':''}</div>
+          <div class="report-review-text">${review.strengths||'—'}</div>
+        </div>
+        <div class="report-review-cell">
+          <div class="report-review-label">สิ่งที่ต้องการพัฒนา</div>
+          <div class="report-review-text">${review.dev_needs||'—'}</div>
+        </div>
+        <div class="report-review-cell">
+          <div class="report-review-label">${isManager?'แผนการพัฒนา':'สิ่งที่ต้องการให้สนับสนุน'}</div>
+          <div class="report-review-text">${isManager?(review.dev_plan||'—'):(review.support_needed||'—')}</div>
+        </div>
+        <div class="report-review-cell">
+          <div class="report-review-label">เป้าหมาย 6 เดือนข้างหน้า</div>
+          <div class="report-review-text">${review.goals_6months||'—'}</div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- ส่วนที่ 4 Manager: วิสัยทัศน์ -->
+    ${isManager && selfEval?.vision ? `
+    <div class="form-card report-section">
+      <div class="card-header-row">
+        <h3 class="card-section-title">ส่วนที่ 4 — วิสัยทัศน์ 6 เดือนข้างหน้า</h3>
+      </div>
+      <p style="font-size:13px;color:var(--text-1);line-height:1.6">${selfEval.vision}</p>
+    </div>` : ''}
+
+    <!-- ความเห็นหัวหน้า -->
+    <div class="form-card report-section" style="${mgrEval?'border-left:3px solid var(--primary)':''}">
+      <div class="card-header-row">
+        <h3 class="card-section-title">${isManager?'ส่วนที่ 5':'ส่วนที่ 4'} — ความเห็นและผลการประเมินโดยหัวหน้า</h3>
+      </div>
+      ${mgrEval ? `
+        <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:${mgrEval.manager_comment?'16px':'0'}">
+          <div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">ผลการประเมิน</div>
+            <div style="font-size:22px;font-weight:800;color:${gi?.color||'var(--text-1)'}">${gi?.label||'—'}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">ข้อเสนอแนะ</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text-1)">${recMap[mgrEval.recommendation]||'—'}</div>
+          </div>
+        </div>
+        ${mgrEval.manager_comment ? `
+        <div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border)">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">ความคิดเห็น</div>
+          <p style="font-size:13px;color:var(--text-2);font-style:italic;line-height:1.5">"${mgrEval.manager_comment}"</p>
+        </div>` : ''}`
+        : '<p style="color:var(--text-3);font-size:13px">หัวหน้ายังไม่ได้ประเมิน</p>'
+      }
+    </div>
+
+    <!-- Director Decision — อ่านอย่างเดียวสำหรับ manager/employee -->
+    ${execDec && currentUser.role !== 'executive' ? `
+    <div class="form-card report-section" style="border-left:3px solid #10B981">
+      <div class="card-header-row">
+        <h3 class="card-section-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</h3>
+      </div>
+      <div style="font-size:18px;font-weight:700;color:#10B981">${recMap[execDec.decision]||'—'}</div>
+      ${execDec.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${execDec.note}</div>` : ''}
+    </div>` : ''}
+
+    <!-- Director Decision — กรอกได้สำหรับ executive -->
+    ${currentUser.role === 'executive' ? `
+    <div class="exec-decision-card">
+      <div class="exec-decision-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</div>
+      ${execDec ? `
+      <div style="padding:10px 14px;background:rgba(16,185,129,0.1);border-radius:var(--radius);margin-bottom:14px;font-size:14px;font-weight:600;color:#10B981">
+        ✓ ${recMap[execDec.decision]||'—'}${execDec.note?' — '+execDec.note:''}
+      </div>` : ''}
+      <div style="margin-bottom:10px">
+        <select class="field-select" id="exec-decision-select">
+          <option value="">— เลือกผลการตัดสินใจ —</option>
+          ${Object.entries(recMap).map(([v,l]) =>
+            `<option value="${v}" ${execDec?.decision===v?'selected':''}>${l}</option>`
+          ).join('')}
+        </select>
+      </div>
+      <div class="exec-decision-row">
+        <input type="text" class="exec-note-input" id="exec-note"
+          placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" value="${execDec?.note||''}">
+        <button class="btn-primary" onclick="submitExecDecision('${empId}')">บันทึก</button>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+async function submitExecDecision(empId) {
+  const decision = document.getElementById('exec-decision-select').value;
+  if (!decision) { showToast('กรุณาเลือกผลการตัดสินใจ', 'error'); return; }
+  const payload = {
+    action:'submitExecDecision', exec_id:currentUser.id, employee_id:empId,
+    decision, note:document.getElementById('exec-note').value.trim(),
+    year:getCurrentPeriod().year, quarter:getCurrentPeriod().quarter,
+  };
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    await loadAllData();
+    showToast('บันทึกการตัดสินใจสำเร็จ', 'success');
+    renderReport();
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+function printReport() { window.print(); }
+
+// ========== MANUAL ==========
+function renderManual() {
+  const role = currentUser.role;
+  const el   = document.getElementById('manual-content');
+  if (!el) return;
+
+  // เนื้อหาคู่มือแยกตาม role
+  const content = {
+    manager: manualManager(),
+    executive: manualExecutive(),
+    hr: manualHR(),
+  }[role] || manualExecutive();
+
+  el.innerHTML = content;
+}
+
+function printManual() {
+  document.body.classList.add('printing-manual');
+  window.print();
+  document.body.classList.remove('printing-manual');
+}
+
+function manualStep(num, icon, title, desc) {
+  return `
+  <div class="manual-step">
+    <div class="manual-step-num">${num}</div>
+    <div class="manual-step-icon">${icon}</div>
+    <div class="manual-step-body">
+      <div class="manual-step-title">${title}</div>
+      <div class="manual-step-desc">${desc}</div>
+    </div>
+  </div>`;
+}
+
+function manualNote(text) {
+  return `<div class="manual-note">⚠ ${text}</div>`;
+}
+
+function manualSection(title, body) {
+  return `
+  <div class="manual-section">
+    <div class="manual-section-title">${title}</div>
+    ${body}
+  </div>`;
+}
+
+function manualManager() {
+  return `
+  <div class="manual-cover print-only">
+    <div class="manual-cover-logo">FM</div>
+    <div class="manual-cover-sys">FMC Software — ระบบประเมินผลงานพนักงาน</div>
+    <div class="manual-cover-title">คู่มือการใช้งานสำหรับหัวหน้างาน</div>
+    <div class="manual-cover-sub">(Manager / Assistant Manager / Section Manager)</div>
+    <div class="manual-cover-ver">เวอร์ชัน 1.0 · ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</div>
+  </div>
+
+  <div class="manual-header no-print">
+    <div class="manual-header-logo">FM</div>
+    <div>
+      <div class="manual-header-title">คู่มือสำหรับหัวหน้างาน</div>
+      <div class="manual-header-sub">Manager / Assistant Manager / Section Manager</div>
+    </div>
+  </div>
+
+  ${manualSection('ภาพรวมหน้าที่ของหัวหน้างาน', `
+    <p class="manual-intro">หัวหน้างานมีหน้าที่ <strong>2 ส่วนหลัก</strong> ในระบบประเมิน ได้แก่ (1) ประเมินตัวเองในฐานะ Manager และ (2) ประเมินลูกน้องที่รับผิดชอบ</p>
+    <div class="manual-flow">
+      <div class="manual-flow-item">พนักงานกรอก<br>Self-Eval</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item manual-flow-active">หัวหน้าประเมิน<br>ลูกน้อง</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item">ผู้บริหาร<br>ตัดสินใจ</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item">HR<br>ดำเนินการ</div>
+    </div>
+  `)}
+
+  ${manualSection('ส่วนที่ 1 — เข้าสู่ระบบ', `
+    ${manualStep(1,'🌐','เปิด browser แล้วไปที่ไฟล์ index.html','เปิดไฟล์ index.html จากโฟลเดอร์ที่ได้รับ หรือจาก URL ที่ HR แจ้งให้')}
+    ${manualStep(2,'🔑','กรอก Username และ Password','ใช้รหัสพนักงานของตัวเองเป็น Username (เช่น fmc-266) Password คือ 1234 หรือที่ HR กำหนด')}
+    ${manualStep(3,'◉','หน้า Dashboard หัวหน้างาน','ระบบจะแสดงรายชื่อลูกน้องทั้งหมดพร้อมสถานะการประเมิน และแถบความคืบหน้าด้านบน')}
+    ${manualNote('ถ้า login ไม่ได้ให้ติดต่อ HR เพื่อตรวจสอบ username/password')}
+  `)}
+
+  ${manualSection('ส่วนที่ 2 — ประเมินลูกน้อง', `
+    ${manualStep(1,'◉','เปิด Dashboard','คลิก "Dashboard" ใน sidebar ซ้าย จะเห็นตารางรายชื่อลูกน้องทั้งหมด')}
+    ${manualStep(2,'👁','ตรวจสอบสถานะ Self-Eval','ดูคอลัมน์ Self-Eval — ✓ หมายความว่าพนักงานกรอกแล้ว รอคอลัมน์เป็น — ให้รอหรือแจ้งพนักงาน')}
+    ${manualStep(3,'✎','กดปุ่ม "ประเมิน"','คลิกปุ่ม "ประเมิน" ข้างชื่อพนักงาน ระบบจะเปิดฟอร์มประเมินโดยแสดงผล Self-Eval ของพนักงานให้อ่านก่อน')}
+    ${manualStep(4,'📋','กรอกแบบประเมิน', `
+      <ul class="manual-list">
+        <li><strong>ส่วนที่ 4 — สรุปผลโดยรวม:</strong> เลือก Grade (ดีเยี่ยม / ดี / ปานกลาง / พอใช้ / ต้องปรับปรุง)</li>
+        <li><strong>ข้อเสนอแนะ:</strong> เลือกแนวทาง (เลื่อนตำแหน่ง / ขึ้นเงินเดือนสูง / ขึ้นปกติ / ยังไม่ขึ้น / PIP)</li>
+        <li><strong>ความคิดเห็นเพิ่มเติม:</strong> กรอกข้อความอิสระ (ไม่บังคับ)</li>
+      </ul>
+    `)}
+    ${manualStep(5,'💾','กดบันทึก','คลิกปุ่ม "บันทึกการประเมิน" ระบบจะแสดง ✓ สีเขียวในตาราง และอัปเดตแถบความคืบหน้า')}
+    ${manualNote('สามารถแก้ไขได้อีกตราบเท่าที่รอบยังไม่ปิด')}
+  `)}
+
+  ${manualSection('ส่วนที่ 3 — ดูรายงานรายบุคคล', `
+    ${manualStep(1,'📊','กดปุ่ม "รายงาน"','หลังบันทึกแล้ว ปุ่ม "รายงาน" จะปรากฏข้างชื่อพนักงาน คลิกเพื่อดู Report สรุป')}
+    ${manualStep(2,'🖨','พิมพ์เป็น PDF','ใน Report มีปุ่ม "พิมพ์ PDF" กดแล้วเลือก "Save as PDF" ใน browser')}
+  `)}
+
+  ${manualSection('ส่วนที่ 4 — ประเมินตัวเอง (Self-Evaluation)', `
+    ${manualStep(1,'✎','คลิก Self-Evaluation ใน sidebar','ระบบจะเปิดฟอร์มประเมินตัวเองสำหรับ Manager ซึ่งมี 5 ส่วน')}
+    ${manualStep(2,'📋','กรอกครบทั้ง 5 ส่วน',`
+      <ul class="manual-list">
+        <li>ส่วนที่ 1: ภารกิจหลักและผลลัพธ์</li>
+        <li>ส่วนที่ 2: พฤติกรรมภาวะผู้นำ 10 หัวข้อ (คะแนน 1–5)</li>
+        <li>ส่วนที่ 3: ทบทวนตนเองในฐานะผู้นำ</li>
+        <li>ส่วนที่ 4: วิสัยทัศน์และเป้าหมาย</li>
+        <li>ส่วนที่ 5: สรุปผลโดย MD (กรอกเมื่อได้รับ feedback)</li>
+      </ul>
+    `)}
+    ${manualStep(3,'💾','กดบันทึก Self-Evaluation','คลิกปุ่ม "บันทึก Self-Evaluation" ด้านล่างฟอร์ม')}
+  `)}
+  `;
+}
+
+function manualExecutive() {
+  return `
+  <div class="manual-cover print-only">
+    <div class="manual-cover-logo">FM</div>
+    <div class="manual-cover-sys">FMC Software — ระบบประเมินผลงานพนักงาน</div>
+    <div class="manual-cover-title">คู่มือการใช้งานสำหรับผู้บริหาร</div>
+    <div class="manual-cover-sub">(Executive / Director / Managing Director)</div>
+    <div class="manual-cover-ver">เวอร์ชัน 1.0 · ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</div>
+  </div>
+
+  <div class="manual-header no-print">
+    <div class="manual-header-logo">FM</div>
+    <div>
+      <div class="manual-header-title">คู่มือสำหรับผู้บริหาร</div>
+      <div class="manual-header-sub">Executive / Director / Managing Director</div>
+    </div>
+  </div>
+
+  ${manualSection('ภาพรวมหน้าที่ของผู้บริหาร', `
+    <p class="manual-intro">ผู้บริหารเป็น <strong>ผู้ตัดสินใจขั้นสุดท้าย</strong> ว่าพนักงานแต่ละคนจะได้รับการขึ้นเงินเดือน เลื่อนตำแหน่ง หรือต้องพัฒนาต่อ โดยอ้างอิงจากผลประเมินของ Manager</p>
+    <div class="manual-flow">
+      <div class="manual-flow-item">พนักงานกรอก<br>Self-Eval</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item">หัวหน้าประเมิน<br>ลูกน้อง</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item manual-flow-active">ผู้บริหาร<br>ตัดสินใจ</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item">HR<br>ดำเนินการ</div>
+    </div>
+  `)}
+
+  ${manualSection('ส่วนที่ 1 — ดูภาพรวมการประเมิน', `
+    ${manualStep(1,'◉','เปิด Dashboard ผู้บริหาร','หลัง login ระบบจะแสดง Dashboard โดยอัตโนมัติ มีสรุปจำนวนพนักงาน 5 กลุ่ม (FMC / ISEC / PPP / BNT / NSP)')}
+    ${manualStep(2,'🔍','กรองข้อมูล','ใช้ dropdown "ทุกกลุ่ม" เพื่อดูเฉพาะกลุ่มที่ต้องการ และ dropdown "ทุกแผนก" เพื่อดูเฉพาะแผนก')}
+    ${manualStep(3,'📋','ดูสถานะในตาราง',`
+      <ul class="manual-list">
+        <li><strong>SELF</strong> — ✓ พนักงานกรอก Self-Eval แล้ว</li>
+        <li><strong>MANAGER</strong> — ✓ หัวหน้าประเมินแล้ว</li>
+        <li><strong>GRADE</strong> — ผลประเมินที่หัวหน้าให้</li>
+        <li><strong>ข้อเสนอแนะ</strong> — recommendation จากหัวหน้า</li>
+        <li><strong>Director</strong> — ผลตัดสินใจขั้นสุดท้ายของผู้บริหาร</li>
+      </ul>
+    `)}
+  `)}
+
+  ${manualSection('ส่วนที่ 2 — ตัดสินใจรายบุคคล', `
+    ${manualStep(1,'👁','กดปุ่ม "ดู / ตัดสินใจ"','คลิกปุ่มสีขาวข้างชื่อพนักงาน ระบบจะเปิด Report รายบุคคลของพนักงานคนนั้น')}
+    ${manualStep(2,'📊','อ่านผลประเมินจาก Manager',`
+      <ul class="manual-list">
+        <li>ภารกิจหลัก — ผลลัพธ์แต่ละภารกิจ (เกินเป้า / บรรลุ / ต่ำกว่า)</li>
+        <li>พฤติกรรม — bar chart คะแนนเฉลี่ย 10 หัวข้อ</li>
+        <li>Grade และข้อเสนอแนะจากหัวหน้า</li>
+      </ul>
+    `)}
+    ${manualStep(3,'✅','กรอก Director Decision','เลื่อนลงมาด้านล่างสุดของ Report จะพบส่วน <strong>"◈ Director — ผลการตัดสินใจขั้นสุดท้าย"</strong>')}
+    ${manualStep(4,'🎯','เลือกผลการตัดสินใจ',`
+      <ul class="manual-list">
+        <li>🔺 เลื่อนตำแหน่ง + ขึ้นเงินเดือน</li>
+        <li>⬆ ขึ้นเงินเดือน (สูง)</li>
+        <li>↑ ขึ้นเงินเดือน (ปกติ)</li>
+        <li>⏸ ยังไม่ขึ้นเงินเดือน</li>
+        <li>📋 ต้องพัฒนา (PIP)</li>
+      </ul>
+    `)}
+    ${manualStep(5,'💬','กรอกหมายเหตุ (ถ้ามี)','กรอกข้อความเพิ่มเติมในช่อง "หมายเหตุ" เช่น เงื่อนไขพิเศษ หรือระยะเวลา')}
+    ${manualStep(6,'💾','กดบันทึก','คลิก "บันทึก" — ระบบจะแสดง ✓ สีเขียวในตาราง Dashboard และ HR จะเห็นผลทันที')}
+    ${manualNote('สามารถกลับมาแก้ไขได้ตราบเท่าที่รอบยังไม่ปิด')}
+  `)}
+
+  ${manualSection('ส่วนที่ 3 — Export รายงาน', `
+    ${manualStep(1,'↓','คลิก Export ใน sidebar','เลือกเมนู Export')}
+    ${manualStep(2,'📄','PDF รายบุคคล','เลือกกลุ่มแล้วกด "พิมพ์ PDF" เพื่อ print Report ของพนักงานทุกคนในกลุ่ม')}
+    ${manualStep(3,'📊','Excel รายกลุ่ม','กด "ดาวน์โหลด Excel" เพื่อได้ไฟล์สรุปทุก field พร้อม Director Decision')}
+  `)}
+  `;
+}
+
+function manualHR() {
+  return `
+  <div class="manual-cover print-only">
+    <div class="manual-cover-logo">FM</div>
+    <div class="manual-cover-sys">FMC Software — ระบบประเมินผลงานพนักงาน</div>
+    <div class="manual-cover-title">คู่มือการใช้งานสำหรับ HR</div>
+    <div class="manual-cover-sub">(Human Resources)</div>
+    <div class="manual-cover-ver">เวอร์ชัน 1.0 · ${new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</div>
+  </div>
+
+  <div class="manual-header no-print">
+    <div class="manual-header-logo">FM</div>
+    <div>
+      <div class="manual-header-title">คู่มือสำหรับ HR</div>
+      <div class="manual-header-sub">Human Resources</div>
+    </div>
+  </div>
+
+  ${manualSection('ภาพรวมหน้าที่ของ HR', `
+    <p class="manual-intro">HR มีหน้าที่ <strong>3 ด้านหลัก</strong>: (1) จัดการข้อมูลพนักงาน (2) ติดตามสถานะการประเมิน และ (3) รับผลตัดสินใจจากผู้บริหารเพื่อดำเนินการต่อ</p>
+    <div class="manual-flow">
+      <div class="manual-flow-item">พนักงานกรอก<br>Self-Eval</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item">หัวหน้าประเมิน<br>ลูกน้อง</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item">ผู้บริหาร<br>ตัดสินใจ</div>
+      <div class="manual-flow-arrow">→</div>
+      <div class="manual-flow-item manual-flow-active">HR<br>ดำเนินการ</div>
+    </div>
+  `)}
+
+  ${manualSection('ส่วนที่ 1 — จัดการข้อมูลพนักงาน', `
+    ${manualStep(1,'⚙','คลิก "จัดการพนักงาน" ใน sidebar','เปิดหน้า Admin สำหรับจัดการฐานข้อมูลพนักงานทั้งหมด')}
+    ${manualStep(2,'🔍','ค้นหาและกรองข้อมูล','ใช้ dropdown กลุ่ม / Role และช่องค้นหาชื่อ เพื่อหาพนักงานที่ต้องการ')}
+    ${manualStep(3,'✎','แก้ไขข้อมูลพนักงาน',`
+      <ul class="manual-list">
+        <li>กดปุ่ม "แก้ไข" ข้างชื่อพนักงาน</li>
+        <li>แก้ไขชื่อ / กลุ่ม / แผนก / ตำแหน่ง / Role / หัวหน้า ได้ในหน้าต่าง modal</li>
+        <li>กด "บันทึก" เพื่อยืนยัน</li>
+      </ul>
+    `)}
+    ${manualStep(4,'➕','เพิ่มพนักงานใหม่','กดปุ่ม "+ เพิ่มพนักงาน" มุมบนขวา กรอกข้อมูลครบแล้วกด "บันทึก"')}
+    ${manualStep(5,'↑','Import Excel','กดปุ่ม "↑ Import Excel" เพื่อนำเข้าข้อมูลพนักงานจากไฟล์ Excel ทีเดียวหลายคน')}
+    ${manualStep(6,'↓','ดาวน์โหลด Template','กด "↓ Template Excel" เพื่อได้ไฟล์ template สำหรับกรอกข้อมูลพนักงานใหม่')}
+    ${manualNote('การลบพนักงานจะลบข้อมูลออกจากระบบทันที ควรตรวจสอบให้แน่ใจก่อน')}
+  `)}
+
+  ${manualSection('ส่วนที่ 2 — ติดตามสถานะการประเมิน', `
+    ${manualStep(1,'◉','เปิด Dashboard','คลิก Dashboard ใน sidebar เพื่อดูภาพรวมสถานะทุกกลุ่ม')}
+    ${manualStep(2,'🔍','กรองตามกลุ่มและแผนก','ใช้ dropdown "ทุกกลุ่ม" และ "ทุกแผนก" เพื่อดูสถานะเฉพาะส่วนที่ต้องการ')}
+    ${manualStep(3,'📋','อ่านสถานะในตาราง',`
+      <ul class="manual-list">
+        <li><strong>SELF ✓</strong> — พนักงานกรอก Self-Evaluation แล้ว</li>
+        <li><strong>MANAGER ✓</strong> — หัวหน้าประเมินและบันทึก Grade แล้ว</li>
+        <li><strong>Director ✓</strong> — ผู้บริหารตัดสินใจขั้นสุดท้ายแล้ว <em>(HR ต้องดำเนินการต่อ)</em></li>
+      </ul>
+    `)}
+    ${manualStep(4,'📄','ดู Report รายบุคคล','กดปุ่ม "รายงาน" ข้างชื่อพนักงาน (เฉพาะที่ Manager ประเมินแล้ว) เพื่อดูรายละเอียด')}
+    ${manualNote('HR ดูข้อมูลได้อย่างเดียว — ไม่สามารถแก้ไขผลประเมินหรือ Director Decision ได้')}
+  `)}
+
+  ${manualSection('ส่วนที่ 3 — Export รายงาน', `
+    ${manualStep(1,'↓','คลิก Export ใน sidebar','เลือกเมนู Export')}
+    ${manualStep(2,'📊','Export Excel รายกลุ่ม','เลือกกลุ่มแล้วกด "ดาวน์โหลด Excel" จะได้ไฟล์ที่มีข้อมูลครบทุก field รวมถึง Director Decision')}
+    ${manualStep(3,'📋','นำข้อมูลไปดำเนินการ','ใช้ข้อมูลจากคอลัมน์ <strong>"Director"</strong> เป็นฐานในการปรับเงินเดือน / เลื่อนตำแหน่ง ตามที่ผู้บริหารตัดสินใจ')}
+  `)}
+
+  ${manualSection('ส่วนที่ 4 — รอบการประเมิน', `
+    ${manualStep(1,'📅','รอบ Q1 — มิถุนายน','ประเมินผลงานครึ่งปีแรก (มกราคม–มิถุนายน) — เลือกที่ปุ่ม Q1 มิ.ย. ด้านบน Dashboard')}
+    ${manualStep(2,'📅','รอบ Q2 — ธันวาคม','ประเมินผลงานครึ่งปีหลัง (กรกฎาคม–ธันวาคม) — เลือกที่ปุ่ม Q2 ธ.ค. ด้านบน Dashboard')}
+    ${manualNote('ข้อมูลแต่ละรอบแยกกัน การเปลี่ยน Q1/Q2 จะแสดงข้อมูลของรอบนั้น')}
+  `)}
+  `;
+}
+
+// ========== EXPORT ==========
+
+// สร้าง HTML report ของพนักงาน 1 คน (ใช้ logic เดียวกับ renderReport แต่ return string)
+function buildReportHTML(empId) {
+  const emp      = allData.employees.find(e => sameId(e.id, empId));
+  const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const mgrEval  = allData.managerEvals.find(m => sameId(m.employee_id, empId));
+  const execDec  = allData.execDecisions.find(d => sameId(d.employee_id, empId));
+  if (!emp) return '';
+
+  const posType      = emp.position_type || 'staff';
+  const isManager    = isManagerType(posType);
+  const behaviorList = isManager ? MANAGER_BEHAVIOR_LIST : BEHAVIOR_LIST;
+  const calcAvgFn    = isManager ? calcBehaviorAvgMgr : calcBehaviorAvg;
+  const gi           = mgrEval?.overall_grade ? GRADE_LIST.find(g => g.key === mgrEval.overall_grade) : null;
+  const mgrName      = allData.employees.find(e => sameId(e.id, emp.manager_id))?.name || '—';
+  const recMap = { promote:'เลื่อนตำแหน่ง + ขึ้นเงินเดือน', 'raise-high':'ขึ้นเงินเดือน (สูง)', raise:'ขึ้นเงินเดือน (ปกติ)', hold:'ยังไม่ขึ้นเงินเดือน', pip:'ต้องพัฒนา (PIP)' };
+  const resultLabel  = { exceed:'เกินเป้าหมาย', achieve:'บรรลุเป้าหมาย', below:'ต่ำกว่าเป้าหมาย' };
+  const missions     = selfEval?.missions    || [];
+  const behavior     = selfEval?.behavior    || {};
+  const review       = selfEval?.self_review || {};
+  const behaviorAvg  = selfEval ? calcAvgFn(behavior) : '—';
+
+  return `
+    <div class="report-header-card">
+      <div style="flex:1">
+        <div class="report-name">${emp.name}</div>
+        <div class="report-meta">${emp.position||'—'} · ${posTypeBadge(posType)} · กลุ่ม ${emp.group} · แผนก ${emp.department||'—'} · ${periodLabel()}</div>
+        <div style="font-size:12px;color:#aaa;margin-top:4px">รหัส: ${emp.id} · หัวหน้า: ${mgrName}</div>
+      </div>
+      <div style="text-align:center;min-width:110px">
+        ${gi ? `<div style="font-size:28px;font-weight:800;color:${gi.color}">${gi.label}</div>
+                <div style="font-size:11px;color:#aaa;margin-top:4px">ผลการประเมิน</div>`
+             : `<div style="font-size:14px;color:#aaa">รอประเมิน</div>`}
+      </div>
+    </div>
+    <div class="form-card report-section">
+      <div class="card-header-row"><h3 class="card-section-title">ส่วนที่ 1 — ภารกิจหลักของตำแหน่ง</h3></div>
+      ${missions.length ? missions.map((m,i) => `
+        <div class="report-mission-row">
+          <div class="report-mission-num">${i+1}</div>
+          <div style="flex:1"><div style="font-size:13px">${m.text||'—'}</div></div>
+          <span class="report-result-chip ${m.result==='exceed'?'chip-exceed':m.result==='achieve'?'chip-achieve':'chip-below'}">${resultLabel[m.result]||'—'}</span>
+        </div>`).join('') : '<p style="color:#aaa;font-size:13px">ยังไม่ได้กรอก</p>'}
+    </div>
+    <div class="form-card report-section">
+      <div class="card-header-row">
+        <h3 class="card-section-title">ส่วนที่ 2 — การประเมินผลพฤติกรรม</h3>
+        <span class="ref-badge">${mgrEval?.mgr_behavior?`หัวหน้า ${calcBehaviorAvg(mgrEval.mgr_behavior)}/5.0`:''}${selfEval?.behavior?` · Self ${behaviorAvg}/5.0`:''}</span>
+      </div>
+      ${(mgrEval?.mgr_behavior || selfEval?.behavior) ? behaviorList.map(b => {
+          const mVal = mgrEval?.mgr_behavior?.[b.key] || 0;
+          const sVal = behavior[b.key] || 0;
+          const displayVal = mVal || sVal;
+          const pct = (displayVal/5)*100;
+          const col = displayVal>=4?'#10B981':displayVal>=3?'#E02020':displayVal>=2?'#F59E0B':'#EF4444';
+          return `<div class="report-behavior-row">
+            <span class="report-behavior-no">${b.no}</span>
+            <span class="report-behavior-name">${b.name}</span>
+            <div class="report-bar-wrap"><div class="report-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+            <span class="report-behavior-val ${displayVal>=4?'score-high':displayVal>=3?'score-mid':'score-low'}">${displayVal||'—'}</span>
+          </div>`;
+        }).join('') : '<p style="color:#aaa;font-size:13px">ยังไม่ได้กรอก</p>'}
+    </div>
+    ${selfEval ? `
+    <div class="form-card report-section">
+      <div class="card-header-row"><h3 class="card-section-title">ส่วนที่ 3 — ทบทวนตนเอง${isManager?' (ผู้นำ)':''}</h3></div>
+      <div class="report-review-grid">
+        <div class="report-review-cell"><div class="report-review-label">จุดแข็ง</div><div class="report-review-text">${review.strengths||'—'}</div></div>
+        <div class="report-review-cell"><div class="report-review-label">สิ่งที่ต้องการพัฒนา</div><div class="report-review-text">${review.dev_needs||'—'}</div></div>
+        <div class="report-review-cell"><div class="report-review-label">${isManager?'แผนการพัฒนา':'สิ่งที่ต้องการให้สนับสนุน'}</div><div class="report-review-text">${isManager?(review.dev_plan||'—'):(review.support_needed||'—')}</div></div>
+        <div class="report-review-cell"><div class="report-review-label">เป้าหมาย 6 เดือนข้างหน้า</div><div class="report-review-text">${review.goals_6months||'—'}</div></div>
+      </div>
+    </div>` : ''}
+    <div class="form-card report-section" style="${mgrEval?'border-left:3px solid #E02020':''}">
+      <div class="card-header-row"><h3 class="card-section-title">${isManager?'ส่วนที่ 5':'ส่วนที่ 4'} — ความเห็นและผลการประเมินโดยหัวหน้า</h3></div>
+      ${mgrEval ? `
+        <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:8px">
+          <div><div style="font-size:11px;color:#aaa;margin-bottom:6px">ผลการประเมิน</div><div style="font-size:22px;font-weight:800;color:${gi?.color||'#333'}">${gi?.label||'—'}</div></div>
+          <div><div style="font-size:11px;color:#aaa;margin-bottom:6px">ข้อเสนอแนะ</div><div style="font-size:14px;font-weight:600">${recMap[mgrEval.recommendation]||'—'}</div></div>
+        </div>
+        ${mgrEval.manager_comment ? `<div style="padding:12px;background:#f9f9f9;border-radius:6px;border-left:3px solid #ddd"><p style="font-size:13px;font-style:italic">"${mgrEval.manager_comment}"</p></div>` : ''}`
+        : '<p style="color:#aaa;font-size:13px">หัวหน้ายังไม่ได้ประเมิน</p>'}
+    </div>
+    ${execDec ? `
+    <div class="form-card report-section" style="border-left:3px solid #10B981">
+      <div class="card-header-row"><h3 class="card-section-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</h3></div>
+      <div style="font-size:18px;font-weight:700;color:#10B981">${recMap[execDec.decision]||'—'}</div>
+      ${execDec.note ? `<div style="font-size:12px;color:#888;margin-top:4px">${execDec.note}</div>` : ''}
+    </div>` : ''}
+  `;
+}
+
+function exportPDF() {
+  const grp  = document.getElementById('pdf-group-select').value;
+  const emps = allData.employees.filter(e => (e.role==='employee'||e.role==='manager') && (!grp||e.group===grp));
+  if (!emps.length) { showToast('ไม่มีข้อมูล', 'error'); return; }
+
+  // สร้าง HTML ทุกคนในกลุ่ม แต่ละคนขึ้นหน้าใหม่
+  const html = emps.map((emp, i) =>
+    `<div style="${i>0?'page-break-before:always':''}">${buildReportHTML(emp.id)}</div>`
+  ).join('');
+
+  // ใส่ลงใน report-content แล้ว print
+  document.getElementById('report-content').innerHTML = html;
+  showView('report');
+  setTimeout(() => window.print(), 400);
+}
+
+function exportExcel() {
+  const grp  = document.getElementById('excel-group-select').value;
+  const emps = allData.employees.filter(e => (e.role==='employee' || e.role==='manager') && (!grp||e.group===grp));
+  if (!emps.length) { showToast('ไม่มีข้อมูล', 'error'); return; }
+
+  const recMap = { promote:'เลื่อนตำแหน่ง+ขึ้นเงินเดือน', 'raise-high':'ขึ้นเงินเดือน(สูง)', raise:'ขึ้นเงินเดือน(ปกติ)', hold:'ยังไม่ขึ้น', pip:'ต้องพัฒนา(PIP)' };
+  const gradeMap = { excellent:'ดีเยี่ยม', good:'ดี', medium:'ปานกลาง', fair:'พอใช้', improve:'ต้องปรับปรุง' };
+
+  // หัวตาราง สำหรับ HR
+  const headers = [
+    'ชื่อ', 'กลุ่ม', 'แผนก', 'ตำแหน่ง', 'ประเภท',
+    'Self-Eval', 'Grade', 'Recommendation', 'Director Decision', 'หมายเหตุ'
+  ];
+
+  const rows = emps.map(emp => {
+    const self = allData.selfEvals.find(s => sameId(s.employee_id, emp.id));
+    const mgr  = allData.managerEvals.find(m => sameId(m.employee_id, emp.id));
+    const exec = allData.execDecisions.find(d => sameId(d.employee_id, emp.id));
+    return [
+      emp.name,
+      emp.group        || '—',
+      emp.department   || '—',
+      emp.position     || '—',
+      emp.position_type|| '—',
+      self ? 'กรอกแล้ว' : 'ยังไม่กรอก',
+      mgr?.overall_grade ? (gradeMap[mgr.overall_grade] || mgr.overall_grade) : '—',
+      mgr?.recommendation ? (recMap[mgr.recommendation] || mgr.recommendation) : '—',
+      exec?.decision  ? (recMap[exec.decision]  || exec.decision)  : '—',
+      exec?.note      || '—',
+    ];
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+
+  // ปรับความกว้างคอลัมน์
+  ws['!cols'] = [
+    {wch:25}, {wch:8}, {wch:10}, {wch:30}, {wch:10},
+    {wch:12}, {wch:12}, {wch:22}, {wch:22}, {wch:30}
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, grp||'ทั้งหมด');
+  XLSX.writeFile(wb, `fmc-review-HR-${grp||'all'}-${new Date().toISOString().split('T')[0]}.xlsx`);
+  showToast('ดาวน์โหลด Excel สำเร็จ', 'success');
+}
+
+// ========== API ==========
+async function apiGet(params) {
+  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return mockApi(params);
+  const qs  = new URLSearchParams(params).toString();
+  const res = await fetch(`${APPS_SCRIPT_URL}?${qs}`);
+  const j   = await res.json();
+  if (j.error) throw new Error(j.error);
+  return j.data;
+}
+
+async function apiPost(payload) {
+  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') return mockApiPost(payload);
+  updateSyncStatus('กำลังบันทึก...');
+  const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(payload) });
+  const j   = await res.json();
+  if (j.error) throw new Error(j.error);
+  updateSyncStatus('บันทึกแล้ว ✓');
+  return j.data;
+}
+
+// ========== MOCK API ==========
+function mockApi(params) {
+  if (params.action === 'login') {
+    const user = getMockUsers().find(u => u.username===params.username && u.password===params.password);
+    if (!user) throw new Error('invalid');
+    const { password, ...safe } = user;
+    return safe;
+  }
+  if (params.action === 'getAllData') {
+    return {
+      employees:     getMockUsers().map(u => { const { password, ...r } = u; return r; }),
+      selfEvals:     JSON.parse(localStorage.getItem('mock_selfEvals')    ||'[]'),
+      managerEvals:  JSON.parse(localStorage.getItem('mock_managerEvals') ||'[]'),
+      execDecisions: JSON.parse(localStorage.getItem('mock_execDecisions')||'[]'),
+    };
+  }
+  return null;
+}
+
+function mockApiPost(payload) {
+  const storeMap = { submitSelfEval:'mock_selfEvals', submitManagerEval:'mock_managerEvals', submitExecDecision:'mock_execDecisions' };
+  const key = storeMap[payload.action];
+  if (key) {
+    const arr = JSON.parse(localStorage.getItem(key)||'[]');
+    const idField = 'employee_id';
+    const idx = arr.findIndex(r => r[idField]===payload[idField]);
+    const rec = { ...payload, submitted_at:new Date().toISOString() };
+    if (idx>=0) arr[idx]=rec; else arr.push(rec);
+    localStorage.setItem(key, JSON.stringify(arr));
+  }
+  // Admin CRUD — เก็บใน mock employees (sessionStorage)
+  if (['addEmployee','updateEmployee','deleteEmployee'].includes(payload.action)) {
+    updateSyncStatus('บันทึก local ✓');
+  }
+  updateSyncStatus('บันทึก local ✓');
+  return { ok:true };
+}
+
+// ========== ข้อมูลพนักงานจริง 112 คน (Auto-generated จาก รายชื่อพนักงาน.xlsx) ==========
+const REAL_EMPLOYEES = [
+  {"id":"BNT-004","username":"bnt-004","password":"1234","role":"executive","group":"BNT","name":"นาย ศุภกิจ รัตนรังสรรค์","position":"Account Director","position_type":"","department":"ACS","manager_id":"FMC-001","nickname":"ซุป"},
+  {"id":"BNT-029","username":"bnt-029","password":"1234","role":"employee","group":"BNT","name":"นางสาว อรฤดี โสวรรณทิพย์","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"อร"},
+  {"id":"BNT-044","username":"bnt-044","password":"1234","role":"manager","group":"BNT","name":"นางสาว ดาลัด ฐิติภาณุเวช","position":"Finance Manager","position_type":"manager","department":"FNS","manager_id":"FMC-001","nickname":"ดา"},
+  {"id":"BNT-046","username":"bnt-046","password":"1234","role":"employee","group":"BNT","name":"นาง จำเรียง สุวรรณศร","position":"Maid","position_type":"staff","department":"CAS","manager_id":"BNT-097","nickname":"เล็ก"},
+  {"id":"BNT-049","username":"bnt-049","password":"1234","role":"employee","group":"BNT","name":"นางสาว จินตณัฏฐ์ โชติมั่ง","position":"Senior General Affairs Officer","position_type":"senior","department":"CAS","manager_id":"BNT-097","nickname":"กระแต"},
+  {"id":"BNT-070","username":"bnt-070","password":"1234","role":"employee","group":"BNT","name":"นางสาว สุดารัตน์ วราภรณ์วิมลชัย","position":"Senior Account Officer","position_type":"senior","department":"ACS","manager_id":"BNT-044","nickname":"เจี้ยบ"},
+  {"id":"BNT-091","username":"bnt-091","password":"1234","role":"manager","group":"BNT","name":"นางสาว กนกพร เหมรา","position":"Section HR Manager","position_type":"manager","department":"HRS","manager_id":"FMC-001","nickname":"เกด"},
+  {"id":"BNT-097","username":"bnt-097","password":"1234","role":"manager","group":"BNT","name":"นางสาว เยาวพา จรูญโสภณสวัสดิ์","position":"General Office Manager","position_type":"manager","department":"CAS","manager_id":"FMC-001","nickname":"ป๋วย"},
+  {"id":"BNT-101","username":"bnt-101","password":"1234","role":"employee","group":"BNT","name":"นางสาว นงเยาว์ อุดมโพชน์","position":"Finance Officer","position_type":"staff","department":"FNS","manager_id":"BNT-044","nickname":"แพรว"},
+  {"id":"BNT-102","username":"bnt-102","password":"1234","role":"employee","group":"BNT","name":"นางสาว ศิริพร คะเนสม","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"นิว"},
+  {"id":"BNT-103","username":"bnt-103","password":"1234","role":"employee","group":"BNT","name":"นางสาว โสภิตารัตน์ สุริยัน","position":"HR.Officer","position_type":"staff","department":"HRS","manager_id":"BNT-091","nickname":"น้ำหวาน"},
+  {"id":"BNT-109","username":"bnt-109","password":"1234","role":"employee","group":"BNT","name":"นางสาว นัสรียา แมหะ","position":"Finance Officer","position_type":"staff","department":"ACS","manager_id":"BNT-044","nickname":"อันยา"},
+  {"id":"BNT-110","username":"bnt-110","password":"1234","role":"employee","group":"BNT","name":"นางสาว ไอรดา บัวใหญ่","position":"Finance Officer","position_type":"staff","department":"ACS","manager_id":"BNT-044","nickname":"ไอซ์"},
+  {"id":"BNT-112","username":"bnt-112","password":"1234","role":"employee","group":"BNT","name":"นางสาว อัมพวรรณ วิงวอน","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"ใบหม่อน"},
+  {"id":"BNT-113","username":"bnt-113","password":"1234","role":"employee","group":"BNT","name":"นาย นันทพงศ์ ศาลางาม","position":"Finance Officer","position_type":"staff","department":"AFD","manager_id":"BNT-044","nickname":"แพนด้า"},
+  {"id":"BNT-114","username":"bnt-114","password":"1234","role":"employee","group":"BNT","name":"นาย กษิดิศ แดงหมื่นไวย","position":"Account Officer","position_type":"staff","department":"AFD","manager_id":"BNT-004","nickname":"เบ๊ค"},
+  {"id":"FMC-001","username":"fmc-001","password":"1234","role":"executive","group":"FMC","name":"นาย พิชัย สีห์โสภณ","position":"Managing Director","position_type":"","department":"MDO","manager_id":"","nickname":"Zeed"},
+  {"id":"FMC-187","username":"fmc-187","password":"1234","role":"employee","group":"FMC","name":"นาย ชาญชัย อ่องเทศ","position":"Service Technician","position_type":"staff","department":"ICS","manager_id":"FMC-266","nickname":"อั๋น"},
+  {"id":"FMC-189","username":"fmc-189","password":"1234","role":"employee","group":"FMC","name":"นาย สัญญา สมาธิ","position":"Service Technician","position_type":"staff","department":"ICS","manager_id":"FMC-266","nickname":"จุก"},
+  {"id":"FMC-201","username":"fmc-201","password":"1234","role":"employee","group":"FMC","name":"นาย สุรชัย ลามอ","position":"Senior CS. Engineer","position_type":"senior","department":"ICS","manager_id":"FMC-266","nickname":"อีน"},
+  {"id":"FMC-214","username":"fmc-214","password":"1234","role":"manager","group":"FMC","name":"นางสาว มัทนี นาคเกษม","position":"Purchasing Manager","position_type":"manager","department":"MDO","manager_id":"FMC-252","nickname":"มัท"},
+  {"id":"FMC-215","username":"fmc-215","password":"1234","role":"employee","group":"FMC","name":"นาย ไซฟูลบาฮารี มะแซ","position":"Project Engineer","position_type":"staff","department":"PPC-J","manager_id":"FMC-250","nickname":"อาบู"},
+  {"id":"FMC-234","username":"fmc-234","password":"1234","role":"manager","group":"FMC","name":"นาย อภิวิชญ์ เหลืองรุ่งโรจน์","position":"Section Technical Support Manager","position_type":"manager","department":"TSS","manager_id":"FMC-001","nickname":"เอก"},
+  {"id":"FMC-237","username":"fmc-237","password":"1234","role":"manager","group":"FMC","name":"นาย ธีรวัฒน์ มณีรัตน์","position":"Assistant Section Engineering Manager","position_type":"manager","department":"ETS","manager_id":"FMC-266","nickname":"เล็ก"},
+  {"id":"FMC-238","username":"fmc-238","password":"1234","role":"employee","group":"FMC","name":"นาย ธนวัฒน์ ใคล้สา","position":"Senior System Engineer","position_type":"senior","department":"ETS","manager_id":"FMC-266","nickname":"บี"},
+  {"id":"FMC-239","username":"fmc-239","password":"1234","role":"employee","group":"FMC","name":"นาย อัศวิน แคนอินทร์","position":"Project Technician","position_type":"staff","department":"PMS-J","manager_id":"OUTS-074","nickname":"เดี่ยว"},
+  {"id":"FMC-240","username":"fmc-240","password":"1234","role":"employee","group":"FMC","name":"นาย พิชิต บุญสร้าง","position":"Service Engineer","position_type":"staff","department":"ETS","manager_id":"FMC-266","nickname":"ชิต"},
+  {"id":"FMC-243","username":"fmc-243","password":"1234","role":"employee","group":"FMC","name":"นาย จิโรจน์ ช่างล้อ","position":"Senior Administrative Officer","position_type":"senior","department":"ICS","manager_id":"FMC-266","nickname":"จากัวร์"},
+  {"id":"FMC-246","username":"fmc-246","password":"1234","role":"employee","group":"FMC","name":"นางสาว สุภัสตรา คงเดช","position":"Administrative Officer","position_type":"staff","department":"ENG","manager_id":"FMC-266","nickname":"แพท"},
+  {"id":"FMC-248","username":"fmc-248","password":"1234","role":"employee","group":"FMC","name":"นาย สุชาติ ชะมที","position":"Project Engineer","position_type":"staff","department":"PMS-J","manager_id":"OUTS-074","nickname":"เก๋ง"},
+  {"id":"FMC-250","username":"fmc-250","password":"1234","role":"manager","group":"FMC","name":"นาย พงษ์สันติ์ ทรัพย์เย็น","position":"Project Manager","position_type":"manager","department":"PPC-J","manager_id":"OUTS-074","nickname":"อาร์ท"},
+  {"id":"FMC-252","username":"fmc-252","password":"1234","role":"manager","group":"FMC","name":"นางสาว แก้วสรร ดั่นสถิตย์","position":"MDO Director","position_type":"manager","department":"MDO","manager_id":"FMC-001","nickname":"แก้ว"},
+  {"id":"FMC-255","username":"fmc-255","password":"1234","role":"employee","group":"FMC","name":"นางสาว ประภาศรี เตียรถ์วงศ์","position":"Senior Administrative Officer","position_type":"senior","department":"PPC-J","manager_id":"FMC-250","nickname":"ฟาง"},
+  {"id":"FMC-256","username":"fmc-256","password":"1234","role":"employee","group":"FMC","name":"นาง ธวัลรัตน์ หมอยา","position":"Administrative Officer","position_type":"staff","department":"MDO","manager_id":"FMC-252","nickname":"เปรม"},
+  {"id":"FMC-257","username":"fmc-257","password":"1234","role":"employee","group":"FMC","name":"นาย บริพัตร บุตรนาค","position":"System Engineer","position_type":"staff","department":"ETS","manager_id":"FMC-266","nickname":"เน"},
+  {"id":"FMC-258","username":"fmc-258","password":"1234","role":"manager","group":"FMC","name":"นาย อดิศรโยธิน นิลละออ","position":"Assistant BU Director","position_type":"manager","department":"ODI","manager_id":"FMC-001","nickname":"ฮาร์ท"},
+  {"id":"FMC-260","username":"fmc-260","password":"1234","role":"employee","group":"FMC","name":"นาย ปณชัย วิเศษสวรรค์","position":"Project Engineer","position_type":"staff","department":"PMS-J","manager_id":"OUTS-074","nickname":"ปรือ"},
+  {"id":"FMC-266","username":"fmc-266","password":"1234","role":"manager","group":"FMC","name":"นาย วีระ พานิชกุล","position":"Section Engineering Manager","position_type":"manager","department":"ENG","manager_id":"FMC-001","nickname":"เซ้ง"},
+  {"id":"FMC-267","username":"fmc-267","password":"1234","role":"employee","group":"FMC","name":"นาย ชยกร คุณวิติ","position":"Senior Project Engineer","position_type":"senior","department":"PPC-I","manager_id":"FMC-258","nickname":"โย"},
+  {"id":"FMC-271","username":"fmc-271","password":"1234","role":"manager","group":"FMC","name":"นาย อนันตยศ แคนหนอง","position":"Project Manager","position_type":"manager","department":"PPC-J","manager_id":"OUTS-074","nickname":"บิ๊ก"},
+  {"id":"FMC-272","username":"fmc-272","password":"1234","role":"manager","group":"FMC","name":"นาย กิตติศักดิ์ สาระบูรณ์","position":"Assistant Project Manager","position_type":"manager","department":"PMS-J","manager_id":"OUTS-074","nickname":"กันต์"},
+  {"id":"FMC-273","username":"fmc-273","password":"1234","role":"employee","group":"FMC","name":"นางสาว ธนนรินทร์ ขันธประสิทธิ์","position":"Senior BD. Officer","position_type":"senior","department":"PPC-J","manager_id":"FMC-250","nickname":"แคท"},
+  {"id":"FMC-275","username":"fmc-275","password":"1234","role":"employee","group":"FMC","name":"นางสาว วรรษมณ รักจิตร","position":"Technical Support Engineer","position_type":"staff","department":"BD-I","manager_id":"FMC-001","nickname":"จอย"},
+  {"id":"FMC-277","username":"fmc-277","password":"1234","role":"employee","group":"FMC","name":"นาย วิษณุ เลหะวาณิชย์","position":"Support Engineer","position_type":"staff","department":"TSS","manager_id":"FMC-234","nickname":"แชมป์"},
+  {"id":"FMC-278","username":"fmc-278","password":"1234","role":"manager","group":"FMC","name":"นางสาว อโนทัย มังกรทอง","position":"BD Manager","position_type":"manager","department":"BD-J","manager_id":"FMC-001","nickname":"นก"},
+  {"id":"FMC-279","username":"fmc-279","password":"1234","role":"employee","group":"FMC","name":"นาย ไกรวิชญ์ พรมจะมร","position":"Senior Project Engineer","position_type":"senior","department":"PMS-J","manager_id":"OUTS-074","nickname":"แมน"},
+  {"id":"FMC-283","username":"fmc-283","password":"1234","role":"employee","group":"FMC","name":"นางสาว สุธีธาร นาคลดา","position":"Sales Support Engineer","position_type":"staff","department":"BD-J","manager_id":"FMC-278","nickname":"จี้"},
+  {"id":"FMC-284","username":"fmc-284","password":"1234","role":"employee","group":"FMC","name":"นาย สุรธัญ คำสุวรรณ์","position":"Service Technician","position_type":"staff","department":"ISS-I","manager_id":"FMC-258","nickname":"มะเขือ"},
+  {"id":"FMC-286","username":"fmc-286","password":"1234","role":"employee","group":"FMC","name":"นาย ธีรยุทธ บุญถาวร","position":"Foreman","position_type":"staff","department":"PMS-I","manager_id":"FMC-258","nickname":"เล็ก"},
+  {"id":"ISEC-076","username":"isec-076","password":"1234","role":"employee","group":"ISEC","name":"นาย วีระวุฒิ เหลี่ยมอุไร","position":"Senior System Technician","position_type":"senior","department":"PSS","manager_id":"ISEC-112","nickname":"คิว"},
+  {"id":"ISEC-087","username":"isec-087","password":"1234","role":"employee","group":"ISEC","name":"นางสาว กิตติมา ไชยมหา","position":"Product Engineer","position_type":"staff","department":"PSS","manager_id":"ISEC-112","nickname":"นุ้ย"},
+  {"id":"ISEC-090","username":"isec-090","password":"1234","role":"employee","group":"ISEC","name":"นางสาว ณัฏฐ์วรัชญ์ คุ้มภัย","position":"Senior Purchasing Officer","position_type":"senior","department":"MD","manager_id":"ISEC-121","nickname":"นกเล็ก"},
+  {"id":"ISEC-094","username":"isec-094","password":"1234","role":"employee","group":"ISEC","name":"นางสาว วรัญญา ปิ่นทอง","position":"Senior System Engineer","position_type":"senior","department":"PSS","manager_id":"ISEC-112","nickname":"ปัน"},
+  {"id":"ISEC-095","username":"isec-095","password":"1234","role":"employee","group":"ISEC","name":"นาย ภัทรพงศ์ ถนัดค้า","position":"System Engineer","position_type":"staff","department":"PSS","manager_id":"ISEC-112","nickname":"ปาร์ค"},
+  {"id":"ISEC-097","username":"isec-097","password":"1234","role":"manager","group":"ISEC","name":"นาย รณชัย วิริยะเนตรบุบผา","position":"Assistant Service Section","position_type":"manager","department":"SVS","manager_id":"ISEC-121","nickname":"รูณ"},
+  {"id":"ISEC-100","username":"isec-100","password":"1234","role":"employee","group":"ISEC","name":"นาย ภิเษก พูดดี","position":"Service Technician","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"ดาวุด"},
+  {"id":"ISEC-101","username":"isec-101","password":"1234","role":"employee","group":"ISEC","name":"นางสาว กมลรัตน์ เวียงวงษ์","position":"Administrative Officer","position_type":"staff","department":"MD","manager_id":"ISEC-121","nickname":"แพท"},
+  {"id":"ISEC-102","username":"isec-102","password":"1234","role":"employee","group":"ISEC","name":"นาย ปฏิภาณ เจริญผล","position":"Service Technician","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"บาซิล"},
+  {"id":"ISEC-103","username":"isec-103","password":"1234","role":"employee","group":"ISEC","name":"นาย ชัยพัฒน์ พูดดี","position":"Service Technician","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"แอล"},
+  {"id":"ISEC-106","username":"isec-106","password":"1234","role":"employee","group":"ISEC","name":"นาย สราวุฒิ มณีขาว","position":"Service Technician","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"วุดเดี่ยว"},
+  {"id":"ISEC-107","username":"isec-107","password":"1234","role":"employee","group":"ISEC","name":"นาย สมคิด สุขสมโสตร์","position":"Service Technician","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"คิด"},
+  {"id":"ISEC-112","username":"isec-112","password":"1234","role":"manager","group":"ISEC","name":"นาย หัสดินทร์ นิลละออ","position":"Product & Solution Manager","position_type":"manager","department":"PSS","manager_id":"ISEC-121","nickname":"อ๊อฟ"},
+  {"id":"ISEC-115","username":"isec-115","password":"1234","role":"manager","group":"ISEC","name":"นาย ชัยวัฒน์ อึ้งใจธรรม","position":"Sales Manager","position_type":"manager","department":"EXS","manager_id":"ISEC-121","nickname":"แบงค์"},
+  {"id":"ISEC-121","username":"isec-121","password":"1234","role":"executive","group":"ISEC","name":"นาย กฤช อมรวรเดโช","position":"Managing Director","position_type":"","department":"MD","manager_id":"FMC-001","nickname":"กฤช"},
+  {"id":"ISEC-131","username":"isec-131","password":"1234","role":"employee","group":"ISEC","name":"นางสาว คณินท์ อาสาเสนา","position":"Service Engineer","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"Janjao"},
+  {"id":"OUTS-003","username":"outs-003","password":"1234","role":"executive","group":"NSP","name":"นางสาว รุจิรา สง่าแสง","position":"Managing Director","position_type":"","department":"ICT","manager_id":"","nickname":"คีย์"},
+  {"id":"OUTS-004","username":"outs-004","password":"1234","role":"employee","group":"NSP","name":"นาย ศรัณย์ ศรีฟ้า","position":"ที่ปรึกษาด้านเทคนิคและผลิตภัณฑ์","position_type":"staff","department":"ICT","manager_id":"OUTS-003","nickname":"ปืน"},
+  {"id":"OUTS-033","username":"outs-033","password":"1234","role":"manager","group":"NSP","name":"นาย ศุขทิวากร รัตนภิญโญกุล","position":"Project Manager","position_type":"manager","department":"ICT","manager_id":"OUTS-003","nickname":"ช้าง"},
+  {"id":"OUTS-074","username":"outs-074","password":"1234","role":"manager","group":"FMC","name":"นาย สุริยา คงสาคร","position":"Business Unit Director","position_type":"manager","department":"ODJ","manager_id":"FMC-001","nickname":"TOP"},
+  {"id":"OUTS-077","username":"outs-077","password":"1234","role":"employee","group":"FMC","name":"นาย ปิยศักดิ์ มาลีขันธ์","position":"Senior Service Technician","position_type":"senior","department":"ICS","manager_id":"FMC-266","nickname":"เอ"},
+  {"id":"OUTS-091","username":"outs-091","password":"1234","role":"manager","group":"PPP","name":"นาย ประสุต สุขประเสริฐ","position":"Project Manager","position_type":"manager","department":"PPP","manager_id":"PPP-015","nickname":"ประสุต"},
+  {"id":"OUTS-108","username":"outs-108","password":"1234","role":"employee","group":"FMC","name":"นางสาว ณัฐฐิกานต์ ขีดขิน","position":"Senior Technical Support Engineer","position_type":"senior","department":"ETS","manager_id":"FMC-266","nickname":"ซอฟท์"},
+  {"id":"OUTS-110","username":"outs-110","password":"1234","role":"employee","group":"NSP","name":"นางสาว จิรัชญา เดชะปัญ","position":"Project Co-ordinator","position_type":"staff","department":"ICT","manager_id":"OUTS-033","nickname":"นิ้ง"},
+  {"id":"OUTS-122","username":"outs-122","password":"1234","role":"employee","group":"FMC","name":"นาย ชัยยะกิตติ์ รัชตนนท์เกษม","position":"Project Engineer","position_type":"staff","department":"PMS-I","manager_id":"FMC-258","nickname":"วิน"},
+  {"id":"OUTS-132","username":"outs-132","password":"1234","role":"employee","group":"FMC","name":"นาย วัชรชัย ป้านสกุล","position":"Site Engineer","position_type":"staff","department":"PMS-I","manager_id":"FMC-258","nickname":"หนุ่ม"},
+  {"id":"OUTS-134","username":"outs-134","password":"1234","role":"manager","group":"FMC","name":"นางสาว พิรุฬห์ลักษณ์ พิมดี","position":"Assistant BD. Manager","position_type":"manager","department":"BD-M","manager_id":"FMC-001","nickname":"บุ๋ม"},
+  {"id":"OUTS-142","username":"outs-142","password":"1234","role":"employee","group":"FMC","name":"นาย กฤษฎี ทาห้วยหว้า","position":"วิศวกรเครื่องกล","position_type":"staff","department":"PMS-I","manager_id":"FMC-258","nickname":"ดอน"},
+  {"id":"OUTS-146","username":"outs-146","password":"1234","role":"employee","group":"FMC","name":"นาย ศักดิ์ชาย แซ่ลิ่ม","position":"System Engineer","position_type":"staff","department":"ETS","manager_id":"FMC-266","nickname":"โม"},
+  {"id":"OUTS-154","username":"outs-154","password":"1234","role":"employee","group":"NSP","name":"นางสาว ธัญชนก เลือดนักรบ","position":"Support Engineer","position_type":"staff","department":"ICT","manager_id":"OUTS-033","nickname":"เขม"},
+  {"id":"OUTS-158","username":"outs-158","password":"1234","role":"employee","group":"BNT","name":"นาย ณนนท์ สีแสงจันทร์","position":"Driver","position_type":"staff","department":"CAS","manager_id":"FMC-001","nickname":"โต"},
+  {"id":"OUTS-159","username":"outs-159","password":"1234","role":"employee","group":"FMC","name":"นางสาว พจนา เศษฐนันท์","position":"BD Officer","position_type":"staff","department":"BD-I","manager_id":"FMC-001","nickname":"กิ๊ก"},
+  {"id":"OUTS-162","username":"outs-162","password":"1234","role":"employee","group":"FMC","name":"นางสาว จีรณันท์ จอมปวง","position":"Sales Co-ordinator","position_type":"staff","department":"BD-M","manager_id":"OUTS-134","nickname":"เจีย"},
+  {"id":"OUTS-166","username":"outs-166","password":"1234","role":"employee","group":"FMC","name":"นางสาว มนทกานติ์ ตรรกดุษฎี","position":"Administrative Officer","position_type":"staff","department":"SMD","manager_id":"FMC-001","nickname":"ทราย"},
+  {"id":"OUTS-173","username":"outs-173","password":"1234","role":"employee","group":"FMC","name":"นาย ประเดิมชัย พะทิ","position":"Service Technician","position_type":"staff","department":"ISS-I","manager_id":"FMC-258","nickname":"ป๊อป"},
+  {"id":"OUTS-174","username":"outs-174","password":"1234","role":"employee","group":"NSP","name":"นาย เกียรติยศ เจริญชอบ","position":"Application Support","position_type":"staff","department":"ICT","manager_id":"OUTS-003","nickname":"ต้น"},
+  {"id":"OUTS-179","username":"outs-179","password":"1234","role":"employee","group":"FMC","name":"นาย เนติวัฒน์ พลกูล","position":"Project Co-ordinator","position_type":"staff","department":"PPC-J","manager_id":"FMC-250","nickname":"เฟน"},
+  {"id":"OUTS-187","username":"outs-187","password":"1234","role":"employee","group":"NSP","name":"นางสาว เกษร สุขสมโสตร์","position":"BD Manager","position_type":"staff","department":"ICT","manager_id":"OUTS-003","nickname":"เก๋"},
+  {"id":"OUTS-188","username":"outs-188","password":"1234","role":"employee","group":"FMC","name":"นางสาว วาสนา พันอุด","position":"เจ้าหน้าที่ธุรการโครงการ","position_type":"staff","department":"PMS-I","manager_id":"FMC-258","nickname":"กระปุก"},
+  {"id":"PPP-003","username":"ppp-003","password":"1234","role":"manager","group":"PPP","name":"นางสาว สุภาพัณณ์ ชาติสุวรรณ","position":"Administrative Manager Director","position_type":"manager","department":"PPP","manager_id":"PPP-015","nickname":"หน่อง"},
+  {"id":"PPP-014","username":"ppp-014","password":"1234","role":"manager","group":"PPP","name":"นางสาว หทัยภัทร อินทรังษี","position":"Project Control Manager","position_type":"manager","department":"PPP","manager_id":"PPP-015","nickname":"ไอซ์"},
+  {"id":"PPP-015","username":"ppp-015","password":"1234","role":"executive","group":"PPP","name":"นาย สุริยะ รัตตากร","position":"Deputy Managing Director","position_type":"","department":"PPP","manager_id":"FMC-001","nickname":"อ๋อง"},
+  {"id":"PPP-019","username":"ppp-019","password":"1234","role":"employee","group":"PPP","name":"นาย นำโชค อินทวีกุล","position":"สถาปนิก","position_type":"staff","department":"PPP","manager_id":"OUTS-091","nickname":"บอย"},
+  {"id":"PPP-026","username":"ppp-026","password":"1234","role":"manager","group":"PPP","name":"นาย ชัยวัฒน์ ชังเทศ","position":"Assistant Project Director","position_type":"manager","department":"PPP","manager_id":"PPP-015","nickname":"โล"},
+  {"id":"PPP-028","username":"ppp-028","password":"1234","role":"manager","group":"PPP","name":"นาย ธีระพงษ์ แสนตรง","position":"Project Manager","position_type":"manager","department":"มาบตาพุด","manager_id":"PPP-026","nickname":"โก้"},
+  {"id":"PPP-029","username":"ppp-029","password":"1234","role":"employee","group":"PPP","name":"นางสาว เพชรน้ำแพร ทองมีขวัญ","position":"เจ้าหน้าที่ธุรการโครงการ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"น้ำแพร"},
+  {"id":"PPP-031","username":"ppp-031","password":"1234","role":"employee","group":"PPP","name":"นางสาว กนกวรรณ จันทะคาม","position":"Admin. Accounting Officer","position_type":"staff","department":"PPP","manager_id":"PPP-003","nickname":"กิ๊ฟ"},
+  {"id":"PPP-033","username":"ppp-033","password":"1234","role":"employee","group":"PPP","name":"นางสาว ขนิษฐา เสียงเย็น","position":"Purchasing Officer","position_type":"staff","department":"PPP","manager_id":"PPP-040","nickname":"ปุ้มปุ้ย"},
+  {"id":"PPP-034","username":"ppp-034","password":"1234","role":"employee","group":"PPP","name":"นาย สมปอง คำพ่วง","position":"Supervisor","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"ยุ้ย"},
+  {"id":"PPP-035","username":"ppp-035","password":"1234","role":"employee","group":"PPP","name":"นาย สราวุธ สรณานุภาพ","position":"พนักงานเขียนแบบ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"โอ๋"},
+  {"id":"PPP-038","username":"ppp-038","password":"1234","role":"employee","group":"PPP","name":"นาย ธนพันธ์ ตรีพิพัฒน์","position":"โฟร์แมนงานระบบ","position_type":"staff","department":"มาบตาพุด","manager_id":"","nickname":"ต้น"},
+  {"id":"PPP-040","username":"ppp-040","password":"1234","role":"manager","group":"PPP","name":"นางสาว ปัทมา จงรักสมหวัง","position":"Administrative Manager","position_type":"manager","department":"PPP","manager_id":"PPP-003","nickname":"ปัท"},
+  {"id":"PPP-044","username":"ppp-044","password":"1234","role":"employee","group":"PPP","name":"นางสาว ฐิติรัตน์ โสจันทร์","position":"Office Engineer","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"เกด"},
+  {"id":"PPP-045","username":"ppp-045","password":"1234","role":"employee","group":"PPP","name":"นางสาว บุญเทียน เสริมชาติ","position":"จป.เทคนิก","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"เทียน"},
+  {"id":"PPP-046","username":"ppp-046","password":"1234","role":"employee","group":"PPP","name":"นาย ศิรศิษฎ์ ปวงสุก","position":"Safety Officer","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"บลู"},
+  {"id":"PPP-047","username":"ppp-047","password":"1234","role":"employee","group":"PPP","name":"นางสาว แก้วกาญจน์ รุ่งทอง","position":"เจ้าหน้าที่ธุรการโครงการ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"เดียร์"},
+  {"id":"PPP-048","username":"ppp-048","password":"1234","role":"employee","group":"PPP","name":"นาย สร้างสรรค์ ที่รักษ์","position":"Project Engineer","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"สิงห์"},
+  {"id":"PPP-050","username":"ppp-050","password":"1234","role":"employee","group":"PPP","name":"นางสาว กิรดา สุวรรณผล","position":"จป.วิชาชีพ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"ใบข้าว"},
+  {"id":"PPP-051","username":"ppp-051","password":"1234","role":"employee","group":"PPP","name":"นางสาว ชนิตา แสงชมภู","position":"เจ้าหน้าที่ธุรการโครงการ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"พลอยสวย"},
+  {"id":"PPP-052","username":"ppp-052","password":"1234","role":"employee","group":"PPP","name":"นางสาว ชลดา โอภาสพินิจ","position":"Office Engineer","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"โน"},
+  {"id":"PPP-053","username":"ppp-053","password":"1234","role":"employee","group":"PPP","name":"นาย กฤษตฤณ ชินคณานนท์","position":"Administrative Officer","position_type":"staff","department":"PPP","manager_id":"PPP-040","nickname":"ตฤณ"},
+  {"id":"SCA-370","username":"sca-370","password":"1234","role":"employee","group":"FMC","name":"นาย ธนสิทธิ์ ทองทับ","position":"Senior Support Engineer","position_type":"senior","department":"TSS","manager_id":"FMC-234","nickname":"เอ็ม"},
+  {"id":"SCA-410","username":"sca-410","password":"1234","role":"employee","group":"FMC","name":"นางสาว ชลธิชา หอยสังข์","position":"Senior Administrative Officer","position_type":"senior","department":"PMS-J","manager_id":"OUTS-074","nickname":"สร้อย"}
+];
+
+function getMockUsers() {
+  // testAccounts ต้องอยู่เสมอ ไม่ขึ้นกับ localStorage
+  const testAccounts = [
+    { id:'_admin', username:'admin', password:'admin', role:'executive', group:'FMC', name:'Admin (Demo)', position:'Managing Director', position_type:'', department:'MDO', manager_id:'', nickname:'' },
+    { id:'_hr',    username:'hr',    password:'1234',  role:'hr',        group:'FMC', name:'HR System',    position:'HR Manager',        position_type:'manager', department:'HR', manager_id:'', nickname:'' },
+  ];
+  const stored = localStorage.getItem('mock_employees');
+  // ใช้พนักงานจริงจาก localStorage (ถ้ามีการแก้ไข) มิฉะนั้นใช้ REAL_EMPLOYEES
+  const realEmps = stored ? JSON.parse(stored) : REAL_EMPLOYEES;
+  return [...testAccounts, ...realEmps];
+}
+
+// ========== HELPERS ==========
+
+// บันทึกรายชื่อพนักงานลง localStorage เพื่อให้คงอยู่หลัง refresh
+function persistEmployees() {
+  // บันทึกเฉพาะพนักงานจริง (กรอง _ accounts ออก เพราะ getMockUsers จะ merge กลับเอง)
+  const realOnly = allData.employees.filter(e => !String(e.id).startsWith('_'));
+  localStorage.setItem('mock_employees', JSON.stringify(realOnly));
+  sessionStorage.setItem('apex_data', JSON.stringify(allData));
+}
+
+function posTypeBadge(type) {
+  const map = { staff:'Staff', senior:'Senior', manager:'Manager', director:'Director', admin:'Admin' };
+  const cls = { staff:'pos-staff', senior:'pos-senior', manager:'pos-manager', director:'pos-manager', admin:'pos-admin' };
+  return `<span class="pos-badge ${cls[type]||''}">${map[type]||type||'—'}</span>`;
+}
+
+// Director ใช้ Manager Form เหมือนกัน
+function isManagerType(posType) {
+  return posType === 'manager' || posType === 'director';
+}
+
+// Admin ใช้ Admin Form (multi-step)
+function isAdminType(posType) {
+  return posType === 'admin';
+}
+
+function updateSyncStatus(text) {
+  const el = document.getElementById('sync-status');
+  if (el) el.textContent = text;
+}
+
+function showToast(msg, type='success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className   = `toast toast-${type} show`;
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function showLoading(show) {
+  document.getElementById('loading-overlay').classList.toggle('hidden', !show);
+}
