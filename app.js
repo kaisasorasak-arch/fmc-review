@@ -28,6 +28,114 @@ const BEHAVIOR_LIST = [
     desc:'เรียนรู้งาน รอบรู้ เข้าใจวิธีการและกระบวนการ แสวงหาความรู้เพิ่มเติมอยู่เสมอ' },
 ];
 
+// ========== Individual Form — Core Behaviors มาตรฐาน (ใช้กับทุกคนที่มี competencies รายบุคคล) ==========
+const INDIVIDUAL_BEHAVIOR_LIST = [
+  { key:'punctuality', no:1,
+    name:'การบริหารจัดการตนเองและการขับเคลื่อนงานตามแผน',
+    question:'ในรอบ 6 เดือนที่ผ่านมา ท่านบริหารจัดการตนเองและขับเคลื่อนงานตามเป้าหมายอย่างไร?',
+    options:[
+      'ส่งงานตรงเวลาหรือก่อนกำหนด 100% บริหารความเสี่ยงล่วงหน้าหากคาดว่างานจะเลท การนัดหมายต่างๆ ไม่เคยพลาด',
+      'ส่งงานตรงเวลามากกว่า 90% มาประชุมตรงเวลา หากจะเลทจะแจ้งผู้เกี่ยวข้องล่วงหน้าเสมอ',
+      'ส่งงานตรงเวลาเป็นส่วนใหญ่ แต่อาจมีล่าช้าบ้างในบางงานที่โหลด แต่ไม่สร้างความเสียหายร้ายแรง',
+      'ส่งงานเลทบ่อยครั้ง ต้องให้หัวหน้างานติดตามทวงถาม มาสายในการประชุมบางครั้ง',
+      'ทำงานล่าช้าเป็นประจำจนส่งผลกระทบต่อ Timeline ของทีม และไม่มีการแจ้งเตือนล่วงหน้า',
+    ]},
+  { key:'integrity', no:2,
+    name:'ความซื่อสัตย์ต่อวิชาชีพ ความปลอดภัย และความโปร่งใส',
+    question:'ท่านปฏิบัติงานด้วยความโปร่งใสตรงไปตรงมา และรักษาข้อมูลสำคัญหรือเอกสารลับของบริษัท/บุคคลอย่างไร?',
+    options:[
+      'ปฏิบัติงานโปร่งใส ตรวจสอบได้ 100% ปกป้องข้อมูลความลับและเอกสารสำคัญอย่างรัดกุมสูงสุด และกล้าตักเตือนเมื่อเห็นสิ่งไม่ถูกต้อง',
+      'รักษาความลับขององค์กรและข้อมูลบุคคลได้อย่างดีเยี่ยม ปฏิบัติตามจรรยาบรรณอย่างเคร่งครัด',
+      'ทำงานด้วยความซื่อสัตย์ตามมาตรฐานทั่วไป ไม่มีเจตนาปกปิดข้อมูลความผิดพลาด',
+      'เคยละเลยการรักษาความลับบ้าง หรือรายงานข้อมูลไม่ตรงกับความจริงบางส่วน',
+      'นำข้อมูลภายในหรือความลับไปเปิดเผย หรือมีพฤติกรรมทุจริต/ส่อเจตนาไม่โปร่งใส',
+    ]},
+  { key:'accountability', no:3,
+    name:'การแสดงออกถึงความรับผิดชอบและความเป็นเจ้าของผลงานของตน',
+    question:'ท่านแสดงออกถึงความรับผิดชอบและความเป็นเจ้าของผลงานของตนอย่างไร?',
+    options:[
+      'เมื่อเกิดปัญหา กล้ายืดอกรับผิดชอบทันที พร้อมนำเสนอแนวทางแก้ไขและแผนป้องกันระยะยาว',
+      'ยอมรับความผิดพลาดของตนอย่างตรงไปตรงมา และกระตือรือร้นแก้ไขให้เสร็จโดยเร็ว',
+      'ยอมรับความผิดพลาดเมื่อมีการตรวจสอบพบ และยินดีแก้ไขงานตามที่หัวหน้าแนะนำ',
+      'อิดออดเมื่อทำผิด พยายามหาข้ออ้างปัดความรับผิดชอบ หรือแก้ไขงานแบบขอไปที',
+      'ปฏิเสธความรับผิดชอบอย่างสิ้นเชิง โยนความผิดให้ผู้อื่น หรือปกปิดความผิดจนเรื่องลุกลาม',
+    ]},
+  { key:'proactive', no:4,
+    name:'การเป็นผู้กำหนดเชิงรุกและแก้ไขปัญหาทันที',
+    question:'เมื่อเผชิญกับอุปสรรคหรือสถานการณ์เปลี่ยนแปลงกะทันหัน ท่านมีวิธีจัดการอย่างไร?',
+    options:[
+      'เมื่อเกิดปัญหา เข้าควบคุมสถานการณ์ทันที พร้อมเสนอทางเลือกแก้ไข A, B, C ที่คิดมาอย่างรอบด้านให้หัวหน้าเลือก',
+      'ไม่รอช้าเมื่อเจอปัญหา เร่งหาข้อมูลที่เกี่ยวข้องและลงมือจัดการในส่วนที่ตนเองทำได้ทันที',
+      'แจ้งปัญหาให้หัวหน้าทราบทันที แต่อาจยังเฝ้ารอแนวทางหรือคำสั่งก่อนลงมือ',
+      'รับรู้ปัญหาแต่ปล่อยไว้เฉยๆ จนกว่าหัวหน้าจะสั่งการ หรือมักโทษว่าปัญหาเกิดจากแผนกอื่น',
+      'ปล่อยให้ปัญหากระทบจนงานพัง และมักคิดว่า "ไม่ใช่หน้าที่ของฉัน"',
+    ]},
+  { key:'planning', no:5,
+    name:'การทำงานอย่างมีเป้าหมายชัดเจน',
+    question:'ท่านมีการวางแผนและกำหนดเป้าหมายในการทำงานอย่างไร?',
+    options:[
+      'มีการวางแผนงานระยะยาว ยึดโยงเป้าหมายโครงการกับเป้าหมายใหญ่ของบริษัท และสามารถอธิบายให้ทีมเห็นภาพความสำเร็จเดียวกันได้',
+      'มีการวางแผนงานประจำสัปดาห์/เดือนล่วงหน้าอย่างเป็นระบบ รู้ว่าผลลัพธ์สุดท้ายของงานที่ทำคืออะไร',
+      'รู้หน้าที่และเป้าหมายงานในแต่ละวัน แต่อาจยังไม่ได้วางแผนล่วงหน้าระยะยาว ทำงานตาม Task ที่รับมอบหมายได้ดี',
+      'ทำงานไปวันๆ ไม่มีแผนชัดเจน ต้องกลับมาแก้ไขบ่อยเพราะเข้าใจผลลัพธ์ไม่ตรงกับหัวหน้า',
+      'ไม่มีเป้าหมายหรือแผนงานเลย ทำงานสะเปะสะปะ ไม่เข้าใจว่างานที่ทำส่งผลอย่างไรต่อภาพรวม',
+    ]},
+  { key:'time_mgmt', no:6,
+    name:'การบริหารเวลาและจัดลำดับความสำคัญ',
+    question:'เมื่อต้องจัดการงานหลายอย่างพร้อมกัน ท่านมีวิธีจัดการเพื่อให้ผลลัพธ์ที่ดีที่สุดอย่างไร?',
+    options:[
+      'แยกแยะงาน "สำคัญ" และ "เร่งด่วน" ได้เด็ดขาด ใช้เวลาส่วนใหญ่กับงานเชิงกลยุทธ์ ลดงานซ้ำซากด้วยการวางระบบ',
+      'บริหารเวลาได้ดี ทำงาน High Impact เสร็จตามกำหนด และปฏิเสธ/ส่งต่องานที่ไม่จำเป็นได้เหมาะสม',
+      'ทำงานสำคัญเสร็จทันเวลา แต่อาจเสียเวลากับการวิ่งไล่แก้งานด่วนหน้างานอยู่บ้าง',
+      'มักจมกับงานเล็กๆ จุกจิก ทำให้งานสำคัญไม่ทันกำหนดบ่อยครั้ง',
+      'รู้สึกยุ่งตลอดเวลาแต่ไม่รู้ว่าทำอะไรสำเร็จเป็นชิ้นเป็นอันบ้าง',
+    ]},
+  { key:'win_win', no:7,
+    name:'การประสานประโยชน์และหาข้อตกลงร่วมกัน',
+    question:'เมื่อเกิดความเห็นไม่ตรงกันระหว่างทีมงาน หรือแผนกต่างๆ ท่านมีวิธีจัดการอย่างไร?',
+    options:[
+      'เป็นตัวกลางไกล่เกลี่ยผลประโยชน์ระหว่างทีมได้อย่างยอดเยี่ยม สร้างข้อตกลงที่ทุกฝ่ายพึงพอใจและร่วมมือระยะยาว',
+      'ในการเจรจา จะพยายามหาทางออกที่ตอบโจทย์เป้าหมายของตนเองและรักษาผลประโยชน์ของอีกฝ่ายเสมอ',
+      'เน้นให้งานสำเร็จตามเป้าหมายเป็นหลัก บนพื้นฐานความถูกต้องและไม่ได้ไปเอาเปรียบใคร',
+      'มุ่งให้ได้ข้อสรุปตามใจตนเองเป็นหลัก บางครั้งสร้างความอึดอัดให้เพื่อนร่วมงาน',
+      'คิดแบบ Win-Lose มองแผนกอื่นเป็นคู่แข่ง เอาประโยชน์เข้าตัวเองโดยไม่สนใจภาพรวม',
+    ]},
+  { key:'communication', no:8,
+    name:'การสื่อสารที่มีประสิทธิภาพ',
+    question:'ท่านมีวิธีสื่อสารและส่งต่อข้อมูล (การพูดเสนอ พูด พิมพ์ LINE, อีเมล์, รายงาน, จดหมาย) อย่างไรให้มีประสิทธิภาพ?',
+    options:[
+      'สื่อสารเรื่องต่างๆ ให้เข้าใจง่ายได้ดีเยี่ยม เลือกช่องทางและจังหวะเวลาได้ตรงจุด ทวนสอบความเข้าใจกับผู้รับสาร 100%',
+      'สื่อสารได้ตรงประเด็น กระชับ บันทึกสรุปการคุยงานเป็นลายลักษณ์อักษร เพื่อใช้อ้างอิงและกันลืมเกือบทุกครั้ง',
+      'สื่อสารงานได้เข้าใจตามมาตรฐานทั่วไปในสถานการณ์ปกติ แต่อาจมีบางครั้งที่รีบร้อนจนลืมทวนสอบ',
+      'สื่อสารคลุมเครือ ข้อมูลไม่ครบถ้วน ทำให้ทีมงานเข้าใจคลาดเคลื่อนจนต้องกลับมาแก้งาน',
+      'ไม่สื่อสารข้อมูลสำคัญ หรือส่งต่อข้อมูลผิดพลาดอย่างร้ายแรงจนเกิดความเสียหายหน้างาน',
+    ]},
+  { key:'teamwork', no:9,
+    name:'การทำงานร่วมกันข้ามสายงานเพื่อผลลัพธ์ที่ดีกว่า',
+    question:'ท่านทำงานร่วมกับผู้อื่นหรือประสานงานข้ามแผนกอย่างไร เพื่อให้ได้ผลลัพธ์ที่ดีที่สุด?',
+    options:[
+      'ดึงจุดเด่นและทักษะที่แตกต่างของคนในทีมมารวมกันจนสร้างนวัตกรรม โซลูชันใหม่ หรือประหยัดต้นทุนให้บริษัท',
+      'ทำงานข้ามสายงาน (Cross-functional) ได้ราบรื่น ยินดีเปิดรับความต่างและหาจุดร่วมเพื่อรวมพลังทำงานให้สำเร็จ',
+      'ทำงานร่วมกับคนอื่นหรือแผนกอื่นได้ตามหน้าที่ที่กำหนดไว้ ไม่ได้สร้างความขัดแย้ง',
+      'ค่อนข้างแยกตัว ชอบทำงานเฉพาะในกลุ่มตนเอง ไม่อยากข้ามสายงานเพราะรู้สึกวุ่นวาย',
+      'ปฏิเสธการทำงานร่วมกับคนที่คิดไม่เหมือนกัน ชอบฉายเดี่ยว ต่อต้านทักษะสายงานอื่น',
+    ]},
+  { key:'learning', no:10,
+    name:'การพัฒนาตนเองอย่างต่อเนื่อง',
+    question:'ในรอบ 6 เดือนที่ผ่านมา ท่านมีการพัฒนาทักษะและเรียนรู้สิ่งใหม่ๆ อย่างไร?',
+    options:[
+      'ขวนขวายเรียนรู้เทคโนโลยีใหม่/ทักษะใหม่ตลอดเวลา (เช่น AI, Smart Solutions, Tools ต่างๆ , ฟัง Podcast) และนำมาปรับใช้จนงานเร็วและดีขึ้นอย่างเห็นได้ชัด',
+      'ชอบเรียนรู้สิ่งใหม่ๆ พัฒนาทักษะอยู่เสมอ ยินดีรับฟังคำติชมจากหัวหน้าและเพื่อนร่วมงานเพื่อนำมาปรับปรุงตัวโดยไม่คิดมาก',
+      'เข้าร่วมการอบรมที่บริษัทจัดให้ตามหน้าที่ ยอมรับคำวิจารณ์ได้ แต่อาจยังไม่ได้ขวนขวายหาความรู้ภายนอกเพิ่มเติมด้วยตนเอง',
+      'ทำงานด้วยวิธีเดิมๆ ไม่ค่อยเปิดรับเทคโนโลยีใหม่ และมักรู้สึกเสียหน้าเมื่อได้รับฟีดแบ็กเชิงลบ',
+      'ต่อต้านการเรียนรู้ ปฏิเสธการใช้เครื่องมือหรือเทคโนโลยีใหม่ๆ ดึงดันจะทำแบบเดิม แม้จะล้าหลัง',
+    ]},
+];
+
+// state สำหรับ Individual Form multi-step
+let individualFormData = {};
+let individualFormStep = 1;
+
 // ========== Admin Form — ส่วนที่ 1: Position Competencies (10 หัวข้อ) ==========
 const ADMIN_COMPETENCY_LIST = [
   { key:'doc_mgmt', no:1, name:'การบริหารจัดการเอกสารและระบบข้อมูล', eng:'Document & Data Management',
@@ -103,6 +211,10 @@ const ADMIN_TOTAL_STEPS = 4;
 let adminMgrFormStep = 1;
 const ADMIN_MGR_TOTAL_STEPS = 4;
 let adminMgrFormData = {};
+
+// state สำหรับ Individual Mgr Form
+let individualMgrFormStep = 1;
+let individualMgrFormData = {};
 
 // ========== Grade System (ใช้กับ Staff/Senior) ==========
 const GRADE_LIST = [
@@ -385,6 +497,9 @@ async function handleLogin(e) {
   try {
     const user = await apiGet({ action:'login', username, password });
     if (!user || !user.id) throw new Error('invalid');
+    // merge competencies จาก REAL_EMPLOYEES เข้า currentUser (ไม่ถูกเก็บใน Sheets)
+    const localEmp = REAL_EMPLOYEES.find(r => sameId(r.id, user.id));
+    if (localEmp && localEmp.competencies) user.competencies = localEmp.competencies;
     currentUser = user;
     sessionStorage.setItem('apex_user', JSON.stringify(user));
     enterApp();
@@ -1046,6 +1161,12 @@ function renderSelfEvalForm() {
   } else if (isAdminType(posType)) {
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Admin Form)';
     renderAdminSelfEvalLayout(layout, currentUser.id, false, 1);
+  } else if (currentUser.competencies && currentUser.competencies.length > 0) {
+    // Individual Form — มี Competency รายบุคคล
+    document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — 4 ส่วน (100 คะแนน)';
+    individualFormData = {};
+    individualFormStep = 1;
+    renderIndividualSelfEvalLayout(layout, currentUser.id, false);
   } else {
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — ส่วนที่ 1–3';
     renderStaffSeniorSelfEvalLayout(layout, currentUser.id, false);
@@ -1453,6 +1574,260 @@ async function submitSelfEval() {
 }
 
 // ========== Admin Self-Eval Form (Multi-step) ==========
+// ========== Individual Self-Eval Form (รายบุคคล — มี competencies ในข้อมูลพนักงาน) ==========
+
+function renderIndividualSelfEvalLayout(container, empId, readOnly) {
+  const emp = getMockUsers().find(u => sameId(u.id, empId));
+  if (!emp || !emp.competencies) return;
+  const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  if (existing && existing.individual_data) {
+    Object.assign(individualFormData, existing.individual_data);
+  }
+  renderIndividualStep(container, empId, readOnly, emp.competencies);
+}
+
+function renderIndividualStep(container, empId, readOnly, competencies) {
+  const step = individualFormStep;
+  const stepTitles = [
+    'ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน (Position Competencies) 25 คะแนน',
+    'ส่วนที่ 2 — พฤติกรรมหลัก (Core Behaviors) 25 คะแนน',
+    'ส่วนที่ 3 — ภารกิจ / OKR 25 คะแนน',
+    'ส่วนที่ 4 — ทบทวนตนเองและการพัฒนา 25 คะแนน',
+  ];
+
+  const progressHTML = `
+    <div class="admin-form-progress">
+      ${[1,2,3,4].map(i => `
+        <div class="admin-step-item ${i===step?'active':i<step?'done':''}">
+          <div class="admin-step-circle">${i<step?'✓':i}</div>
+          <div class="admin-step-label">ส่วนที่ ${i}</div>
+        </div>
+        ${i<4?'<div class="admin-step-line '+(i<step?'done':'')+'"></div>':''}
+      `).join('')}
+    </div>
+    <h3 class="admin-step-title">${stepTitles[step-1]}</h3>
+  `;
+
+  let bodyHTML = '';
+  if (step === 1) bodyHTML = renderIndividualStep1(competencies, readOnly);
+  else if (step === 2) bodyHTML = renderIndividualStep2(readOnly);
+  else if (step === 3) bodyHTML = renderIndividualStep3(readOnly);
+  else if (step === 4) bodyHTML = renderIndividualStep4(readOnly);
+
+  const backBtn   = step > 1 ? `<button class="btn-outline" onclick="individualFormNav(${step-1},'${empId}',${readOnly})">← ย้อนกลับ</button>` : '';
+  const nextBtn   = step < 4 ? `<button class="btn-primary" onclick="individualFormNav(${step+1},'${empId}',${readOnly})">ถัดไป →</button>` : '';
+  const submitBtn = step === 4 && !readOnly ? `<button class="btn-primary" onclick="submitIndividualSelfEval('${empId}')">ส่งแบบประเมิน</button>` : '';
+
+  container.innerHTML = `
+    <div class="form-card">
+      ${progressHTML}
+      <div class="admin-step-body">${bodyHTML}</div>
+      <div class="form-actions" style="justify-content:space-between;margin-top:24px">
+        <div>${backBtn}</div>
+        <div style="display:flex;gap:12px">${nextBtn}${submitBtn}</div>
+      </div>
+    </div>
+  `;
+}
+
+function individualFormNav(toStep, empId, readOnly) {
+  saveIndividualStepData(individualFormStep);
+  individualFormStep = toStep;
+  const emp = getMockUsers().find(u => sameId(u.id, empId));
+  const container = document.getElementById('self-eval-layout');
+  renderIndividualStep(container, empId, readOnly, emp ? emp.competencies : []);
+}
+
+function saveIndividualStepData(step) {
+  if (step === 1) {
+    // บันทึก Competency ส่วนที่ 1
+    document.querySelectorAll('.individual-comp-radio').forEach(input => {
+      if (input.checked) individualFormData[input.name] = parseInt(input.value);
+    });
+    document.querySelectorAll('.individual-comp-evidence').forEach(ta => {
+      if (ta.id) individualFormData[ta.id] = ta.value;
+    });
+  } else if (step === 2) {
+    // บันทึก Core Behaviors ส่วนที่ 2
+    INDIVIDUAL_BEHAVIOR_LIST.forEach(b => {
+      const checked = document.querySelector(`input[name="ibeh_${b.key}"]:checked`);
+      if (checked) individualFormData[`ibeh_${b.key}`] = parseInt(checked.value);
+      const ev = document.getElementById(`ibeh_ev_${b.key}`);
+      if (ev) individualFormData[`ibeh_ev_${b.key}`] = ev.value;
+    });
+  } else if (step === 3) {
+    // บันทึก OKR ส่วนที่ 3
+    [1,2,3].forEach(i => {
+      ['objective','kr1','kr2','kr3','actual1','actual2','actual3'].forEach(f => {
+        const el = document.getElementById(`okr${i}_${f}`);
+        if (el) individualFormData[`okr${i}_${f}`] = el.value;
+      });
+    });
+  } else if (step === 4) {
+    // บันทึก Self-Review ส่วนที่ 4
+    ['strengths','dev_needs','goals','support'].forEach(f => {
+      const el = document.getElementById(`ireview_${f}`);
+      if (el) individualFormData[`ireview_${f}`] = el.value;
+    });
+  }
+}
+
+function renderIndividualStep1(competencies, readOnly) {
+  // ส่วนที่ 1 — Position Competencies เฉพาะคน
+  return competencies.map(c => `
+    <div class="admin-competency-block">
+      <div class="admin-comp-header">
+        <span class="admin-comp-no">${c.no}</span>
+        <div class="admin-comp-name">${c.name}</div>
+      </div>
+      <div class="admin-comp-question">${c.question}</div>
+      <div class="admin-radio-group">
+        ${c.options.map((opt, idx) => {
+          const score = 5 - idx;
+          const saved = individualFormData[`icomp_${c.key}`];
+          const checked = saved === score ? 'checked' : '';
+          const disabled = readOnly ? 'disabled' : '';
+          return `
+            <label class="admin-radio-label ${saved===score?'admin-radio-selected':''}">
+              <input type="radio" name="icomp_${c.key}" value="${score}" ${checked} ${disabled} class="individual-comp-radio"
+                onchange="this.closest('.admin-radio-group').querySelectorAll('.admin-radio-label').forEach(l=>l.classList.remove('admin-radio-selected'));this.closest('.admin-radio-label').classList.add('admin-radio-selected')">
+              <span class="admin-radio-score"></span>
+              <span class="admin-radio-text">${opt}</span>
+            </label>
+          `;
+        }).join('')}
+      </div>
+      <div class="admin-evidence-wrap">
+        <label class="field-label">ตัวอย่างเหตุการณ์จริง / ผลงานที่จับต้องได้ในรอบ 6 เดือน (โปรดระบุ)</label>
+        <textarea id="icomp_ev_${c.key}" class="field-textarea individual-comp-evidence" rows="2" placeholder="ระบุตัวอย่างเหตุการณ์จริง..." ${readOnly?'readonly':''}>${individualFormData[`icomp_ev_${c.key}`]||''}</textarea>
+      </div>
+    </div>
+  `).join('<hr class="admin-divider">');
+}
+
+function renderIndividualStep2(readOnly) {
+  // ส่วนที่ 2 — Core Behaviors มาตรฐาน (เหมือนกันทุกคน)
+  const groups = [
+    { label:'หมวดที่ 1: ด้านวินัยแห่งตน ความซื่อสัตย์สุจริต และความรับผิดชอบต่อหน้าที่', items: INDIVIDUAL_BEHAVIOR_LIST.slice(0,3) },
+    { label:'หมวดที่ 2: ลักษณะนิสัยของการเป็นผู้มีประสิทธิผลสูง', items: INDIVIDUAL_BEHAVIOR_LIST.slice(3) },
+  ];
+  return groups.map(g => `
+    <div class="admin-group-header">${g.label}</div>
+    ${g.items.map(b => `
+      <div class="admin-competency-block">
+        <div class="admin-comp-header">
+          <span class="admin-comp-no">${b.no}</span>
+          <div class="admin-comp-name">${b.name}</div>
+        </div>
+        <div class="admin-comp-question">${b.question}</div>
+        <div class="admin-radio-group">
+          ${b.options.map((opt, idx) => {
+            const score = 5 - idx;
+            const saved = individualFormData[`ibeh_${b.key}`];
+            const checked = saved === score ? 'checked' : '';
+            const disabled = readOnly ? 'disabled' : '';
+            return `
+              <label class="admin-radio-label ${saved===score?'admin-radio-selected':''}">
+                <input type="radio" name="ibeh_${b.key}" value="${score}" ${checked} ${disabled}
+                  onchange="this.closest('.admin-radio-group').querySelectorAll('.admin-radio-label').forEach(l=>l.classList.remove('admin-radio-selected'));this.closest('.admin-radio-label').classList.add('admin-radio-selected')">
+                <span class="admin-radio-score"></span>
+                <span class="admin-radio-text">${opt}</span>
+              </label>
+            `;
+          }).join('')}
+        </div>
+        <div class="admin-evidence-wrap">
+          <label class="field-label">ตัวอย่างเหตุการณ์จริง / ผลงานที่จับต้องได้ในรอบ 6 เดือน (โปรดระบุ)</label>
+          <textarea id="ibeh_ev_${b.key}" class="field-textarea" rows="2" placeholder="ระบุตัวอย่างเหตุการณ์จริง..." ${readOnly?'readonly':''}>${individualFormData[`ibeh_ev_${b.key}`]||''}</textarea>
+        </div>
+      </div>
+    `).join('<hr class="admin-divider">')}
+  `).join('');
+}
+
+function renderIndividualStep3(readOnly) {
+  // ส่วนที่ 3 — OKR 3 ภารกิจ × KR1/KR2/KR3
+  return [1,2,3].map(i => `
+    <div class="admin-mission-block">
+      <div class="admin-comp-header">
+        <span class="admin-comp-no">${i}</span>
+        <div class="admin-comp-name">ภารกิจที่ ${i} (Objective)</div>
+      </div>
+      <textarea id="okr${i}_objective" class="field-textarea" rows="2"
+        placeholder="ระบุภารกิจหลักของตำแหน่ง (เรื่องที่ต้องทำในหน้าที่)..." ${readOnly?'readonly':''}>${individualFormData[`okr${i}_objective`]||''}</textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div style="font-weight:600;font-size:13px;color:var(--text-2);grid-column:1/-1;padding-bottom:4px">เป้าหมายที่ตั้งไว้ (Key Result) → ผลลัพธ์จริง (Actual)</div>
+        ${['kr1','kr2','kr3'].map((kr,ki) => `
+          <div class="form-field">
+            <label class="field-label">KR${ki+1} — เป้าหมาย</label>
+            <textarea id="okr${i}_${kr}" class="field-textarea" rows="2"
+              placeholder="ระบุ Key Result ${ki+1}..." ${readOnly?'readonly':''}>${individualFormData[`okr${i}_${kr}`]||''}</textarea>
+          </div>
+          <div class="form-field">
+            <label class="field-label">KR${ki+1} — ผลลัพธ์จริง (Actual)</label>
+            <textarea id="okr${i}_actual${ki+1}" class="field-textarea" rows="2"
+              placeholder="ระบุผลลัพธ์ที่ทำได้จริง..." ${readOnly?'readonly':''}>${individualFormData[`okr${i}_actual${ki+1}`]||''}</textarea>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('<hr class="admin-divider">');
+}
+
+function renderIndividualStep4(readOnly) {
+  // ส่วนที่ 4 — Self-Review
+  const fields = [
+    { key:'strengths', label:'1. จุดแข็งหรือสิ่งที่เป็นความภาคภูมิใจของท่าน', hint:'ลองนึกถึงคำชมที่เคยได้รับจากหัวหน้า เพื่อนร่วมงาน หรือปัญหายากๆ ที่แก้ได้สำเร็จ' },
+    { key:'dev_needs', label:'2. โอกาสในการพัฒนาตนเอง', hint:'ไม่ใช่แค่บอกข้อเสียของตัวเอง แต่บอกว่า "ถ้าฉันเก่งเรื่อง...นี้เพิ่มขึ้น งานของทีมจะดีกว่านี้แน่นอน"' },
+    { key:'goals', label:'3. เป้าหมายและสิ่งใหม่ที่ตั้งใจจะทำให้สำเร็จใน 6 เดือนข้างหน้า', hint:'ลองใช้หลัก SMART Goal (จับต้องได้ มีตัวเลข หรือมีระยะเวลาที่ชัดเจน)' },
+    { key:'support', label:'4. ข้อเสนอแนะเพิ่มเติมจากหัวหน้างาน', hint:'หัวหน้างานให้แนวทางการสนับสนุน เช่น การส่งเข้าคอร์สฝึกอบรม, การ Coaching รายบุคคล หรือการเปิดโอกาสให้ทำงานใหม่ๆ' },
+  ];
+  return fields.map(f => `
+    <div class="admin-review-block">
+      <label class="field-label" style="font-weight:600;font-size:14px">${f.label}</label>
+      <div class="admin-hint">${f.hint}</div>
+      <textarea id="ireview_${f.key}" class="field-textarea" rows="4" placeholder="กรอกรายละเอียด..." ${readOnly?'readonly':''}>${individualFormData[`ireview_${f.key}`]||''}</textarea>
+    </div>
+  `).join('');
+}
+
+async function submitIndividualSelfEval(empId) {
+  saveIndividualStepData(individualFormStep);
+
+  // ตรวจสอบว่ากรอกครบไหม
+  const emp = getMockUsers().find(u => sameId(u.id, empId));
+  const comps = emp ? emp.competencies : [];
+  const missing1 = comps.filter(c => !individualFormData[`icomp_${c.key}`]).length;
+  const missing2 = INDIVIDUAL_BEHAVIOR_LIST.filter(b => !individualFormData[`ibeh_${b.key}`]).length;
+  if (missing1 + missing2 > 0) {
+    showToast(`กรุณากรอกให้ครบ — ส่วนที่ 1 ขาด ${missing1} ข้อ, ส่วนที่ 2 ขาด ${missing2} ข้อ`, 'error');
+    return;
+  }
+
+  const payload = {
+    action:      'submitSelfEval',
+    employee_id: empId || currentUser.id,
+    form_type:   'individual',
+    individual_data: { ...individualFormData },
+    year:        getCurrentPeriod().year,
+    quarter:     getCurrentPeriod().quarter,
+  };
+
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    await loadAllData();
+    individualFormData = {};
+    showToast('ส่งแบบประเมินสำเร็จ', 'success');
+    goBack();
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  } finally {
+    showLoading(false);
+  }
+}
+
+// ========== Admin Self-Eval Form ==========
 function renderAdminSelfEvalLayout(container, empId, readOnly, step) {
   adminFormStep = step || 1;
   const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId));
@@ -2070,14 +2445,374 @@ function renderMgrEvalForm() {
   const layout  = document.getElementById('mgr-eval-layout');
   const posType = emp.position_type || 'staff';
 
+  // หาข้อมูลพนักงานจาก REAL_EMPLOYEES เพื่อเช็ค competencies
+  const realEmp = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
+  const hasIndividual = realEmp && realEmp.competencies && realEmp.competencies.length > 0;
+
   if (isManagerType(posType)) {
     renderOldMgrEvalLayout(layout, empId);
   } else if (isAdminType(posType)) {
     adminMgrFormStep = 1;
     adminMgrFormData = {};
     renderAdminMgrStep(layout, empId);
+  } else if (hasIndividual) {
+    individualMgrFormStep = 1;
+    individualMgrFormData = {};
+    renderIndividualMgrStep(layout, empId, realEmp.competencies);
   } else {
     renderStaffSeniorMgrEvalLayout(layout, empId);
+  }
+}
+
+// ========== Individual Manager Eval Form ==========
+
+function renderIndividualMgrStep(container, empId, competencies) {
+  const step = individualMgrFormStep;
+  const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const selfData = selfEval?.individual_data || {};
+
+  const stepTitles = [
+    'ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน (Position Competencies) 25 คะแนน',
+    'ส่วนที่ 2 — พฤติกรรมหลัก (Core Behaviors) 25 คะแนน',
+    'ส่วนที่ 3 — ภารกิจ / OKR 25 คะแนน',
+    'ส่วนที่ 4 — ทบทวนตนเอง + สรุปผล 25 คะแนน',
+  ];
+
+  const progressHTML = `
+    <div class="admin-form-progress">
+      ${[1,2,3,4].map(i => `
+        <div class="admin-step-item ${i===step?'active':i<step?'done':''}">
+          <div class="admin-step-circle">${i<step?'✓':i}</div>
+          <div class="admin-step-label">ส่วนที่ ${i}</div>
+        </div>
+        ${i<4?'<div class="admin-step-line '+(i<step?'done':'')+'"></div>':''}
+      `).join('')}
+    </div>
+    <h3 class="admin-step-title">${stepTitles[step-1]}</h3>
+  `;
+
+  let bodyHTML = '';
+  if (step === 1) bodyHTML = renderIndividualMgrStep1(empId, selfData, competencies);
+  else if (step === 2) bodyHTML = renderIndividualMgrStep2(empId, selfData);
+  else if (step === 3) bodyHTML = renderIndividualMgrStep3(empId, selfData);
+  else if (step === 4) bodyHTML = renderIndividualMgrStep4(empId, selfData);
+
+  const backBtn   = step > 1 ? `<button class="btn-outline" onclick="individualMgrFormNav(${step-1},'${empId}')">← ย้อนกลับ</button>` : '';
+  const nextBtn   = step < 4 ? `<button class="btn-primary" onclick="individualMgrFormNav(${step+1},'${empId}')">ถัดไป →</button>` : '';
+  const submitBtn = step === 4 ? `<button class="btn-primary" onclick="submitIndividualMgrEval('${empId}')">บันทึกการประเมิน</button>` : '';
+
+  container.innerHTML = `
+    <div class="form-card">
+      ${progressHTML}
+      <div class="admin-step-body">${bodyHTML}</div>
+      <div class="form-actions" style="justify-content:space-between;margin-top:24px">
+        <div>${backBtn}</div>
+        <div style="display:flex;gap:12px">${nextBtn}${submitBtn}</div>
+      </div>
+    </div>
+  `;
+}
+
+function individualMgrFormNav(toStep, empId) {
+  saveIndividualMgrStepData(individualMgrFormStep);
+  individualMgrFormStep = toStep;
+  const realEmp = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
+  const container = document.getElementById('mgr-eval-layout');
+  renderIndividualMgrStep(container, empId, realEmp ? realEmp.competencies : []);
+}
+
+function saveIndividualMgrStepData(step) {
+  if (step === 1) {
+    const el = document.getElementById('imgrScore1');
+    if (el) individualMgrFormData.score1 = parseFloat(el.value) || 0;
+    const c = document.getElementById('imgrComment1');
+    if (c) individualMgrFormData.comment1 = c.value;
+  } else if (step === 2) {
+    const el = document.getElementById('imgrScore2');
+    if (el) individualMgrFormData.score2 = parseFloat(el.value) || 0;
+    const c = document.getElementById('imgrComment2');
+    if (c) individualMgrFormData.comment2 = c.value;
+  } else if (step === 3) {
+    const el = document.getElementById('imgrScore3');
+    if (el) individualMgrFormData.score3 = parseFloat(el.value) || 0;
+    [1,2,3].forEach(i => {
+      const n = document.getElementById(`imgrOkrNote${i}`);
+      if (n) individualMgrFormData[`okrNote${i}`] = n.value;
+    });
+  } else if (step === 4) {
+    const el = document.getElementById('imgrScore4');
+    if (el) individualMgrFormData.score4 = parseFloat(el.value) || 0;
+    ['review_comment','overall_comment','recommendation','career','dev_plan'].forEach(f => {
+      const e = document.getElementById(`imgr_${f}`);
+      if (e) individualMgrFormData[f] = e.value;
+    });
+  }
+}
+
+function renderIndividualMgrScoreInput(step, savedScore) {
+  // กล่องกรอกคะแนน 0-25 พร้อม indicator
+  return `
+    <div style="background:rgba(224,32,32,0.04);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:16px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px">คะแนนส่วนที่ ${step} (เต็ม 25 คะแนน)</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="number" id="imgrScore${step}" min="0" max="25" step="0.5"
+          value="${savedScore||''}" placeholder="0"
+          style="width:80px;padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-size:18px;font-weight:700;text-align:center;color:var(--primary)"
+          oninput="document.getElementById('imgrScoreBar${step}').style.width=(this.value/25*100)+'%'">
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">/ 25 คะแนน</div>
+          <div style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
+            <div id="imgrScoreBar${step}" style="height:100%;background:var(--primary);border-radius:4px;transition:width 0.3s;width:${savedScore?(savedScore/25*100):0}%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderIndividualMgrStep1(empId, selfData, competencies) {
+  // แสดง competency ที่พนักงานเลือก (read-only) + กรอกคะแนน
+  const compRows = competencies.map(c => {
+    const score = selfData[`icomp_${c.key}`] || 0;
+    const evidence = selfData[`icomp_ev_${c.key}`] || '—';
+    const optLabel = score > 0 ? c.options[5-score] : '—';
+    return `
+      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="font-weight:600;font-size:13px;margin-bottom:4px">${c.no}. ${c.name}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-bottom:4px">พนักงานเลือก: <span style="color:var(--primary);font-weight:600">${optLabel}</span></div>
+        ${evidence !== '—' ? `<div style="font-size:12px;color:var(--text-3)">ตัวอย่างจริง: ${evidence}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
+      ดูคำตอบของพนักงานด้านล่าง แล้วให้คะแนนรวมส่วนที่ 1 (0–25 คะแนน)
+    </div>
+    <div style="max-height:400px;overflow-y:auto;padding-right:4px">${compRows}</div>
+    <div class="form-field" style="margin-top:12px">
+      <label class="field-label">ความเห็น / ข้อเสนอแนะส่วนที่ 1</label>
+      <textarea id="imgrComment1" class="field-textarea" rows="3" placeholder="กรอกความเห็น...">${individualMgrFormData.comment1||''}</textarea>
+    </div>
+    ${renderIndividualMgrScoreInput(1, individualMgrFormData.score1)}
+  `;
+}
+
+function renderIndividualMgrStep2(empId, selfData) {
+  // แสดง Core Behaviors ที่พนักงานเลือก (read-only) + กรอกคะแนน
+  const groups = [
+    { label:'หมวดที่ 1: ด้านวินัยแห่งตน ความซื่อสัตย์สุจริต และความรับผิดชอบต่อหน้าที่', items: INDIVIDUAL_BEHAVIOR_LIST.slice(0,3) },
+    { label:'หมวดที่ 2: ลักษณะนิสัยของการเป็นผู้มีประสิทธิผลสูง', items: INDIVIDUAL_BEHAVIOR_LIST.slice(3) },
+  ];
+  const behRows = groups.map(g => `
+    <div style="font-weight:700;font-size:12px;color:var(--text-2);padding:8px 0 4px">${g.label}</div>
+    ${g.items.map(b => {
+      const score = selfData[`ibeh_${b.key}`] || 0;
+      const evidence = selfData[`ibeh_ev_${b.key}`] || '';
+      const optLabel = score > 0 ? b.options[5-score] : '—';
+      return `
+        <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="font-weight:600;font-size:13px;margin-bottom:4px">${b.no}. ${b.name}</div>
+          <div style="font-size:12px;color:var(--text-2)">พนักงานเลือก: <span style="color:var(--primary);font-weight:600">${optLabel}</span></div>
+          ${evidence ? `<div style="font-size:12px;color:var(--text-3);margin-top:2px">ตัวอย่างจริง: ${evidence}</div>` : ''}
+        </div>
+      `;
+    }).join('')}
+  `).join('');
+
+  return `
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
+      ดูคำตอบของพนักงานด้านล่าง แล้วให้คะแนนรวมส่วนที่ 2 (0–25 คะแนน)
+    </div>
+    <div style="max-height:400px;overflow-y:auto;padding-right:4px">${behRows}</div>
+    <div class="form-field" style="margin-top:12px">
+      <label class="field-label">ความเห็น / ข้อเสนอแนะส่วนที่ 2</label>
+      <textarea id="imgrComment2" class="field-textarea" rows="3" placeholder="กรอกความเห็น...">${individualMgrFormData.comment2||''}</textarea>
+    </div>
+    ${renderIndividualMgrScoreInput(2, individualMgrFormData.score2)}
+  `;
+}
+
+function renderIndividualMgrStep3(empId, selfData) {
+  // แสดง OKR ที่พนักงานกรอก + กรอก Note + คะแนน
+  const okrRows = [1,2,3].map(i => {
+    const obj    = selfData[`okr${i}_objective`] || '—';
+    const kr1    = selfData[`okr${i}_kr1`]       || '—';
+    const kr2    = selfData[`okr${i}_kr2`]       || '—';
+    const kr3    = selfData[`okr${i}_kr3`]       || '—';
+    const act1   = selfData[`okr${i}_actual1`]   || '—';
+    const act2   = selfData[`okr${i}_actual2`]   || '—';
+    const act3   = selfData[`okr${i}_actual3`]   || '—';
+    const note   = individualMgrFormData[`okrNote${i}`] || '';
+    return `
+      <div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:12px">
+        <div style="font-weight:700;font-size:13px;margin-bottom:8px">ภารกิจที่ ${i}: ${obj}</div>
+        <table style="width:100%;font-size:12px;border-collapse:collapse">
+          <thead><tr style="color:var(--text-3)">
+            <th style="text-align:left;padding:4px 0;width:40%">Key Result</th>
+            <th style="text-align:left;padding:4px 8px;width:40%">Actual</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="padding:3px 0">KR1: ${kr1}</td><td style="padding:3px 8px;color:var(--primary)">${act1}</td></tr>
+            <tr><td style="padding:3px 0">KR2: ${kr2}</td><td style="padding:3px 8px;color:var(--primary)">${act2}</td></tr>
+            <tr><td style="padding:3px 0">KR3: ${kr3}</td><td style="padding:3px 8px;color:var(--primary)">${act3}</td></tr>
+          </tbody>
+        </table>
+        <div class="form-field" style="margin-top:8px">
+          <label class="field-label">ข้อเสนอแนะจากหัวหน้า (ภารกิจที่ ${i})</label>
+          <textarea id="imgrOkrNote${i}" class="field-textarea" rows="2" placeholder="กรอกข้อเสนอแนะ...">${note}</textarea>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
+      ดู OKR ของพนักงาน แล้วให้คะแนนรวมส่วนที่ 3 (0–25 คะแนน)
+    </div>
+    ${okrRows}
+    ${renderIndividualMgrScoreInput(3, individualMgrFormData.score3)}
+  `;
+}
+
+function renderIndividualMgrStep4(empId, selfData) {
+  const strengths = selfData['ireview_strengths'] || '—';
+  const devNeeds  = selfData['ireview_dev_needs']  || '—';
+  const goals     = selfData['ireview_goals']      || '—';
+  const support   = selfData['ireview_support']    || '—';
+
+  const s1 = individualMgrFormData.score1 || 0;
+  const s2 = individualMgrFormData.score2 || 0;
+  const s3 = individualMgrFormData.score3 || 0;
+  const s4 = individualMgrFormData.score4 || 0;
+  const total = s1 + s2 + s3 + s4;
+
+  const recOptions = [
+    { value:'merit',    label:'ปรับขึ้นเงินเดือนกรณีพิเศษ (Merit Increase)' },
+    { value:'standard', label:'ปรับขึ้นเงินเดือนตามเกณฑ์มาตรฐาน (Standard Annual Increase)' },
+    { value:'hold',     label:'คงอัตราเงินเดือนเดิม / ชะลอการปรับขึ้น' },
+  ];
+  const careerOptions = [
+    { value:'promote',  label:'เสนอปรับเลื่อนตำแหน่ง (Promotion)' },
+    { value:'enrich',   label:'เสนอปรับขยายขอบเขตความรับผิดชอบ (Job Enrichment)' },
+    { value:'maintain', label:'เสนอให้ปฏิบัติหน้าที่ในตำแหน่งเดิมต่อไป' },
+  ];
+
+  return `
+    <!-- ทบทวนตนเองของพนักงาน -->
+    <div style="background:var(--bg);border-radius:var(--radius);padding:14px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px">ทบทวนตนเองของพนักงาน (อ่านอย่างเดียว)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px">
+        <div><div style="color:var(--text-3);margin-bottom:4px">จุดแข็ง</div><div>${strengths}</div></div>
+        <div><div style="color:var(--text-3);margin-bottom:4px">โอกาสพัฒนา</div><div>${devNeeds}</div></div>
+        <div><div style="color:var(--text-3);margin-bottom:4px">เป้าหมาย 6 เดือน</div><div>${goals}</div></div>
+        <div><div style="color:var(--text-3);margin-bottom:4px">ขอสนับสนุนจากหัวหน้า</div><div>${support}</div></div>
+      </div>
+    </div>
+    <!-- หัวหน้าให้คะแนนส่วนที่ 4 -->
+    <div class="form-field">
+      <label class="field-label">ความเห็น / ข้อเสนอแนะส่วนที่ 4</label>
+      <textarea id="imgr_review_comment" class="field-textarea" rows="3" placeholder="กรอกความเห็น...">${individualMgrFormData.review_comment||''}</textarea>
+    </div>
+    ${renderIndividualMgrScoreInput(4, individualMgrFormData.score4)}
+
+    <!-- สรุปคะแนนรวม -->
+    <div style="margin-top:20px;background:rgba(224,32,32,0.06);border-radius:var(--radius);padding:14px">
+      <div style="font-weight:700;font-size:13px;margin-bottom:10px">สรุปคะแนนรวม (อัปเดตหลังกรอกครบ)</div>
+      <table style="width:100%;font-size:13px;border-collapse:collapse">
+        <tr><td style="padding:4px 0">ส่วนที่ 1 Position Competencies</td><td style="text-align:right;font-weight:600">${s1} / 25</td></tr>
+        <tr><td style="padding:4px 0">ส่วนที่ 2 Core Behaviors</td><td style="text-align:right;font-weight:600">${s2} / 25</td></tr>
+        <tr><td style="padding:4px 0">ส่วนที่ 3 OKR / ภารกิจ</td><td style="text-align:right;font-weight:600">${s3} / 25</td></tr>
+        <tr><td style="padding:4px 0">ส่วนที่ 4 ทบทวนตนเอง</td><td style="text-align:right;font-weight:600">${s4} / 25</td></tr>
+        <tr style="border-top:2px solid var(--primary);font-weight:700;font-size:15px">
+          <td style="padding:8px 0">รวมทั้งหมด</td>
+          <td style="text-align:right;color:var(--primary)">${total} / 100</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- สรุปผลการประเมิน -->
+    <div class="form-field" style="margin-top:16px">
+      <label class="field-label">สรุปความเห็นภาพรวมการปฏิบัติงาน</label>
+      <textarea id="imgr_overall_comment" class="field-textarea" rows="3" placeholder="กรอกสรุปภาพรวม...">${individualMgrFormData.overall_comment||''}</textarea>
+    </div>
+
+    <!-- เสนอปรับเงินเดือน -->
+    <div class="form-field">
+      <label class="field-label">เสนอเพื่อการปรับอัตราตอบแทน</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+        ${recOptions.map(o => `
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="radio" name="imgr_recommendation" value="${o.value}" ${individualMgrFormData.recommendation===o.value?'checked':''}>
+            ${o.label}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- เสนอปรับตำแหน่ง -->
+    <div class="form-field">
+      <label class="field-label">เสนอเพื่อการปรับตำแหน่งงาน / การขยายขอบเขตหน้าที่</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+        ${careerOptions.map(o => `
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+            <input type="radio" name="imgr_career" value="${o.value}" ${individualMgrFormData.career===o.value?'checked':''}>
+            ${o.label}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- แผนพัฒนา -->
+    <div class="form-field">
+      <label class="field-label">แผนการพัฒนาและเตรียมความพร้อม (6 เดือนข้างหน้า)</label>
+      <textarea id="imgr_dev_plan" class="field-textarea" rows="3" placeholder="ระบุแผนพัฒนา...">${individualMgrFormData.dev_plan||''}</textarea>
+    </div>
+  `;
+}
+
+async function submitIndividualMgrEval(empId) {
+  saveIndividualMgrStepData(4);
+
+  // ดึงค่า radio ส่วนที่ 4
+  const rec    = document.querySelector('input[name="imgr_recommendation"]:checked')?.value || '';
+  const career = document.querySelector('input[name="imgr_career"]:checked')?.value || '';
+  individualMgrFormData.recommendation = rec;
+  individualMgrFormData.career = career;
+
+  const s1 = individualMgrFormData.score1 || 0;
+  const s2 = individualMgrFormData.score2 || 0;
+  const s3 = individualMgrFormData.score3 || 0;
+  const s4 = individualMgrFormData.score4 || 0;
+
+  if (s4 === 0) {
+    showToast('กรุณากรอกคะแนนส่วนที่ 4 ก่อนบันทึก', 'error');
+    return;
+  }
+
+  const payload = {
+    action:      'submitManagerEval',
+    manager_id:  currentUser.id,
+    employee_id: empId,
+    form_type:   'individual',
+    overall_grade: '',
+    individual_mgr_data: { ...individualMgrFormData },
+    score_total: s1 + s2 + s3 + s4,
+    year:        getCurrentPeriod().year,
+    quarter:     getCurrentPeriod().quarter,
+  };
+
+  showLoading(true);
+  try {
+    await apiPost(payload);
+    await loadAllData();
+    individualMgrFormData = {};
+    showToast('บันทึกการประเมินสำเร็จ', 'success');
+    goBack();
+  } catch(e) {
+    showToast('เกิดข้อผิดพลาด: ' + e.message, 'error');
+  } finally {
+    showLoading(false);
   }
 }
 
@@ -3512,7 +4247,18 @@ const REAL_EMPLOYEES = [
   {"id":"BNT-029","username":"bnt-029","password":"1234","role":"employee","group":"BNT","name":"นางสาว อรฤดี โสวรรณทิพย์","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"อร"},
   {"id":"BNT-044","username":"bnt-044","password":"1234","role":"manager","group":"BNT","name":"นางสาว ดาลัด ฐิติภาณุเวช","position":"Finance Manager","position_type":"manager","department":"FNS","manager_id":"FMC-001","nickname":"ดา"},
   {"id":"BNT-046","username":"bnt-046","password":"1234","role":"employee","group":"BNT","name":"นาง จำเรียง สุวรรณศร","position":"Maid","position_type":"staff","department":"CAS","manager_id":"BNT-097","nickname":"เล็ก"},
-  {"id":"BNT-049","username":"bnt-049","password":"1234","role":"employee","group":"BNT","name":"นางสาว จินตณัฏฐ์ โชติมั่ง","position":"Senior General Affairs Officer","position_type":"senior","department":"CAS","manager_id":"BNT-097","nickname":"กระแต"},
+  {"id":"BNT-049","username":"bnt-049","password":"1234","role":"employee","group":"BNT","name":"นางสาว จินตณัฏฐ์ โชติมั่ง","position":"Senior General Affairs Officer","position_type":"senior","department":"CAS","manager_id":"BNT-097","nickname":"กระแต","competencies":[
+    {key:'doc_mgmt',no:1,name:'การบริหารจัดการเอกสารและระบบข้อมูล',question:'ท่านมีความถูกต้องและรวดเร็วในการจัดเก็บ คัดแยก และค้นหาเอกสารของสำนักงาน (ทั้งระบบเอกสารจริงและระบบไฟล์ดิจิทัล) อย่างไร?',options:['จัดเก็บหมวดหมู่ระบบสมบูรณ์ มีไฟล์สำรองบนระบบคลาวด์/ดิจิทัล ค้นหาและส่งมอบได้ทันทีภายใน 1-3 นาที ไม่มีประวัติเอกสารสูญหายหรือผิดพลาดเลย','จัดเก็บหมวดหมู่ชัดเจน ค้นหาได้รวดเร็วภายใน 5 นาที เอกสารถูกต้อง เกือบไม่พบข้อผิดพลาดในการจัดเก็บ','จัดเก็บตามมาตรฐานทั่วไป ค้นหาได้ตามเวลาปกติ แต่อาจมีเอกสารสะสมรอจัดเก็บบ้างในช่วงที่งานโหลด','จัดเก็บล่าช้า บ่อยครั้งที่ต้องใช้เวลาค้นหานาน (เกิน 15 นาที) หรือจัดเก็บสลับหมวดหมู่จนต้องเสียเวลารื้อระบบใหม่','เอกสารไม่เป็นระบบ มีกรณีเอกสารสำคัญชำรุดหรือสูญหาย ส่งผลกระทบให้งานของผู้อื่นติดขัด']},
+    {key:'reporting',no:2,name:'การใช้โปรแกรมจัดทำรายงานและสรุปข้อมูลโครงการ',question:'ท่านมีความเชี่ยวชาญในการจัดทำรายงาน สรุปข้อมูล หรือใช้ข้อมูลในการประกอบการตัดสินใจของโครงการ อย่างไร?',options:['เชี่ยวชาญการใช้เครื่องมือสูง (เช่น Excel สูตรซับซ้อน / Pivot Table / VLOOKUP หรือโปรแกรมเฉพาะทาง) สรุปงานได้รวดเร็ว แม่นยำ 100% และนำเสนอข้อมูลได้ให้เข้าใจง่าย','ใช้โปรแกรมในการจัดทำรายงานและคำนวณข้อมูลได้อย่างคล่องแคล่ว ตรวจสอบและแก้ไขข้อมูลได้ด้วยตนเองก่อนส่ง','ใช้โปรแกรมจัดทำรายงานได้และรูปแบบกำหนด แต่อาจต้องใช้เวลาพิเศษหากคำนวณจำนวนมากในช่วงที่ข้อมูลมีปริมาณมาก','ขาดทักษะการใช้เครื่องมือ ต้องส่งงานไปให้ผู้อื่นช่วยทำรายงาน ผลลัพธ์ออกมาไม่ตรงมาตรฐาน ตัวเลขผิด หรือเลทบ่อยครั้ง','ไม่สามารถใช้โปรแกรมในการจัดทำรายงานได้เลย ต้องให้ผู้อื่นทำแทนเสมอ ส่งงานล่าช้าและขาดความน่าเชื่อถือ']},
+    {key:'coordination',no:3,name:'การประสานงานและการติดตามงาน',question:'ในการประสานงานนัดหมาย จัดประชุม หรือติดต่อกับหน่วยงานภายในและภายนอก ท่านมีการสื่อสารที่ชัดเจนและติดตามผลจนงานสำเร็จอย่างไร?',options:['ประสานงานได้อย่างมีประสิทธิภาพสูงสุด มีการบันทึกข้อตกลง สรุปข้อมูลชัดเจน และติดตามผลเชิงรุกจนงานจบ 100% โดยที่หัวหน้าไม่ต้องตามซ้ำ','สื่อสารข้อมูลครบถ้วน ชัดเจน มีการติดตามงานตามกำหนดเวลา ทำให้การประสานงานราบรื่นและไม่เกิดความเข้าใจผิด','ประสานงานได้ตามหน้าที่ ส่งสารได้ครบ แต่อาจเน้นแค่การส่งต่อข้อมูล โดยไม่ได้ติดตามผลเชิงรุกจนกว่าจะถึงกำหนด','สื่อสารคลาดเคลื่อนบ่อยครั้ง หรือลืมติดตามผล ทำให้งานล่าช้า ต้องให้ผู้เกี่ยวข้องหรือหัวหน้าคอยเตือนบ่อยๆ','ละเลยการประสานงาน สื่อสารผิดพลาดอย่างรุนแรง หรือลืมแจ้งผู้เกี่ยวข้อง จนทำให้งานหรือกิจกรรมของบริษัทเสียหาย']},
+    {key:'attention',no:4,name:'การใส่ใจในรายละเอียดของงาน',question:'ท่านมีความรอบคอบในการตรวจสอบความถูกต้องของข้อมูล ตัวเลข ตัวอักษรในเอกสารต่างๆ ก่อนส่งต่อหรือจัดเก็บอย่างไร?',options:['ตรวจสอบงานอย่างถี่ถ้วน 100% ไม่เคยมีคำผิด ตัวเลขสลับ หรือข้อมูลผิดพลาดหลุดไปถึงหัวหน้าหรือผู้บริหารเลย','มีความรอบคอบสูง ตรวจพบและแก้ไขจุดผิดพลาดได้ด้วยตนเองก่อนส่งงาน มีข้อผิดพลาดหลุดไปน้อยมาก','ทำงานได้ถูกต้องตามมาตรฐานทั่วไป แต่ยังมีข้อผิดพลาดเล็กๆ น้อยๆ หลุดไปให้หัวหน้าต้องทักท้วงอยู่บ้าง','ทำงานเร็วแต่ขาดความรอบคอบ มักส่งงานที่มีข้อมูลผิด ตัวเลขไม่ตรง ทำให้ต้องนำกลับมาแก้ไขบ่อยครั้ง','ทำงานสะเพร่า ไม่เคยตรวจสอบงานก่อนส่ง ส่งผลกระทบต่อการอนุมัติหรือความน่าเชื่อถือ']},
+    {key:'service_mind',no:5,name:'การบริการด้วยใจ (Service Mind)',question:'ท่านแสดงออกถึงความกระตือรือร้น ความสุภาพ และความเต็มใจในการให้บริการและช่วยเหลือผู้มาติดต่อในระดับใด?',options:['ให้บริการด้วยความยิ้มแย้ม สุภาพ กระตือรือร้นเป็นเลิศ ได้รับคำชมจากผู้มาติดต่ออย่างสม่ำเสมอ เป็นที่พึ่งของคนในออฟฟิศได้ทุกเรื่อง','มีจิตสำนึกบริการที่ดี ช่วยเหลือผู้มาติดต่ออย่างเต็มใจและสุภาพเรียบร้อย สามารถจัดการคำขอต่างๆ ได้ราบรื่น','ให้บริการตามหน้าที่และมาตรฐานที่กำหนด พูดจาสุภาพเรียบร้อย แต่อาจไม่ได้แสดงความกระตือรือร้นเป็นพิเศษ','ให้บริการตามอารมณ์ บางครั้งแสดงสีหน้าเหนื่อยล้า ทำให้ผู้มาติดต่อรู้สึกเกรงใจหรืออึดอัด','ปฏิเสธการช่วยเหลือ หรือพูดจาไม่สุภาพกับผู้มาติดต่อ จนได้รับการร้องเรียนเกี่ยวกับพฤติกรรมการบริการ']},
+    {key:'team_support',no:6,name:'การสนับสนุนทีมงาน',question:'ท่านมีการอำนวยความสะดวกต่างๆ ให้แก่บุคลากรในทีมอย่างไร?',options:['ดำเนินการเบิกจ่ายต่างๆ ของทีมงานได้อย่างรวดเร็ว ประสานงานน่าเชื่อถือ รวดเร็ว เป็นที่พึ่งด้านการช่วยดูแลความสะดวกให้ทีมงานได้อย่างยอดเยี่ยม','ตรวจสอบและดำเนินการเรื่องเบิกจ่ายของทีมงานได้อย่างถูกต้อง ครบถ้วน จัดส่งเอกสารชำระตามกำหนด และคอยช่วยเหลือทีมงานในบางครั้ง','ดำเนินการเบิกจ่ายของทีมงานได้ถูกต้องเป็นส่วนใหญ่ แต่อาจมีบางครั้งที่ดำเนินการล่าช้าเพราะขาดทักษะ หรือไม่แน่ใจในขั้นตอน','ขาดการบันทึกรายการเบิกจ่ายที่สม่ำเสมอ บ่อยครั้งที่ทีมงานต้องรอนาน ผลลัพธ์คลาดเคลื่อนบ้าง ส่งผลกระทบต่อความพึงพอใจ','ละเลยการดูแลความต้องการของทีมงาน ส่งผลให้ทีมงานไม่ได้รับการสนับสนุนที่เหมาะสม ไม่สามารถพึ่งพาได้']},
+    {key:'inventory',no:7,name:'การบริหารและดูแลอุปกรณ์เครื่องใช้สำนักงาน',question:'ท่านสามารถควบคุม ดูแล และจัดสรรอุปกรณ์เครื่องใช้สำนักงาน ไม่ให้เกิดปัญหาของขาดคลังหรือของเสื่อมสภาพอย่างไร?',options:['มีระบบบันทึกรับ-จ่าย แม่นยำ 100% ตัวเลขตรงกับของจริงเสมอ มีการวางแผนสั่งซื้อล่วงหน้า ของไม่เคยขาดคลังและไม่เคยมีของหมดอายุ','ดูแลสต็อกได้ดี มีการเช็กยอดเป็นประจำก่อนของหมด สั่งซื้อทันเวลา สินค้าในคลังจัดเป็นระเบียบเรียบร้อย หยิบง่าย','บริหารคลังได้ตามมาตรฐานทั่วไป ของมีเพียงพอใช้งานเป็นส่วนใหญ่ แต่อาจมีบางครั้งที่ของหมดกะทันหันต้องวิ่งซื้อด่วนบ้าง','ขาดการบันทึกสต็อกที่สม่ำเสมอ บ่อยครั้งที่ปล่อยให้ของหมดคลัง หรือสั่งมาเยอะเกินไปจนเสื่อมสภาพคาตู้','คลังอุปกรณ์ไร้ระเบียบ ไม่เคยเช็กยอด และไม่สามารถควบคุมค่าใช้จ่ายในการจัดซื้อได้เลย']},
+    {key:'adaptability',no:8,name:'ความยืดหยุ่นและการเรียนรู้ระบบใหม่',question:'ท่านมีความสามารถในการเรียนรู้เทคโนโลยี เครื่องมือ หรือระบบการทำงานใหม่ๆ ของออฟฟิศ และปรับตัวเข้ากับการเปลี่ยนแปลงได้เร็วระดับใด?',options:['เรียนรู้ไวมาก ปรับตัวเข้ากับระบบใหม่ได้ทันที และสามารถทำคู่มือสรุปหรือช่วยสอนพนักงานคนอื่นเข้าใจระบบได้ด้วย','เปิดรับและเรียนรู้สิ่งใหม่ๆ ได้อย่างรวดเร็ว พยายามฝึกฝนใช้งานด้วยตนเองจนชำนาญ และใช้งานระบบใหม่ได้ถูกต้องตามกำหนด','ปรับตัวและใช้งานระบบใหม่ได้ตามมาตรฐาน แต่อาจต้องใช้เวลาลองผิดลองถูกหรือสอบถามผู้รู้ในช่วงแรกๆ','ค่อนข้างยึดติดกับวิธีทำงานแบบเดิม รู้สึกกังวลกับการเปลี่ยนแปลง ปรับตัวช้า มักหลีกเลี่ยงการใช้ระบบใหม่ถ้าไม่บังคับ','ต่อต้านการเปลี่ยนแปลง ไม่ยอมเรียนรู้ระบบใหม่ และยังคงใช้วิธีเดิมๆ ที่ล้าสมัย ทำให้งานภาพรวมล่าช้า']},
+    {key:'confidentiality',no:9,name:'การรักษาความลับและข้อมูลภายใน',question:'ในฐานะงานที่ต้องสัมผัสเอกสารสำคัญ ท่านมีความรอบคอบในการปกป้องและรักษาความลับของบริษัท/ข้อมูลส่วนบุคคลของพนักงาน ไม่ให้รั่วไหลในระดับใด?',options:['รักษาความลับขั้นสูงสุด ล็อกหน้าจอคอมพิวเตอร์ ทำลายเอกสารที่ไม่ใช้ด้วยเครื่องย่อยสลาย และไม่เคยนำเรื่องภายในไปพูดคุยภายนอกเลย 100%','มีความตระหนักเรื่องความลับสูง จัดเก็บเอกสารสำคัญในตู้ล็อกกุญแจมิดชิด ไม่พูดถึงข้อมูลภายในให้บุคคลที่ไม่เกี่ยวข้องฟัง','รักษาความลับได้ดีตามเกณฑ์ทั่วไป แต่อาจมีบางครั้งที่ลืมคว่ำหน้าเอกสารทิ้งไว้บนโต๊ะหรือลืมล็อกหน้าจอ','ขาดความระมัดระวัง เช่น วางเอกสารสำคัญทิ้งไว้บนเครื่องถ่ายเอกสาร หรือหลุดปากพูดเรื่องภายในในที่สาธารณะ','ปล่อยปละละเลยข้อมูลความลับ นำข้อมูลภายในไปเล่า/แชร์ให้คนนอกหรือแผนกอื่น ส่งผลกระทบต่อความเชื่อมั่นองค์กร']},
+    {key:'accountability2',no:10,name:'ความรับผิดชอบและดูแลความเรียบร้อยของสำนักงาน',question:'ท่านมีความใส่ใจในการดูแลสภาพแวดล้อม ความสะอาด ความปลอดภัย และความพร้อมใช้งานของพื้นที่ส่วนกลางในสำนักงานในระดับใด?',options:['สอดส่องดูแลสำนักงานอย่างเป็นระบบ (มี Check-list) พื้นที่ส่วนกลางพร้อมใช้งานเสมอ ตรวจสอบความปลอดภัยครบถ้วน 100% ก่อนกลับบ้านทุกวัน','มีความรับผิดชอบสูง คอยเดินตรวจความเรียบร้อยเป็นประจำ หากเจอจุดชำรุดจะรีบแจ้งซ่อมทันที และปิดออฟฟิศเรียบร้อยดี','ดูแลความเรียบร้อยตามหน้าที่และตารางเวลาที่กำหนด ออฟฟิศสะอาดและปลอดภัยตามเกณฑ์ทั่วไป','ละเลยการตรวจสอบสภาพแวดล้อม ปล่อยให้เครื่องใช้ในออฟฟิศพังชำรุดหลายวันถึงค่อยแจ้งซ่อม หรือบางครั้งลืมปิดไฟ/แอร์ทิ้งไว้ข้ามคืน','ไม่สนใจดูแลความเรียบร้อยของสำนักงาน ปล่อยให้ออฟฟิศรก ชำรุด หรือละเลยเรื่องความปลอดภัยในการเปิด-ปิดออฟฟิศ']}
+  ]},
   {"id":"BNT-070","username":"bnt-070","password":"1234","role":"employee","group":"BNT","name":"นางสาว สุดารัตน์ วราภรณ์วิมลชัย","position":"Senior Account Officer","position_type":"senior","department":"ACS","manager_id":"BNT-044","nickname":"เจี้ยบ"},
   {"id":"BNT-091","username":"bnt-091","password":"1234","role":"manager","group":"BNT","name":"นางสาว กนกพร เหมรา","position":"Section HR Manager","position_type":"manager","department":"HRS","manager_id":"FMC-001","nickname":"เกด"},
   {"id":"BNT-097","username":"bnt-097","password":"1234","role":"manager","group":"BNT","name":"นางสาว เยาวพา จรูญโสภณสวัสดิ์","position":"General Office Manager","position_type":"manager","department":"CAS","manager_id":"FMC-001","nickname":"ป๋วย"},
@@ -3639,7 +4385,13 @@ function getMockUsers() {
 // บันทึกรายชื่อพนักงานลง localStorage เพื่อให้คงอยู่หลัง refresh
 function persistEmployees() {
   // บันทึกเฉพาะพนักงานจริง (กรอง _ accounts ออก เพราะ getMockUsers จะ merge กลับเอง)
-  const realOnly = allData.employees.filter(e => !String(e.id).startsWith('_'));
+  // รวม competencies จาก REAL_EMPLOYEES กลับเข้าไปด้วย เพราะ allData.employees อาจไม่มี
+  const realOnly = allData.employees
+    .filter(e => !String(e.id).startsWith('_'))
+    .map(e => {
+      const original = REAL_EMPLOYEES.find(r => sameId(r.id, e.id));
+      return original && original.competencies ? { ...e, competencies: original.competencies } : e;
+    });
   localStorage.setItem('mock_employees', JSON.stringify(realOnly));
   sessionStorage.setItem('apex_data', JSON.stringify(allData));
 }
