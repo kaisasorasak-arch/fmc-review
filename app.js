@@ -2527,11 +2527,19 @@ function saveIndividualMgrStepData(step) {
     if (el) individualMgrFormData.score1 = parseFloat(el.value) || 0;
     const c = document.getElementById('imgrComment1');
     if (c) individualMgrFormData.comment1 = c.value;
+    // บันทึก dropdown หัวหน้าเลือกสำหรับแต่ละ competency
+    document.querySelectorAll('select[name^="mgr_icomp_"]').forEach(sel => {
+      if (sel.value) individualMgrFormData[sel.name] = parseInt(sel.value);
+    });
   } else if (step === 2) {
     const el = document.getElementById('imgrScore2');
     if (el) individualMgrFormData.score2 = parseFloat(el.value) || 0;
     const c = document.getElementById('imgrComment2');
     if (c) individualMgrFormData.comment2 = c.value;
+    // บันทึก dropdown หัวหน้าเลือกสำหรับแต่ละ behavior
+    document.querySelectorAll('select[name^="mgr_ibeh_"]').forEach(sel => {
+      if (sel.value) individualMgrFormData[sel.name] = parseInt(sel.value);
+    });
   } else if (step === 3) {
     const el = document.getElementById('imgrScore3');
     if (el) individualMgrFormData.score3 = parseFloat(el.value) || 0;
@@ -2542,10 +2550,23 @@ function saveIndividualMgrStepData(step) {
   } else if (step === 4) {
     const el = document.getElementById('imgrScore4');
     if (el) individualMgrFormData.score4 = parseFloat(el.value) || 0;
-    ['review_comment','overall_comment','recommendation','career','dev_plan'].forEach(f => {
+    ['review_comment','overall_comment','dev_plan'].forEach(f => {
       const e = document.getElementById(`imgr_${f}`);
       if (e) individualMgrFormData[f] = e.value;
     });
+    // radio recommendation + career
+    const rec = document.querySelector('input[name="imgr_recommendation"]:checked');
+    if (rec) individualMgrFormData.recommendation = rec.value;
+    const recSub = document.querySelector('input[name="imgr_rec_sub"]:checked');
+    if (recSub) individualMgrFormData.rec_sub = recSub.value;
+    const pct = document.getElementById('imgr_merit_pct');
+    if (pct) individualMgrFormData.merit_pct = pct.value;
+    const subOther = document.getElementById('imgr_rec_sub_other');
+    if (subOther) individualMgrFormData.rec_sub_other = subOther.value;
+    const subOther2 = document.getElementById('imgr_rec_sub_other2');
+    if (subOther2) individualMgrFormData.rec_sub_other2 = subOther2.value;
+    const career = document.querySelector('input[name="imgr_career"]:checked');
+    if (career) individualMgrFormData.career = career.value;
   }
 }
 
@@ -2571,26 +2592,32 @@ function renderIndividualMgrScoreInput(step, savedScore) {
 }
 
 function renderIndividualMgrStep1(empId, selfData, competencies) {
-  // แสดง competency ที่พนักงานเลือก (read-only) + กรอกคะแนน
   const compRows = competencies.map(c => {
-    const score = selfData[`icomp_${c.key}`] || 0;
-    const evidence = selfData[`icomp_ev_${c.key}`] || '—';
-    const optLabel = score > 0 ? c.options[5-score] : '—';
+    const empScore  = selfData[`icomp_${c.key}`] || 0;
+    const evidence  = selfData[`icomp_ev_${c.key}`] || '';
+    const empLabel  = empScore > 0 ? c.options[5 - empScore] : '(ยังไม่กรอก)';
+    const mgrScore  = individualMgrFormData[`mgr_icomp_${c.key}`] || '';
     return `
-      <div style="padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="font-weight:600;font-size:13px;margin-bottom:4px">${c.no}. ${c.name}</div>
-        <div style="font-size:12px;color:var(--text-2);margin-bottom:4px">พนักงานเลือก: <span style="color:var(--primary);font-weight:600">${optLabel}</span></div>
-        ${evidence !== '—' ? `<div style="font-size:12px;color:var(--text-3)">ตัวอย่างจริง: ${evidence}</div>` : ''}
+      <div style="padding:12px 0;border-bottom:1px solid var(--border)">
+        <div style="font-weight:600;font-size:13px;margin-bottom:6px">${c.no}. ${c.name}</div>
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">พนักงานเลือก:</div>
+        <div style="font-size:12px;background:var(--bg);border-radius:6px;padding:8px 12px;color:var(--text-1);line-height:1.6;margin-bottom:8px">${empLabel}</div>
+        ${evidence ? `<div style="font-size:12px;color:var(--text-3);margin-bottom:8px">ตัวอย่างจริง: ${evidence}</div>` : ''}
+        <div style="font-size:11px;color:var(--primary);font-weight:600;margin-bottom:4px">หัวหน้าประเมิน:</div>
+        <select name="mgr_icomp_${c.key}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface)">
+          <option value="">— เลือกระดับ —</option>
+          ${c.options.map((opt, idx) => { const v = 5-idx; return `<option value="${v}" ${mgrScore==v?'selected':''}>${v}: ${opt}</option>`; }).join('')}
+        </select>
       </div>
     `;
   }).join('');
 
   return `
     <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
-      ดูคำตอบของพนักงานด้านล่าง แล้วให้คะแนนรวมส่วนที่ 1 (0–25 คะแนน)
+      ดูคำตอบพนักงาน แล้วเลือกระดับที่หัวหน้าเห็นว่าถูกต้อง จากนั้นให้คะแนนรวมส่วนที่ 1
     </div>
-    <div style="max-height:400px;overflow-y:auto;padding-right:4px">${compRows}</div>
-    <div class="form-field" style="margin-top:12px">
+    <div style="max-height:500px;overflow-y:auto;padding-right:4px;margin-bottom:12px">${compRows}</div>
+    <div class="form-field">
       <label class="field-label">ความเห็น / ข้อเสนอแนะส่วนที่ 1</label>
       <textarea id="imgrComment1" class="field-textarea" rows="3" placeholder="กรอกความเห็น...">${individualMgrFormData.comment1||''}</textarea>
     </div>
@@ -2599,7 +2626,6 @@ function renderIndividualMgrStep1(empId, selfData, competencies) {
 }
 
 function renderIndividualMgrStep2(empId, selfData) {
-  // แสดง Core Behaviors ที่พนักงานเลือก (read-only) + กรอกคะแนน
   const groups = [
     { label:'หมวดที่ 1: ด้านวินัยแห่งตน ความซื่อสัตย์สุจริต และความรับผิดชอบต่อหน้าที่', items: INDIVIDUAL_BEHAVIOR_LIST.slice(0,3) },
     { label:'หมวดที่ 2: ลักษณะนิสัยของการเป็นผู้มีประสิทธิผลสูง', items: INDIVIDUAL_BEHAVIOR_LIST.slice(3) },
@@ -2607,14 +2633,21 @@ function renderIndividualMgrStep2(empId, selfData) {
   const behRows = groups.map(g => `
     <div style="font-weight:700;font-size:12px;color:var(--text-2);padding:8px 0 4px">${g.label}</div>
     ${g.items.map(b => {
-      const score = selfData[`ibeh_${b.key}`] || 0;
+      const empScore = selfData[`ibeh_${b.key}`] || 0;
       const evidence = selfData[`ibeh_ev_${b.key}`] || '';
-      const optLabel = score > 0 ? b.options[5-score] : '—';
+      const empLabel = empScore > 0 ? b.options[5-empScore] : '(ยังไม่กรอก)';
+      const mgrScore = individualMgrFormData[`mgr_ibeh_${b.key}`] || '';
       return `
-        <div style="padding:8px 0;border-bottom:1px solid var(--border)">
-          <div style="font-weight:600;font-size:13px;margin-bottom:4px">${b.no}. ${b.name}</div>
-          <div style="font-size:12px;color:var(--text-2)">พนักงานเลือก: <span style="color:var(--primary);font-weight:600">${optLabel}</span></div>
-          ${evidence ? `<div style="font-size:12px;color:var(--text-3);margin-top:2px">ตัวอย่างจริง: ${evidence}</div>` : ''}
+        <div style="padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px">${b.no}. ${b.name}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:3px">พนักงานเลือก:</div>
+          <div style="font-size:12px;background:var(--bg);border-radius:6px;padding:8px 12px;color:var(--text-1);line-height:1.6;margin-bottom:8px">${empLabel}</div>
+          ${evidence ? `<div style="font-size:12px;color:var(--text-3);margin-bottom:8px">ตัวอย่างจริง: ${evidence}</div>` : ''}
+          <div style="font-size:11px;color:var(--primary);font-weight:600;margin-bottom:4px">หัวหน้าประเมิน:</div>
+          <select name="mgr_ibeh_${b.key}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--surface)">
+            <option value="">— เลือกระดับ —</option>
+            ${b.options.map((opt, idx) => { const v = 5-idx; return `<option value="${v}" ${mgrScore==v?'selected':''}>${v}: ${opt}</option>`; }).join('')}
+          </select>
         </div>
       `;
     }).join('')}
@@ -2622,10 +2655,10 @@ function renderIndividualMgrStep2(empId, selfData) {
 
   return `
     <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
-      ดูคำตอบของพนักงานด้านล่าง แล้วให้คะแนนรวมส่วนที่ 2 (0–25 คะแนน)
+      ดูคำตอบพนักงาน แล้วเลือกระดับที่หัวหน้าเห็นว่าถูกต้อง จากนั้นให้คะแนนรวมส่วนที่ 2
     </div>
-    <div style="max-height:400px;overflow-y:auto;padding-right:4px">${behRows}</div>
-    <div class="form-field" style="margin-top:12px">
+    <div style="max-height:500px;overflow-y:auto;padding-right:4px;margin-bottom:12px">${behRows}</div>
+    <div class="form-field">
       <label class="field-label">ความเห็น / ข้อเสนอแนะส่วนที่ 2</label>
       <textarea id="imgrComment2" class="field-textarea" rows="3" placeholder="กรอกความเห็น...">${individualMgrFormData.comment2||''}</textarea>
     </div>
@@ -2693,11 +2726,11 @@ function renderIndividualMgrStep4(empId, selfData) {
     { value:'hold',     label:'คงอัตราเงินเดือนเดิม / ชะลอการปรับขึ้น' },
   ];
   const careerOptions = [
-    { value:'promote',  label:'เสนอปรับเลื่อนตำแหน่ง (Promotion)' },
-    { value:'enrich',   label:'เสนอปรับขยายขอบเขตความรับผิดชอบ (Job Enrichment)' },
+    { value:'promote',  label:'เสนอปรับเลื่อนตำแหน่ง ระบุตำแหน่งใหม่...' },
+    { value:'transfer', label:'เสนอโยกย้าย เปลี่ยนแปลงตำแหน่งจากเดิม ระบุตำแหน่งใหม่...' },
+    { value:'enrich',   label:'เสนอปรับขยายขอบเขตความรับผิดชอบ คงตำแหน่งเดิม แต่เพิ่มความท้าทายหรือมอบหมายให้ดูแลโครงการ / ระบบงานที่สำคัญมากขึ้น' },
     { value:'maintain', label:'เสนอให้ปฏิบัติหน้าที่ในตำแหน่งเดิมต่อไป' },
   ];
-
   return `
     <!-- ทบทวนตนเองของพนักงาน -->
     <div style="background:var(--bg);border-radius:var(--radius);padding:14px;margin-bottom:16px">
@@ -2739,21 +2772,61 @@ function renderIndividualMgrStep4(empId, selfData) {
 
     <!-- เสนอปรับเงินเดือน -->
     <div class="form-field">
-      <label class="field-label">เสนอเพื่อการปรับอัตราตอบแทน</label>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
-        ${recOptions.map(o => `
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-            <input type="radio" name="imgr_recommendation" value="${o.value}" ${individualMgrFormData.recommendation===o.value?'checked':''}>
-            ${o.label}
+      <label class="field-label">2. เสนอเพื่อการปรับอัตราตอบแทน (โปรดทำเครื่องหมายในช่องที่ต้องการเพียง 1 ข้อ)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+        <!-- ปรับขึ้น -->
+        <div style="border:1px solid var(--border);border-radius:8px;padding:12px">
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px">
+            <input type="radio" name="imgr_recommendation" value="merit" ${individualMgrFormData.recommendation==='merit'?'checked':''} style="margin-top:2px">
+            เสนอปรับขึ้น
+            <input type="number" id="imgr_merit_pct" min="0" max="100" step="0.5"
+              value="${individualMgrFormData.merit_pct||''}" placeholder="0"
+              style="width:56px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px;text-align:center">
+            %
           </label>
-        `).join('')}
+          <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px">
+            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
+              <input type="radio" name="imgr_rec_sub" value="merit_outstanding" ${individualMgrFormData.rec_sub==='merit_outstanding'?'checked':''} style="margin-top:2px">
+              ด้วยผลงานโดดเด่น เกินเป้าหมายอย่างชัดเจน และแสดงออกด้านพฤติกรรมที่สอดคล้องกับค่านิยม
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
+              <input type="radio" name="imgr_rec_sub" value="merit_standard" ${individualMgrFormData.rec_sub==='merit_standard'?'checked':''} style="margin-top:2px">
+              จากผลการปฏิบัติงานบรรลุเป้าหมาย เป็นไปตามหน้าที่ของแต่ละตำแหน่งที่กำหนดไว้
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
+              <input type="radio" name="imgr_rec_sub" value="merit_other" ${individualMgrFormData.rec_sub==='merit_other'?'checked':''} style="margin-top:2px">
+              อื่นๆ ระบุ:
+              <input type="text" id="imgr_rec_sub_other" value="${individualMgrFormData.rec_sub_other||''}" placeholder="ระบุ..."
+                style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px">
+            </label>
+          </div>
+        </div>
+        <!-- ยังไม่ปรับ -->
+        <div style="border:1px solid var(--border);border-radius:8px;padding:12px">
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px">
+            <input type="radio" name="imgr_recommendation" value="hold" ${individualMgrFormData.recommendation==='hold'?'checked':''} style="margin-top:2px">
+            ยังไม่ปรับขึ้น
+          </label>
+          <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px">
+            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
+              <input type="radio" name="imgr_rec_sub" value="hold_below" ${individualMgrFormData.rec_sub==='hold_below'?'checked':''} style="margin-top:2px">
+              เนื่องจากผลงานยังไม่บรรลุเป้าหมายหรือพฤติกรรมบางประการยังต้องได้รับการปรับปรุง
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
+              <input type="radio" name="imgr_rec_sub" value="hold_other" ${individualMgrFormData.rec_sub==='hold_other'?'checked':''} style="margin-top:2px">
+              อื่นๆ ระบุ:
+              <input type="text" id="imgr_rec_sub_other2" value="${individualMgrFormData.rec_sub_other2||''}" placeholder="ระบุ..."
+                style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px">
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- เสนอปรับตำแหน่ง -->
     <div class="form-field">
-      <label class="field-label">เสนอเพื่อการปรับตำแหน่งงาน / การขยายขอบเขตหน้าที่</label>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+      <label class="field-label">3. เสนอเพื่อการปรับตำแหน่งงาน / การขยายขอบเขตหน้าที่ (โปรดทำเครื่องหมายในช่องที่ต้องการเพียง 1 ข้อ)</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
         ${careerOptions.map(o => `
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
             <input type="radio" name="imgr_career" value="${o.value}" ${individualMgrFormData.career===o.value?'checked':''}>
