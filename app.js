@@ -815,12 +815,18 @@ function renderExecDashboard() {
   const titleEl = document.getElementById('exec-dashboard-title');
   if (titleEl) titleEl.textContent = currentUser.role === 'hr' ? 'Dashboard HR' : 'Dashboard — ผู้บริหาร';
 
-  const groups = ['FMC','ISEC','PPP','BNT','NSP','SCA'];
-  const emps   = allData.employees.filter(e => e.role === 'employee' || e.role === 'manager');
+  // FMC-001 และ HR เห็นทุกกลุ่ม, executive คนอื่นเห็นเฉพาะกลุ่มตัวเอง
+  const isSuperExec = sameId(currentUser.id, 'FMC-001') || currentUser.id === '_admin' || currentUser.role === 'hr';
+  const allGroups   = ['FMC','ISEC','PPP','BNT','NSP','SCA'];
+  const visGroups   = isSuperExec ? allGroups : [currentUser.group];
+  const emps = allData.employees.filter(e =>
+    (e.role === 'employee' || e.role === 'manager') && visGroups.includes(e.group)
+  );
 
+  // stat cards — แสดงเฉพาะกลุ่มที่มองเห็นได้
   const statRow = document.getElementById('group-stat-row');
   statRow.innerHTML = '';
-  groups.forEach(grp => {
+  visGroups.forEach(grp => {
     const ge   = emps.filter(e => e.group === grp);
     const done = ge.filter(e => allData.managerEvals.some(m => sameId(m.employee_id, e.id)));
     const card = document.createElement('div');
@@ -832,6 +838,10 @@ function renderExecDashboard() {
     `;
     statRow.appendChild(card);
   });
+
+  // group filter dropdown — ซ่อนถ้าไม่ใช่ super exec
+  const grpSel = document.getElementById('exec-filter-group');
+  if (grpSel) grpSel.closest('.filter-wrap, div')?.style && (grpSel.parentElement.style.display = isSuperExec ? '' : 'none');
 
   // populate dept filter dropdown จาก departments จริงในข้อมูล
   const deptSel = document.getElementById('exec-filter-dept');
@@ -845,10 +855,11 @@ function renderExecDashboard() {
 }
 
 function filterExecTable() {
-  const grp     = document.getElementById('exec-filter-group').value;
-  const deptSel = document.getElementById('exec-filter-dept');
+  const isSuperExec = sameId(currentUser.id, 'FMC-001') || currentUser.id === '_admin' || currentUser.role === 'hr';
+  const grp         = isSuperExec ? document.getElementById('exec-filter-group').value : currentUser.group;
+  const deptSel     = document.getElementById('exec-filter-dept');
 
-  // กรองตาม group ก่อน เพื่อ rebuild dept list
+  // กรองตาม group ก่อน เพื่อ rebuild dept list — executive ที่ไม่ใช่ super ถูก lock ที่ group ตัวเอง
   const byGroup = allData.employees.filter(e =>
     (e.role === 'employee' || e.role === 'manager') &&
     (!grp || e.group === grp)
@@ -964,8 +975,14 @@ function renderAdminTable() {
 function populateManagerDropdown() {
   const sel = document.getElementById('modal-manager');
   if (!sel) return;
-  // รวม manager + executive ทั้งหมด เพราะ executive สามารถเป็นหัวหน้า director ได้
-  const mgrs = allData.employees.filter(e => e.role === 'manager' || e.role === 'executive');
+  // รวม manager + executive จาก allData และ MD จาก REAL_EMPLOYEES (กรณี MD ไม่ได้อยู่ใน Google Sheets)
+  const fromData = allData.employees.filter(e => e.role === 'manager' || e.role === 'executive');
+  const fromReal = REAL_EMPLOYEES.filter(e => e.role === 'executive');
+  // merge โดย deduplicate ตาม id
+  const seen = new Set(fromData.map(e => e.id.toLowerCase()));
+  const extra = fromReal.filter(e => !seen.has(e.id.toLowerCase()));
+  const mgrs = [...fromData, ...extra];
+  mgrs.sort((a,b) => a.name.localeCompare(b.name, 'th'));
   sel.innerHTML = '<option value="">— ไม่มี / เลือกภายหลัง —</option>';
   mgrs.forEach(m => {
     const opt = document.createElement('option');
