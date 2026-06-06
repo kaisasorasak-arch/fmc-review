@@ -549,25 +549,33 @@ function renderSidebar() {
     manager:   [
       { icon:'◉', label:'Dashboard',       view:'mgr-dashboard' },
       { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
-      { icon:'?', label:'คู่มือการใช้งาน', view:'manual' },
     ],
     executive: [
       { icon:'◉', label:'Dashboard',       view:'exec-dashboard' },
       { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
       { icon:'↓', label:'Export',          view:'export' },
-      { icon:'?', label:'คู่มือการใช้งาน', view:'manual' },
     ],
     hr:        [
       { icon:'◉', label:'Dashboard',       view:'exec-dashboard' },
       { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
       { icon:'⚙', label:'จัดการพนักงาน',  view:'admin' },
-      { icon:'?', label:'คู่มือการใช้งาน', view:'manual' },
     ],
   };
 
   const nav = document.getElementById('sidebar-nav');
   nav.innerHTML = '';
-  (navDefs[u.role] || []).forEach(item => {
+  // FMC-001 (MD สูงสุด) ไม่ต้องประเมินตัวเอง — ซ่อน Self-Evaluation + เพิ่ม Manager Dashboard
+  let navItems = (navDefs[u.role] || []).filter(item =>
+    !(sameId(u.id, 'FMC-001') && item.view === 'self-eval')
+  );
+  if (sameId(u.id, 'FMC-001')) {
+    navItems = [
+      { icon:'◉', label:'Dashboard',          view:'exec-dashboard' },
+      { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-dashboard' },
+      { icon:'↓', label:'Export',             view:'export' },
+    ];
+  }
+  navItems.forEach(item => {
     const btn = document.createElement('button');
     btn.className    = 'nav-item';
     btn.dataset.view = item.view;
@@ -694,7 +702,12 @@ function renderEmpDashboard() {
 
 // ========== MANAGER DASHBOARD ==========
 function renderMgrDashboard() {
-  const myTeam = allData.employees.filter(e => sameId(e.manager_id, currentUser.id) && (e.role === 'employee' || e.role === 'manager'));
+  // FMC-001 มีลูกน้องตรงที่เป็น executive ด้วย — รวม executive เข้าในทีม
+  const isMD = sameId(currentUser.id, 'FMC-001');
+  const seen = new Set(allData.employees.map(e => e.id.toLowerCase()));
+  const extra = isMD ? REAL_EMPLOYEES.filter(e => !seen.has(e.id.toLowerCase())) : [];
+  const allEmps = [...allData.employees, ...extra];
+  const myTeam = allEmps.filter(e => sameId(e.manager_id, currentUser.id) && (e.role === 'employee' || e.role === 'manager' || (isMD && e.role === 'executive')));
   const done   = myTeam.filter(e => allData.managerEvals.some(m => sameId(m.employee_id, e.id)));
 
   document.getElementById('mgr-period-badge').textContent = periodLabel();
@@ -937,7 +950,12 @@ function renderAdminTable() {
   const role   = document.getElementById('admin-filter-role')?.value  || '';
   const search = (document.getElementById('admin-search')?.value || '').toLowerCase();
 
-  let list = allData.employees.filter(e => {
+  // merge allData + REAL_EMPLOYEES (executive อาจไม่ถูกส่งมาจาก Google Sheets) แล้ว deduplicate
+  const seen = new Set(allData.employees.map(e => e.id.toLowerCase()));
+  const extra = REAL_EMPLOYEES.filter(e => !seen.has(e.id.toLowerCase()));
+  const allEmps = [...allData.employees, ...extra];
+
+  let list = allEmps.filter(e => {
     if (grp  && e.group !== grp)  return false;
     if (role && e.role  !== role) return false;
     if (search && !e.name.toLowerCase().includes(search) && !(e.id||'').toLowerCase().includes(search)) return false;
@@ -953,7 +971,9 @@ function renderAdminTable() {
   const roleLabel = { employee:'พนักงาน', manager:'หัวหน้า', hr:'HR', executive:'ผู้บริหาร' };
 
   list.forEach(emp => {
-    const mgr = allData.employees.find(e => sameId(e.id, emp.manager_id));
+    // ค้นชื่อหัวหน้าจาก allData ก่อน ถ้าไม่เจอ (MD อาจไม่อยู่ใน Sheets) ให้หาจาก REAL_EMPLOYEES
+    const mgr = allData.employees.find(e => sameId(e.id, emp.manager_id))
+             || REAL_EMPLOYEES.find(e => sameId(e.id, emp.manager_id));
     const tr  = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${emp.name}</strong></td>
@@ -1027,6 +1047,9 @@ function openEmployeeModal(empId = null) {
   const deptSel = document.getElementById('modal-dept');
   if (deptSel) deptSel.innerHTML = '<option value="">— เลือกกลุ่มก่อน —</option>';
 
+  // populate manager dropdown ก่อน เพื่อให้ set ค่าได้ถูกต้อง
+  populateManagerDropdown();
+
   // ถ้าแก้ไข — โหลดข้อมูลเดิม
   if (empId) {
     const emp = allData.employees.find(e => sameId(e.id, empId));
@@ -1044,8 +1067,6 @@ function openEmployeeModal(empId = null) {
       if (deptSel && emp.department) deptSel.value = emp.department;
     }
   }
-
-  populateManagerDropdown();
   document.getElementById('modal-employee').classList.remove('hidden');
 }
 
@@ -4335,7 +4356,7 @@ function mockApiPost(payload) {
 
 // ========== ข้อมูลพนักงานจริง 112 คน (Auto-generated จาก รายชื่อพนักงาน.xlsx) ==========
 const REAL_EMPLOYEES = [
-  {"id":"BNT-004","username":"bnt-004","password":"1234","role":"executive","group":"BNT","name":"นาย ศุภกิจ รัตนรังสรรค์","position":"Account Director","position_type":"","department":"ACS","manager_id":"FMC-001","nickname":"ซุป"},
+  {"id":"BNT-004","username":"bnt-004","password":"1234","role":"executive","group":"BNT","name":"นาย ศุภกิจ รัตนรังสรรค์","position":"Account Director","position_type":"director","department":"ACS","manager_id":"FMC-001","nickname":"ซุป"},
   {"id":"BNT-029","username":"bnt-029","password":"1234","role":"employee","group":"BNT","name":"นางสาว อรฤดี โสวรรณทิพย์","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"อร"},
   {"id":"BNT-044","username":"bnt-044","password":"1234","role":"manager","group":"BNT","name":"นางสาว ดาลัด ฐิติภาณุเวช","position":"Finance Manager","position_type":"manager","department":"FNS","manager_id":"FMC-001","nickname":"ดา"},
   {"id":"BNT-046","username":"bnt-046","password":"1234","role":"employee","group":"BNT","name":"นาง จำเรียง สุวรรณศร","position":"Maid","position_type":"staff","department":"CAS","manager_id":"BNT-097","nickname":"เล็ก"},
@@ -4464,9 +4485,9 @@ const REAL_EMPLOYEES = [
   {"id":"ISEC-107","username":"isec-107","password":"1234","role":"employee","group":"ISEC","name":"นาย สมคิด สุขสมโสตร์","position":"Service Technician","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"คิด"},
   {"id":"ISEC-112","username":"isec-112","password":"1234","role":"manager","group":"ISEC","name":"นาย หัสดินทร์ นิลละออ","position":"Product & Solution Manager","position_type":"manager","department":"PSS","manager_id":"ISEC-121","nickname":"อ๊อฟ"},
   {"id":"ISEC-115","username":"isec-115","password":"1234","role":"manager","group":"ISEC","name":"นาย ชัยวัฒน์ อึ้งใจธรรม","position":"Sales Manager","position_type":"manager","department":"EXS","manager_id":"ISEC-121","nickname":"แบงค์"},
-  {"id":"ISEC-121","username":"isec-121","password":"1234","role":"executive","group":"ISEC","name":"นาย กฤช อมรวรเดโช","position":"Managing Director","position_type":"","department":"MD","manager_id":"FMC-001","nickname":"กฤช"},
+  {"id":"ISEC-121","username":"isec-121","password":"1234","role":"executive","group":"ISEC","name":"นาย กฤช อมรวรเดโช","position":"Managing Director","position_type":"director","department":"MD","manager_id":"FMC-001","nickname":"กฤช"},
   {"id":"ISEC-131","username":"isec-131","password":"1234","role":"employee","group":"ISEC","name":"นางสาว คณินท์ อาสาเสนา","position":"Service Engineer","position_type":"staff","department":"SVS","manager_id":"ISEC-097","nickname":"Janjao"},
-  {"id":"OUTS-003","username":"outs-003","password":"1234","role":"executive","group":"NSP","name":"นางสาว รุจิรา สง่าแสง","position":"Managing Director","position_type":"","department":"ICT","manager_id":"","nickname":"คีย์"},
+  {"id":"OUTS-003","username":"outs-003","password":"1234","role":"executive","group":"NSP","name":"นางสาว รุจิรา สง่าแสง","position":"Managing Director","position_type":"director","department":"ICT","manager_id":"FMC-001","nickname":"คีย์"},
   {"id":"OUTS-004","username":"outs-004","password":"1234","role":"employee","group":"NSP","name":"นาย ศรัณย์ ศรีฟ้า","position":"ที่ปรึกษาด้านเทคนิคและผลิตภัณฑ์","position_type":"staff","department":"ICT","manager_id":"OUTS-003","nickname":"ปืน"},
   {"id":"OUTS-033","username":"outs-033","password":"1234","role":"manager","group":"NSP","name":"นาย ศุขทิวากร รัตนภิญโญกุล","position":"Project Manager","position_type":"manager","department":"ICT","manager_id":"OUTS-003","nickname":"ช้าง"},
   {"id":"OUTS-074","username":"outs-074","password":"1234","role":"manager","group":"FMC","name":"นาย สุริยา คงสาคร","position":"Business Unit Director","position_type":"manager","department":"ODJ","manager_id":"FMC-001","nickname":"TOP"},
@@ -4502,7 +4523,7 @@ const REAL_EMPLOYEES = [
   {"id":"OUTS-188","username":"outs-188","password":"1234","role":"employee","group":"FMC","name":"นางสาว วาสนา พันอุด","position":"เจ้าหน้าที่ธุรการโครงการ","position_type":"staff","department":"PMS-I","manager_id":"FMC-258","nickname":"กระปุก"},
   {"id":"PPP-003","username":"ppp-003","password":"1234","role":"manager","group":"PPP","name":"นางสาว สุภาพัณณ์ ชาติสุวรรณ","position":"Administrative Manager Director","position_type":"manager","department":"PPP","manager_id":"PPP-015","nickname":"หน่อง"},
   {"id":"PPP-014","username":"ppp-014","password":"1234","role":"manager","group":"PPP","name":"นางสาว หทัยภัทร อินทรังษี","position":"Project Control Manager","position_type":"manager","department":"PPP","manager_id":"PPP-015","nickname":"ไอซ์"},
-  {"id":"PPP-015","username":"ppp-015","password":"1234","role":"executive","group":"PPP","name":"นาย สุริยะ รัตตากร","position":"Deputy Managing Director","position_type":"","department":"PPP","manager_id":"FMC-001","nickname":"อ๋อง"},
+  {"id":"PPP-015","username":"ppp-015","password":"1234","role":"executive","group":"PPP","name":"นาย สุริยะ รัตตากร","position":"Deputy Managing Director","position_type":"director","department":"PPP","manager_id":"FMC-001","nickname":"อ๋อง"},
   {"id":"PPP-019","username":"ppp-019","password":"1234","role":"employee","group":"PPP","name":"นาย นำโชค อินทวีกุล","position":"สถาปนิก","position_type":"staff","department":"PPP","manager_id":"OUTS-091","nickname":"บอย"},
   {"id":"PPP-026","username":"ppp-026","password":"1234","role":"manager","group":"PPP","name":"นาย ชัยวัฒน์ ชังเทศ","position":"Assistant Project Director","position_type":"manager","department":"PPP","manager_id":"PPP-015","nickname":"โล"},
   {"id":"PPP-028","username":"ppp-028","password":"1234","role":"manager","group":"PPP","name":"นาย ธีระพงษ์ แสนตรง","position":"Project Manager","position_type":"manager","department":"มาบตาพุด","manager_id":"PPP-026","nickname":"โก้"},
@@ -4522,7 +4543,7 @@ const REAL_EMPLOYEES = [
   {"id":"PPP-033","username":"ppp-033","password":"1234","role":"employee","group":"PPP","name":"นางสาว ขนิษฐา เสียงเย็น","position":"Purchasing Officer","position_type":"staff","department":"PPP","manager_id":"PPP-040","nickname":"ปุ้มปุ้ย"},
   {"id":"PPP-034","username":"ppp-034","password":"1234","role":"employee","group":"PPP","name":"นาย สมปอง คำพ่วง","position":"Supervisor","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"ยุ้ย"},
   {"id":"PPP-035","username":"ppp-035","password":"1234","role":"employee","group":"PPP","name":"นาย สราวุธ สรณานุภาพ","position":"พนักงานเขียนแบบ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"โอ๋"},
-  {"id":"PPP-038","username":"ppp-038","password":"1234","role":"employee","group":"PPP","name":"นาย ธนพันธ์ ตรีพิพัฒน์","position":"โฟร์แมนงานระบบ","position_type":"staff","department":"มาบตาพุด","manager_id":"","nickname":"ต้น"},
+  {"id":"PPP-038","username":"ppp-038","password":"1234","role":"employee","group":"PPP","name":"นาย ธนพันธ์ ตรีพิพัฒน์","position":"โฟร์แมนงานระบบ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"ต้น"},
   {"id":"PPP-040","username":"ppp-040","password":"1234","role":"manager","group":"PPP","name":"นางสาว ปัทมา จงรักสมหวัง","position":"Administrative Manager","position_type":"manager","department":"PPP","manager_id":"PPP-003","nickname":"ปัท"},
   {"id":"PPP-044","username":"ppp-044","password":"1234","role":"employee","group":"PPP","name":"นางสาว ฐิติรัตน์ โสจันทร์","position":"Office Engineer","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"เกด"},
   {"id":"PPP-045","username":"ppp-045","password":"1234","role":"employee","group":"PPP","name":"นางสาว บุญเทียน เสริมชาติ","position":"จป.เทคนิก","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"เทียน"},
