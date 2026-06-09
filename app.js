@@ -678,7 +678,8 @@ function renderEmpDashboard() {
   document.getElementById('emp-period-badge').textContent  = periodLabel();
   document.getElementById('emp-self-status').textContent   = self ? '✓ กรอกแล้ว' : 'ยังไม่กรอก';
   document.getElementById('emp-mgr-status').textContent    = mgr ? '✓ ประเมินแล้ว' : 'รอประเมิน';
-  document.getElementById('emp-grade').textContent         = gradeLabel;
+  const gradeEl = document.getElementById('emp-grade');
+  if (gradeEl) gradeEl.textContent = gradeLabel;
   document.getElementById('emp-action-title').textContent = self ? 'แก้ไข Self-Evaluation' : 'กรอก Self-Evaluation';
   document.getElementById('emp-action-desc').textContent  = self
     ? 'คุณกรอกแล้ว — สามารถแก้ไขได้ก่อนปิดรอบ'
