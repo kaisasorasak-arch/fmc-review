@@ -1186,6 +1186,14 @@ body {
   .chip-exceed, .chip-achieve, .chip-below { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .exec-decision-card { display: none !important; }
   .report-section { page-break-inside: avoid; }
+
+  /* tabs: ซ่อน tab bar, แสดงทุก pane ต่อกัน */
+  .report-tabs { display: none !important; }
+  .report-tab-pane { display: flex !important; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .report-tabs-body { padding-top: 0; }
+  .score-summary-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .score-card { break-inside: avoid; }
+  .no-print { display: none !important; }
 }
 
 /* ============================================================
@@ -1803,6 +1811,106 @@ body {
   min-height: 40px;
   white-space: pre-wrap;
   line-height: 1.6;
+}
+
+/* ============================================================
+   REPORT TABS & SCORE CARDS (Individual Report)
+   ============================================================ */
+
+.score-summary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr 1.3fr;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.score-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+}
+
+.score-card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+
+.score-card-num {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.score-card-max {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.score-card-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.score-card-total {
+  background: rgba(224,32,32,0.04);
+  border-color: rgba(224,32,32,0.2);
+}
+
+.score-card-director {
+  background: rgba(16,185,129,0.04);
+  border-color: rgba(16,185,129,0.2);
+}
+
+.report-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+.report-tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.report-tab:hover { color: var(--text-1); }
+
+.report-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.report-tabs-body {
+  padding-top: 16px;
+}
+
+.report-tab-pane {
+  display: none;
+}
+
+.report-tab-pane.active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* ============================================================
