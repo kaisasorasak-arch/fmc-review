@@ -689,7 +689,8 @@ function renderEmpDashboard() {
   const posType  = u.position_type || 'staff';
   const posLabel = { staff:'Staff', senior:'Senior', manager:'Manager' }[posType] || posType;
   const isStaffSenior = posType === 'staff' || posType === 'senior';
-  document.querySelector('.form-download-grid').innerHTML = `
+  const dlGrid = document.querySelector('.form-download-grid');
+  if (dlGrid) dlGrid.innerHTML = `
     <div class="form-download-card" onclick="downloadForm('${posType}')">
       <span class="form-icon">📄</span>
       <div class="form-label">แบบฟอร์ม — ${posLabel}</div>
