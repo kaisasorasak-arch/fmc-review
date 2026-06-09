@@ -2777,75 +2777,179 @@ function renderIndividualMgrScoreInput(step, savedScore) {
   `;
 }
 
+function selectMgrOverride(type, key, score, empId) {
+  // บันทึก override ของหัวหน้าลง individualMgrFormData ทันทีเมื่อคลิก
+  individualMgrFormData[`mgr_${type}_${key}`] = score;
+
+  const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId));
+  const selfData = selfEval?.individual_data || {};
+  const empScore = selfData[`${type}_${key}`] || 0;
+
+  // อัปเดต style ของ option 1-5 สำหรับ key นี้
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`mgr_${type}_opt_${key}_${i}`);
+    if (!el) continue;
+    const isEmpPick = (empScore === i);
+    const isMgrPick = (score === i);
+    if (isMgrPick) {
+      el.style.border = '2px solid var(--primary)';
+      el.style.background = 'rgba(224,32,32,0.09)';
+    } else if (isEmpPick) {
+      el.style.border = '1px dashed rgba(224,32,32,0.3)';
+      el.style.background = 'rgba(224,32,32,0.02)';
+    } else {
+      el.style.border = '1px solid var(--border)';
+      el.style.background = '';
+    }
+    const dot = el.querySelector('.mgr-radio-dot');
+    if (dot) {
+      if (isMgrPick) {
+        dot.style.border = '2px solid var(--primary)';
+        dot.style.background = 'var(--primary)';
+        dot.innerHTML = '<div style="width:6px;height:6px;border-radius:50%;background:white;margin:3px auto 0"></div>';
+      } else {
+        dot.style.border = '2px solid var(--border)';
+        dot.style.background = 'white';
+        dot.innerHTML = '';
+      }
+    }
+  }
+
+  // อัปเดตคะแนนรวมที่แสดงด้านล่าง
+  const realEmp = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
+  if (type === 'icomp') {
+    const comps = realEmp?.competencies || [];
+    const newTotal = comps.reduce((sum, c) => {
+      return sum + (individualMgrFormData[`mgr_icomp_${c.key}`] || selfData[`icomp_${c.key}`] || 0);
+    }, 0);
+    const el = document.getElementById('mgr-step1-total');
+    if (el) el.innerHTML = `${newTotal} <span style="font-size:16px;font-weight:400;color:var(--text-3)">/ 50</span>`;
+  } else {
+    const newTotal = INDIVIDUAL_BEHAVIOR_LIST.reduce((sum, b) => {
+      return sum + (individualMgrFormData[`mgr_ibeh_${b.key}`] || selfData[`ibeh_${b.key}`] || 0);
+    }, 0);
+    const el = document.getElementById('mgr-step2-total');
+    if (el) el.innerHTML = `${newTotal} <span style="font-size:16px;font-weight:400;color:var(--text-3)">/ 50</span>`;
+  }
+}
+
 function renderIndividualMgrStep1(empId, selfData, competencies) {
-  // ส่วนที่ 1 — แสดง Position Competencies ที่พนักงานกรอก (read-only) + คะแนนรวมอัตโนมัติ
-  const total50 = competencies.reduce((sum, c) => sum + (selfData[`icomp_${c.key}`] || 0), 0);
+  // ส่วนที่ 1 — Position Competencies: Manager ดูและปรับคะแนนได้
   const compRows = competencies.map(c => {
     const empScore = selfData[`icomp_${c.key}`] || 0;
+    const mgrScore = individualMgrFormData[`mgr_icomp_${c.key}`] || 0;
+    const effectiveScore = mgrScore || empScore;
     const evidence = selfData[`icomp_ev_${c.key}`] || '';
-    const empLabel = empScore > 0 ? `${empScore}: ${c.options[5 - empScore]}` : '(ยังไม่กรอก)';
-    return `
-      <div style="padding:12px 0;border-bottom:1px solid var(--border)">
-        <div style="font-weight:600;font-size:13px;margin-bottom:6px">${c.no}. ${c.name}</div>
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <span style="min-width:28px;height:28px;line-height:28px;background:${empScore>=4?'var(--primary)':empScore>=3?'#F59E0B':'var(--border)'};color:white;border-radius:50%;text-align:center;font-weight:700;font-size:13px;flex-shrink:0">${empScore||'—'}</span>
-          <div>
-            <div style="font-size:12px;color:var(--text-1)">${empLabel}</div>
-            ${evidence ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
-          </div>
-        </div>
-      </div>
-    `;
+
+    const optsHTML = [5,4,3,2,1].map(score => {
+      const optText    = c.options[5 - score];
+      const isEmpPick  = (empScore === score);
+      const isMgrPick  = (mgrScore === score);
+      const isActive   = (effectiveScore === score);
+      const border = isActive
+        ? (isMgrPick ? '2px solid var(--primary)' : '2px solid rgba(224,32,32,0.4)')
+        : (isEmpPick && mgrScore > 0 ? '1px dashed rgba(224,32,32,0.3)' : '1px solid var(--border)');
+      const bg = isActive ? (isMgrPick ? 'rgba(224,32,32,0.09)' : 'rgba(224,32,32,0.04)') : '';
+      const radioBorder = isActive ? 'var(--primary)' : 'var(--border)';
+      const radioBg     = isActive ? 'var(--primary)' : 'white';
+      const innerDot    = isActive ? '<div style="width:6px;height:6px;border-radius:50%;background:white;margin:3px auto 0"></div>' : '';
+      const empBadge    = isEmpPick
+        ? `<span style="font-size:10px;color:var(--primary);font-weight:600;padding:1px 7px;background:rgba(224,32,32,0.1);border-radius:10px;white-space:nowrap;flex-shrink:0">👤 พนักงานเลือก</span>`
+        : '';
+      return `<div id="mgr_icomp_opt_${c.key}_${score}"
+                   onclick="selectMgrOverride('icomp','${c.key}',${score},'${empId}')"
+                   style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:4px;border:${border};background:${bg};border-radius:8px;cursor:pointer;transition:all 0.15s">
+                <div class="mgr-radio-dot" style="width:16px;height:16px;min-width:16px;border-radius:50%;border:2px solid ${radioBorder};background:${radioBg};margin-top:2px">${innerDot}</div>
+                <div style="flex:1;font-size:12px;line-height:1.5;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap">
+                  <span style="font-weight:${isActive?'600':'400'}">${score}: ${optText}</span>${empBadge}
+                </div>
+              </div>`;
+    }).join('');
+
+    return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+              <div style="font-weight:600;font-size:13px;margin-bottom:8px">${c.no}. ${c.name}</div>
+              ${evidence ? `<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;padding:5px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
+              ${optsHTML}
+            </div>`;
   }).join('');
+
+  const total50 = competencies.reduce((sum, c) => {
+    return sum + (individualMgrFormData[`mgr_icomp_${c.key}`] || selfData[`icomp_${c.key}`] || 0);
+  }, 0);
 
   return `
     <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
-      คะแนนส่วนที่ 1 คำนวณอัตโนมัติจากคำตอบของพนักงาน (เต็ม 50 คะแนน) — หน้านี้ดูอย่างเดียว
+      หัวหน้าสามารถปรับคำตอบได้โดยคลิกตัวเลือกที่ต้องการ — คะแนนจะอัปเดตอัตโนมัติ
     </div>
-    <div style="max-height:500px;overflow-y:auto;padding-right:4px;margin-bottom:12px">${compRows}</div>
+    <div style="max-height:600px;overflow-y:auto;padding-right:4px;margin-bottom:12px">${compRows}</div>
     <div style="background:rgba(224,32,32,0.06);border-radius:var(--radius);padding:14px;text-align:center">
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">คะแนนส่วนที่ 1 รวม (อัตโนมัติ)</div>
-      <div style="font-size:28px;font-weight:800;color:var(--primary)">${total50} <span style="font-size:16px;font-weight:400;color:var(--text-3)">/ 50</span></div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">คะแนนส่วนที่ 1 รวม</div>
+      <div id="mgr-step1-total" style="font-size:28px;font-weight:800;color:var(--primary)">${total50} <span style="font-size:16px;font-weight:400;color:var(--text-3)">/ 50</span></div>
     </div>
   `;
 }
 
 function renderIndividualMgrStep2(empId, selfData) {
-  // ส่วนที่ 2 — แสดง Core Behaviors ที่พนักงานกรอก (read-only) + คะแนนรวมอัตโนมัติ
-  const total50 = INDIVIDUAL_BEHAVIOR_LIST.reduce((sum, b) => sum + (selfData[`ibeh_${b.key}`] || 0), 0);
+  // ส่วนที่ 2 — Core Behaviors: Manager ดูและปรับคะแนนได้
   const groups = [
     { label:'หมวดที่ 1: ด้านวินัยแห่งตน ความซื่อสัตย์สุจริต และความรับผิดชอบต่อหน้าที่', items: INDIVIDUAL_BEHAVIOR_LIST.slice(0,3) },
     { label:'หมวดที่ 2: ลักษณะนิสัยของการเป็นผู้มีประสิทธิผลสูง', items: INDIVIDUAL_BEHAVIOR_LIST.slice(3) },
   ];
-  const behRows = groups.map(g => `
-    <div style="font-weight:700;font-size:12px;color:var(--text-2);padding:10px 0 4px;border-top:2px solid var(--border);margin-top:8px">${g.label}</div>
-    ${g.items.map(b => {
+
+  const behRows = groups.map(g => {
+    const groupHeader = `<div style="font-weight:700;font-size:12px;color:var(--text-2);padding:10px 0 4px;border-top:2px solid var(--border);margin-top:8px">${g.label}</div>`;
+    const itemsHTML = g.items.map(b => {
       const empScore = selfData[`ibeh_${b.key}`] || 0;
+      const mgrScore = individualMgrFormData[`mgr_ibeh_${b.key}`] || 0;
+      const effectiveScore = mgrScore || empScore;
       const evidence = selfData[`ibeh_ev_${b.key}`] || '';
-      const empLabel = empScore > 0 ? `${empScore}: ${b.options[5-empScore]}` : '(ยังไม่กรอก)';
-      return `
-        <div style="padding:10px 0;border-bottom:1px solid var(--border)">
-          <div style="font-weight:600;font-size:13px;margin-bottom:6px">${b.no}. ${b.name}</div>
-          <div style="display:flex;align-items:flex-start;gap:10px">
-            <span style="min-width:28px;height:28px;line-height:28px;background:${empScore>=4?'var(--primary)':empScore>=3?'#F59E0B':'var(--border)'};color:white;border-radius:50%;text-align:center;font-weight:700;font-size:13px;flex-shrink:0">${empScore||'—'}</span>
-            <div>
-              <div style="font-size:12px;color:var(--text-1)">${empLabel}</div>
-              ${evidence ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('')}
-  `).join('');
+
+      const optsHTML = [5,4,3,2,1].map(score => {
+        const optText    = b.options[5 - score];
+        const isEmpPick  = (empScore === score);
+        const isMgrPick  = (mgrScore === score);
+        const isActive   = (effectiveScore === score);
+        const border = isActive
+          ? (isMgrPick ? '2px solid var(--primary)' : '2px solid rgba(224,32,32,0.4)')
+          : (isEmpPick && mgrScore > 0 ? '1px dashed rgba(224,32,32,0.3)' : '1px solid var(--border)');
+        const bg = isActive ? (isMgrPick ? 'rgba(224,32,32,0.09)' : 'rgba(224,32,32,0.04)') : '';
+        const radioBorder = isActive ? 'var(--primary)' : 'var(--border)';
+        const radioBg     = isActive ? 'var(--primary)' : 'white';
+        const innerDot    = isActive ? '<div style="width:6px;height:6px;border-radius:50%;background:white;margin:3px auto 0"></div>' : '';
+        const empBadge    = isEmpPick
+          ? `<span style="font-size:10px;color:var(--primary);font-weight:600;padding:1px 7px;background:rgba(224,32,32,0.1);border-radius:10px;white-space:nowrap;flex-shrink:0">👤 พนักงานเลือก</span>`
+          : '';
+        return `<div id="mgr_ibeh_opt_${b.key}_${score}"
+                     onclick="selectMgrOverride('ibeh','${b.key}',${score},'${empId}')"
+                     style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:4px;border:${border};background:${bg};border-radius:8px;cursor:pointer;transition:all 0.15s">
+                  <div class="mgr-radio-dot" style="width:16px;height:16px;min-width:16px;border-radius:50%;border:2px solid ${radioBorder};background:${radioBg};margin-top:2px">${innerDot}</div>
+                  <div style="flex:1;font-size:12px;line-height:1.5;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap">
+                    <span style="font-weight:${isActive?'600':'400'}">${score}: ${optText}</span>${empBadge}
+                  </div>
+                </div>`;
+      }).join('');
+
+      return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+                <div style="font-weight:600;font-size:13px;margin-bottom:8px">${b.no}. ${b.name}</div>
+                ${evidence ? `<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;padding:5px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
+                ${optsHTML}
+              </div>`;
+    }).join('');
+    return groupHeader + itemsHTML;
+  }).join('');
+
+  const total50 = INDIVIDUAL_BEHAVIOR_LIST.reduce((sum, b) => {
+    return sum + (individualMgrFormData[`mgr_ibeh_${b.key}`] || selfData[`ibeh_${b.key}`] || 0);
+  }, 0);
 
   return `
     <div style="font-size:12px;color:var(--text-3);margin-bottom:12px;padding:10px 14px;background:rgba(224,32,32,0.05);border-radius:var(--radius)">
-      คะแนนส่วนที่ 2 คำนวณอัตโนมัติจากคำตอบของพนักงาน (เต็ม 50 คะแนน) — หน้านี้ดูอย่างเดียว
+      หัวหน้าสามารถปรับคำตอบได้โดยคลิกตัวเลือกที่ต้องการ — คะแนนจะอัปเดตอัตโนมัติ
     </div>
-    <div style="max-height:500px;overflow-y:auto;padding-right:4px;margin-bottom:12px">${behRows}</div>
+    <div style="max-height:600px;overflow-y:auto;padding-right:4px;margin-bottom:12px">${behRows}</div>
     <div style="background:rgba(224,32,32,0.06);border-radius:var(--radius);padding:14px;text-align:center">
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">คะแนนส่วนที่ 2 รวม (อัตโนมัติ)</div>
-      <div style="font-size:28px;font-weight:800;color:var(--primary)">${total50} <span style="font-size:16px;font-weight:400;color:var(--text-3)">/ 50</span></div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">คะแนนส่วนที่ 2 รวม</div>
+      <div id="mgr-step2-total" style="font-size:28px;font-weight:800;color:var(--primary)">${total50} <span style="font-size:16px;font-weight:400;color:var(--text-3)">/ 50</span></div>
     </div>
   `;
 }
@@ -2944,8 +3048,8 @@ function renderIndividualMgrStep4(empId, selfData) {
 
 function renderIndividualMgrStep5(empId, selfData, competencies) {
   // ส่วนที่ 5 — คะแนนรวมอัตโนมัติ (50+50=100) + 4 รายการ PDF ต้นฉบับ
-  const score1 = competencies.reduce((sum, c) => sum + (selfData[`icomp_${c.key}`] || 0), 0);
-  const score2 = INDIVIDUAL_BEHAVIOR_LIST.reduce((sum, b) => sum + (selfData[`ibeh_${b.key}`] || 0), 0);
+  const score1 = competencies.reduce((sum, c) => sum + (individualMgrFormData[`mgr_icomp_${c.key}`] || selfData[`icomp_${c.key}`] || 0), 0);
+  const score2 = INDIVIDUAL_BEHAVIOR_LIST.reduce((sum, b) => sum + (individualMgrFormData[`mgr_ibeh_${b.key}`] || selfData[`ibeh_${b.key}`] || 0), 0);
   const total  = score1 + score2;
 
   const careerOptions = [
@@ -3069,8 +3173,8 @@ async function submitIndividualMgrEval(empId) {
   const selfData = selfEval?.individual_data || {};
   const realEmp  = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
   const comps    = realEmp?.competencies || [];
-  const score1   = comps.reduce((sum, c) => sum + (selfData[`icomp_${c.key}`] || 0), 0);
-  const score2   = INDIVIDUAL_BEHAVIOR_LIST.reduce((sum, b) => sum + (selfData[`ibeh_${b.key}`] || 0), 0);
+  const score1   = comps.reduce((sum, c) => sum + (individualMgrFormData[`mgr_icomp_${c.key}`] || selfData[`icomp_${c.key}`] || 0), 0);
+  const score2   = INDIVIDUAL_BEHAVIOR_LIST.reduce((sum, b) => sum + (individualMgrFormData[`mgr_ibeh_${b.key}`] || selfData[`ibeh_${b.key}`] || 0), 0);
   const total    = score1 + score2;
 
   const payload = {
