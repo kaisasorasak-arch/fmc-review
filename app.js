@@ -559,6 +559,7 @@ function renderSidebar() {
       { icon:'◉', label:'Dashboard',       view:'exec-dashboard' },
       { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
       { icon:'⚙', label:'จัดการพนักงาน',  view:'admin' },
+      { icon:'↓', label:'Export',          view:'export' },
     ],
   };
 
@@ -3959,7 +3960,8 @@ async function renderReport() {
 
   // ถ้าเป็น Individual Form → ใช้ report แบบใหม่
   const realEmpR = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
-  if (realEmpR?.competencies?.length > 0 && !isAdminType(emp.position_type || 'staff')) {
+  const effectivePosTypeR = realEmpR?.position_type || emp.position_type || 'staff';
+  if (realEmpR?.competencies?.length > 0 && !isAdminType(effectivePosTypeR)) {
     renderIndividualReport(empId, emp, realEmpR);
     return;
   }
@@ -4154,7 +4156,14 @@ async function renderReport() {
   `;
 }
 
-// ========== Individual Form Report ==========
+// ========== Individual Form Report (Tab Layout) ==========
+function switchReportTab(tabId) {
+  document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.report-tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.report-tab[data-tab="${tabId}"]`)?.classList.add('active');
+  document.getElementById(`report-tab-${tabId}`)?.classList.add('active');
+}
+
 function renderIndividualReport(empId, emp, realEmp) {
   const selfEval = allData.selfEvals.find(s => sameId(s.employee_id, empId) && s.form_type === 'individual');
   const mgrEval  = allData.managerEvals.find(m => sameId(m.employee_id, empId) && m.form_type === 'individual');
@@ -4162,84 +4171,121 @@ function renderIndividualReport(empId, emp, realEmp) {
   const indData  = selfEval?.individual_data  || {};
   const mgrData  = mgrEval?.individual_mgr_data || {};
   const gi       = mgrEval?.overall_grade ? GRADE_LIST.find(g => g.key === mgrEval.overall_grade) : null;
-  const mgrName  = allData.employees.find(e => sameId(e.id, emp.manager_id))?.name || '—';
+  const mgrName  = allData.employees.find(e => sameId(e.id, emp.manager_id))?.name
+                || REAL_EMPLOYEES.find(r => sameId(r.id, emp.manager_id))?.name || '—';
   const comps    = realEmp.competencies || [];
   const score1   = mgrData.score1 ?? 0;
   const score2   = mgrData.score2 ?? 0;
   const total    = mgrData.total  ?? 0;
+  const recMap   = { merit:'เสนอปรับขึ้น', hold:'ยังไม่ขึ้นเงินเดือน', pip:'ต้องพัฒนา (PIP)', promote:'เลื่อนตำแหน่ง + ขึ้นเงินเดือน', 'raise-high':'ขึ้นเงินเดือน (สูง)', raise:'ขึ้นเงินเดือน (ปกติ)' };
+  const careerMap = { promote:'เสนอปรับเลื่อนตำแหน่ง', transfer:'เสนอโยกย้าย / เปลี่ยนตำแหน่ง', enrich:'เสนอขยายขอบเขตความรับผิดชอบ', maintain:'เสนอให้ปฏิบัติหน้าที่เดิมต่อไป' };
+  const sCol = (s, max) => s/max >= 0.8 ? '#10B981' : s/max >= 0.6 ? 'var(--primary)' : '#F59E0B';
 
-  const recMap = {
-    merit:'เสนอปรับขึ้น', hold:'ยังไม่ขึ้นเงินเดือน', pip:'ต้องพัฒนา (PIP)',
-    promote:'เลื่อนตำแหน่ง + ขึ้นเงินเดือน', 'raise-high':'ขึ้นเงินเดือน (สูง)', raise:'ขึ้นเงินเดือน (ปกติ)',
-  };
-  const careerMap = {
-    promote:'เสนอปรับเลื่อนตำแหน่ง', transfer:'เสนอโยกย้าย / เปลี่ยนแปลงตำแหน่ง',
-    enrich:'เสนอปรับขยายขอบเขตความรับผิดชอบ', maintain:'เสนอให้ปฏิบัติหน้าที่ในตำแหน่งเดิมต่อไป',
-  };
-
-  // --- Header ---
+  // --- HEADER (screen: dark card / print: clean) ---
   const headerHTML = `
     <div class="report-header-card">
       <div style="flex:1">
         <div class="report-name">${emp.name}</div>
-        <div class="report-meta">${emp.position||'—'} · ${posTypeBadge(emp.position_type)} · กลุ่ม ${emp.group} · แผนก ${emp.department||'—'} · ${periodLabel()}</div>
+        <div class="report-meta">${emp.position||'—'} · ${posTypeBadge(emp.position_type)} · กลุ่ม ${emp.group} · ${emp.department||'—'} · ${periodLabel()}</div>
         <div style="font-size:12px;color:var(--sidebar-muted);margin-top:4px">รหัส: ${emp.id} · หัวหน้า: ${mgrName}</div>
       </div>
-      <div style="text-align:center;min-width:110px">
-        ${gi ? `<div style="font-size:28px;font-weight:800;color:${gi.color}">${gi.label}</div>
-                <div style="font-size:11px;color:var(--sidebar-muted);margin-top:4px;letter-spacing:0.07em;text-transform:uppercase">ผลการประเมิน</div>`
-             : `<div style="font-size:14px;color:var(--sidebar-muted)">รอประเมิน</div>`}
+      <div style="display:flex;align-items:center;gap:12px">
+        ${gi ? `<div style="text-align:center">
+          <div style="font-size:32px;font-weight:800;color:${gi.color}">${gi.label}</div>
+          <div style="font-size:10px;color:var(--sidebar-muted);text-transform:uppercase;letter-spacing:0.07em">ผลการประเมิน</div>
+        </div>` : `<div style="font-size:13px;color:var(--sidebar-muted)">รอประเมิน</div>`}
+        <button class="btn-outline no-print" onclick="window.print()" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.2)">🖨 PDF</button>
+        <button class="btn-outline no-print" onclick="goBack()" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.2)">← กลับ</button>
+      </div>
+    </div>
+    <div class="print-only" style="border-bottom:3px solid var(--primary);padding-bottom:12px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:22px;font-weight:800">${emp.name}</div>
+          <div style="font-size:13px;color:#555;margin-top:4px">${emp.position||'—'} · กลุ่ม ${emp.group} · ${emp.department||'—'}</div>
+          <div style="font-size:12px;color:#888;margin-top:2px">รหัส: ${emp.id} · หัวหน้า: ${mgrName} · ${periodLabel()}</div>
+        </div>
+        ${gi ? `<div style="text-align:right">
+          <div style="font-size:28px;font-weight:800;color:${gi.color}">${gi.label}</div>
+          <div style="font-size:11px;color:#888">คะแนนรวม: ${total}/100</div>
+        </div>` : ''}
       </div>
     </div>`;
 
-  // --- Score Summary ---
+  // --- SCORE SUMMARY (4 cards) ---
+  const execLabel = execDec ? (recMap[execDec.decision] || execDec.decision) : null;
   const scoreHTML = mgrEval ? `
-    <div class="form-card report-section">
-      <div style="background:rgba(224,32,32,0.06);border-radius:var(--radius);padding:16px">
-        <div style="font-weight:700;font-size:13px;margin-bottom:12px">คะแนนรวมผลการประเมิน</div>
-        <table style="width:100%;font-size:13px;border-collapse:collapse">
-          <tr><td style="padding:6px 0;color:var(--text-2)">ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน</td><td style="text-align:right;font-weight:700;color:var(--primary)">${score1} / 50</td></tr>
-          <tr><td style="padding:6px 0;color:var(--text-2)">ส่วนที่ 2 — พฤติกรรมหลัก (Core Behaviors)</td><td style="text-align:right;font-weight:700;color:var(--primary)">${score2} / 50</td></tr>
-          <tr style="border-top:2px solid var(--primary)">
-            <td style="padding:10px 0;font-weight:700;font-size:15px">รวมคะแนนทั้งหมด</td>
-            <td style="text-align:right;font-weight:800;font-size:20px;color:var(--primary)">${total} <span style="font-size:14px;font-weight:400;color:var(--text-3)">/ 100</span></td>
-          </tr>
-        </table>
+    <div class="score-summary-row">
+      <div class="score-card">
+        <div class="score-card-label">ส่วนที่ 1 — สมรรถนะ</div>
+        <div class="score-card-num" style="color:${sCol(score1,50)}">${score1}</div>
+        <div class="score-card-max">/ 50</div>
+        <div class="score-card-bar"><div style="width:${(score1/50)*100}%;background:${sCol(score1,50)};height:100%;border-radius:3px"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="score-card-label">ส่วนที่ 2 — พฤติกรรม</div>
+        <div class="score-card-num" style="color:${sCol(score2,50)}">${score2}</div>
+        <div class="score-card-max">/ 50</div>
+        <div class="score-card-bar"><div style="width:${(score2/50)*100}%;background:${sCol(score2,50)};height:100%;border-radius:3px"></div></div>
+      </div>
+      <div class="score-card score-card-total">
+        <div class="score-card-label">คะแนนรวม</div>
+        <div class="score-card-num" style="color:${sCol(total,100)};font-size:36px">${total}</div>
+        <div class="score-card-max">/ 100</div>
+        <div class="score-card-bar"><div style="width:${(total/100)*100}%;background:${sCol(total,100)};height:100%;border-radius:3px"></div></div>
+      </div>
+      <div class="score-card score-card-director" style="${execDec?'border-color:#10B981':''}">
+        <div class="score-card-label">Director Decision</div>
+        ${execDec
+          ? `<div style="font-size:13px;font-weight:700;color:#10B981;margin-top:8px">✓ ${execLabel}</div>
+             ${execDec.note ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px">${execDec.note}</div>` : ''}`
+          : `<div style="font-size:13px;color:var(--text-3);margin-top:8px">รอตัดสินใจ</div>`}
       </div>
     </div>` : '';
 
-  // --- ส่วนที่ 1: Position Competencies ---
-  const comp1HTML = `
+  // --- TAB NAV ---
+  const tabNavHTML = `
+    <div class="report-tabs no-print">
+      <button class="report-tab active" data-tab="tab1" onclick="switchReportTab('tab1')">ส่วนที่ 1 — สมรรถนะ</button>
+      <button class="report-tab" data-tab="tab2" onclick="switchReportTab('tab2')">ส่วนที่ 2 — พฤติกรรม</button>
+      <button class="report-tab" data-tab="tab3" onclick="switchReportTab('tab3')">ส่วนที่ 3 — OKR</button>
+      <button class="report-tab" data-tab="tab4" onclick="switchReportTab('tab4')">ส่วนที่ 4 — ทบทวนตนเอง</button>
+      <button class="report-tab" data-tab="tab5" onclick="switchReportTab('tab5')">สรุปหัวหน้า</button>
+    </div>`;
+
+  // --- TAB 1: Position Competencies ---
+  const tab1 = `
     <div class="form-card report-section">
       <div class="card-header-row">
-        <h3 class="card-section-title">ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน (Position Competencies)</h3>
+        <h3 class="card-section-title">ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน</h3>
         <span class="ref-badge">${score1} / 50</span>
       </div>
       ${comps.map((c, idx) => {
         const empScore = indData[`icomp_${c.key}`] || 0;
         const mgrScore = mgrData[`mgr_icomp_${c.key}`];
-        const dispScore = mgrScore || empScore;
+        const disp = mgrScore || empScore;
+        const col = sCol(disp, 5);
         const optText = empScore > 0 ? (c.options[5 - empScore] || '') : '';
-        const col = dispScore>=4?'#10B981':dispScore>=3?'var(--primary)':'#F59E0B';
         return `
-          <div style="margin-bottom:14px;padding-bottom:12px;${idx<comps.length-1?'border-bottom:1px solid var(--border)':''}">
-            <div style="font-size:13px;font-weight:600;margin-bottom:6px">${c.no||idx+1}. ${c.name}</div>
-            <div style="display:flex;align-items:flex-start;gap:12px">
-              <div style="font-size:26px;font-weight:800;color:${col};min-width:36px;text-align:center">${dispScore||'—'}</div>
-              <div style="flex:1">
-                ${(mgrScore && mgrScore !== empScore)
-                  ? `<div style="font-size:12px;color:var(--primary);font-weight:600">หัวหน้าปรับ → ${mgrScore} (พนักงาน: ${empScore||'—'})</div>`
-                  : `<div style="font-size:12px;color:var(--text-3)">พนักงานเลือก: ${empScore||'—'}</div>`}
-                ${optText ? `<div style="font-size:11px;color:var(--text-2);margin-top:3px">${optText}</div>` : ''}
-                ${indData[`icomp_ev_${c.key}`] ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px;font-style:italic">ตัวอย่าง: ${indData[`icomp_ev_${c.key}`]}</div>` : ''}
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;${idx<comps.length-1?'border-bottom:1px solid var(--border)':''}">
+            <div style="width:22px;text-align:center;font-size:11px;color:var(--text-3);flex-shrink:0">${c.no||idx+1}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600">${c.name}</div>
+              ${optText ? `<div style="font-size:11px;color:var(--text-2);margin-top:2px">${optText}</div>` : ''}
+              ${(mgrScore && mgrScore!==empScore) ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${empScore}→${mgrScore}</div>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <div style="width:64px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                <div style="width:${(disp/5)*100}%;height:100%;background:${col};border-radius:3px"></div>
               </div>
+              <span style="font-size:16px;font-weight:800;color:${col};width:18px;text-align:right">${disp||'—'}</span>
             </div>
           </div>`;
       }).join('')}
     </div>`;
 
-  // --- ส่วนที่ 2: Core Behaviors ---
-  const comp2HTML = `
+  // --- TAB 2: Core Behaviors ---
+  const tab2 = `
     <div class="form-card report-section">
       <div class="card-header-row">
         <h3 class="card-section-title">ส่วนที่ 2 — พฤติกรรมหลัก (Core Behaviors)</h3>
@@ -4248,51 +4294,50 @@ function renderIndividualReport(empId, emp, realEmp) {
       ${INDIVIDUAL_BEHAVIOR_LIST.map((b, idx) => {
         const empScore = indData[`ibeh_${b.key}`] || 0;
         const mgrScore = mgrData[`mgr_ibeh_${b.key}`];
-        const dispScore = mgrScore || empScore;
-        const pct = (dispScore/5)*100;
-        const col = dispScore>=4?'#10B981':dispScore>=3?'var(--primary)':'#F59E0B';
+        const disp = mgrScore || empScore;
+        const col = sCol(disp, 5);
         return `
           <div class="report-behavior-row">
             <span class="report-behavior-no">${b.no||idx+1}</span>
             <span class="report-behavior-name">${b.name}</span>
-            <div class="report-bar-wrap"><div class="report-bar-fill" style="width:${pct}%;background:${col}"></div></div>
-            <span class="report-behavior-val ${dispScore>=4?'score-high':dispScore>=3?'score-mid':'score-low'}">${dispScore||'—'}</span>
-            ${(mgrScore && mgrScore!==empScore) ? `<span style="font-size:10px;color:var(--primary);margin-left:4px;font-weight:600">M:${mgrScore}</span>` : (empScore?`<span style="font-size:10px;color:var(--text-3);margin-left:4px">S:${empScore}</span>`:'')}
+            <div class="report-bar-wrap"><div class="report-bar-fill" style="width:${(disp/5)*100}%;background:${col}"></div></div>
+            <span class="report-behavior-val" style="color:${col}">${disp||'—'}</span>
+            ${(mgrScore && mgrScore!==empScore) ? `<span style="font-size:10px;color:var(--primary);margin-left:4px" title="Manager ปรับ">M</span>` : ''}
           </div>`;
       }).join('')}
     </div>`;
 
-  // --- ส่วนที่ 3: OKR ---
-  const okrHTML = `
+  // --- TAB 3: OKR ---
+  const tab3 = `
     <div class="form-card report-section">
       <div class="card-header-row"><h3 class="card-section-title">ส่วนที่ 3 — ภารกิจหลัก / OKR</h3></div>
       ${[1,2,3].map(i => `
-        <div style="margin-bottom:18px">
-          <div style="font-weight:700;font-size:13px;margin-bottom:8px">ภารกิจที่ ${i}: ${indData[`okr${i}_objective`]||'—'}</div>
+        <div style="${i<3?'margin-bottom:20px':''}">
+          <div style="font-weight:700;font-size:13px;color:var(--primary);margin-bottom:8px">ภารกิจที่ ${i}: ${indData[`okr${i}_objective`]||'—'}</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px">
             <thead>
-              <tr style="background:var(--primary);color:white">
-                <th style="width:40px;padding:6px;border:1px solid rgba(255,255,255,0.3);text-align:center"></th>
-                <th style="padding:6px 10px;border:1px solid rgba(255,255,255,0.3);text-align:left">เป้าหมาย (Key Result)</th>
-                <th style="padding:6px 10px;border:1px solid rgba(255,255,255,0.3);text-align:left">ผลลัพธ์จริง (Actual)</th>
-                <th style="padding:6px 10px;border:1px solid rgba(255,255,255,0.3);text-align:left">ข้อเสนอแนะหัวหน้า</th>
+              <tr style="background:var(--primary);color:#fff">
+                <th style="width:36px;padding:7px;border:1px solid rgba(255,255,255,0.25);text-align:center"></th>
+                <th style="padding:7px 10px;border:1px solid rgba(255,255,255,0.25);text-align:left">เป้าหมาย (Key Result)</th>
+                <th style="padding:7px 10px;border:1px solid rgba(255,255,255,0.25);text-align:left">ผลลัพธ์จริง</th>
+                <th style="padding:7px 10px;border:1px solid rgba(255,255,255,0.25);text-align:left">หมายเหตุจากหัวหน้า</th>
               </tr>
             </thead>
             <tbody>
               ${['kr1','kr2','kr3'].map((kr,ki) => `
-                <tr>
-                  <td style="padding:6px;border:1px solid var(--border);text-align:center;font-weight:700;color:var(--text-3);background:var(--bg)">KR${ki+1}</td>
-                  <td style="padding:6px 8px;border:1px solid var(--border)">${indData[`okr${i}_${kr}`]||'—'}</td>
-                  <td style="padding:6px 8px;border:1px solid var(--border);color:var(--primary)">${indData[`okr${i}_actual${ki+1}`]||'—'}</td>
-                  <td style="padding:6px 8px;border:1px solid var(--border);background:rgba(224,32,32,0.03)">${mgrData[`okr${i}_${kr}_note`]||'—'}</td>
+                <tr style="background:${ki%2?'var(--bg)':'var(--surface)'}">
+                  <td style="padding:7px;border:1px solid var(--border);text-align:center;font-weight:700;color:var(--text-3)">KR${ki+1}</td>
+                  <td style="padding:7px 10px;border:1px solid var(--border)">${indData[`okr${i}_${kr}`]||'—'}</td>
+                  <td style="padding:7px 10px;border:1px solid var(--border);color:var(--primary);font-weight:500">${indData[`okr${i}_actual${ki+1}`]||'—'}</td>
+                  <td style="padding:7px 10px;border:1px solid var(--border);color:var(--text-2);font-style:italic">${mgrData[`okr${i}_${kr}_note`]||'—'}</td>
                 </tr>`).join('')}
             </tbody>
           </table>
         </div>`).join('')}
     </div>`;
 
-  // --- ส่วนที่ 4: Self-Review + Manager Note ---
-  const reviewHTML = `
+  // --- TAB 4: Self-Review ---
+  const tab4 = `
     <div class="form-card report-section">
       <div class="card-header-row"><h3 class="card-section-title">ส่วนที่ 4 — ทบทวนตนเองและข้อเสนอแนะหัวหน้า</h3></div>
       <div class="report-review-grid">
@@ -4309,50 +4354,45 @@ function renderIndividualReport(empId, emp, realEmp) {
           <div class="report-review-text">${indData.ireview_goals||'—'}</div>
         </div>
         ${mgrData.support_note ? `
-        <div class="report-review-cell" style="border-left:3px solid var(--primary);background:rgba(224,32,32,0.03)">
+        <div class="report-review-cell" style="border-left:3px solid var(--primary);background:rgba(224,32,32,0.04)">
           <div class="report-review-label" style="color:var(--primary)">ข้อเสนอแนะเพิ่มเติมจากหัวหน้า</div>
           <div class="report-review-text">${mgrData.support_note}</div>
         </div>` : ''}
       </div>
     </div>`;
 
-  // --- ส่วนที่ 5: Manager Summary ---
-  const recLabel = mgrData.recommendation==='merit'
+  // --- TAB 5: Manager Summary + Director Decision ---
+  const recLabel = mgrData.recommendation === 'merit'
     ? `เสนอปรับขึ้น ${mgrData.merit_pct||''}%`
     : (recMap[mgrData.recommendation] || recMap[mgrEval?.recommendation] || '—');
-  const summaryHTML = `
+  const tab5 = `
     <div class="form-card report-section" style="${mgrEval?'border-left:3px solid var(--primary)':''}">
-      <div class="card-header-row"><h3 class="card-section-title">ส่วนที่ 5 — สรุปผลการประเมินโดยหัวหน้า</h3></div>
+      <div class="card-header-row"><h3 class="card-section-title">สรุปผลการประเมินโดยหัวหน้า</h3></div>
       ${mgrEval ? `
-        <div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:16px">
+        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px">
           <div>
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">ผลการประเมิน</div>
-            <div style="font-size:22px;font-weight:800;color:${gi?.color||'var(--text-1)'}">${gi?.label||'—'}</div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">ผลการประเมิน</div>
+            <div style="font-size:24px;font-weight:800;color:${gi?.color||'var(--text-1)'}">${gi?.label||'—'}</div>
           </div>
           <div>
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">ข้อเสนอแนะ</div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">ข้อเสนอแนะ</div>
             <div style="font-size:14px;font-weight:600">${recLabel}</div>
           </div>
           ${mgrData.career ? `<div>
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">การปรับตำแหน่ง</div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">การปรับตำแหน่ง</div>
             <div style="font-size:13px;font-weight:600">${careerMap[mgrData.career]||mgrData.career}</div>
           </div>` : ''}
         </div>
-        ${mgrData.overall_comment ? `
-        <div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border);margin-bottom:12px">
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">สรุปความเห็นภาพรวม</div>
-          <p style="font-size:13px;color:var(--text-2);font-style:italic;line-height:1.5">"${mgrData.overall_comment}"</p>
+        ${mgrData.overall_comment ? `<div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border);margin-bottom:10px">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">สรุปความเห็น</div>
+          <p style="font-size:13px;color:var(--text-2);font-style:italic;line-height:1.6;margin:0">"${mgrData.overall_comment}"</p>
         </div>` : ''}
-        ${mgrData.dev_plan ? `
-        <div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border)">
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px">แผนการพัฒนา</div>
-          <p style="font-size:13px;color:var(--text-2);line-height:1.5">${mgrData.dev_plan}</p>
+        ${mgrData.dev_plan ? `<div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border)">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">แผนการพัฒนา</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin:0">${mgrData.dev_plan}</p>
         </div>` : ''}`
-      : '<p style="color:var(--text-3);font-size:13px">หัวหน้ายังไม่ได้ประเมิน</p>'}
-    </div>`;
-
-  // --- Director Decision ---
-  const dirHTML = `
+      : `<p style="color:var(--text-3);font-size:13px">หัวหน้ายังไม่ได้ประเมิน</p>`}
+    </div>
     ${execDec && currentUser.role !== 'executive' ? `
     <div class="form-card report-section" style="border-left:3px solid #10B981">
       <div class="card-header-row"><h3 class="card-section-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</h3></div>
@@ -4377,7 +4417,15 @@ function renderIndividualReport(empId, emp, realEmp) {
       </div>
     </div>` : ''}`;
 
-  document.getElementById('report-content').innerHTML = headerHTML + scoreHTML + comp1HTML + comp2HTML + okrHTML + reviewHTML + summaryHTML + dirHTML;
+  document.getElementById('report-content').innerHTML =
+    headerHTML + scoreHTML + tabNavHTML +
+    `<div class="report-tabs-body">
+      <div id="report-tab-tab1" class="report-tab-pane active">${tab1}</div>
+      <div id="report-tab-tab2" class="report-tab-pane">${tab2}</div>
+      <div id="report-tab-tab3" class="report-tab-pane">${tab3}</div>
+      <div id="report-tab-tab4" class="report-tab-pane">${tab4}</div>
+      <div id="report-tab-tab5" class="report-tab-pane">${tab5}</div>
+    </div>`;
 }
 
 async function submitExecDecision(empId) {
@@ -4792,13 +4840,19 @@ function exportExcel() {
   // หัวตาราง สำหรับ HR
   const headers = [
     'ชื่อ', 'กลุ่ม', 'แผนก', 'ตำแหน่ง', 'ประเภท',
-    'Self-Eval', 'Grade', 'Recommendation', 'Director Decision', 'หมายเหตุ'
+    'Self-Eval', 'Grade', 'Score 1/50', 'Score 2/50', 'Total/100',
+    'Recommendation', 'Director Decision', 'หมายเหตุ'
   ];
 
   const rows = emps.map(emp => {
-    const self = allData.selfEvals.find(s => sameId(s.employee_id, emp.id));
-    const mgr  = allData.managerEvals.find(m => sameId(m.employee_id, emp.id));
-    const exec = allData.execDecisions.find(d => sameId(d.employee_id, emp.id));
+    const self    = allData.selfEvals.find(s => sameId(s.employee_id, emp.id));
+    const mgr     = allData.managerEvals.find(m => sameId(m.employee_id, emp.id));
+    const exec    = allData.execDecisions.find(d => sameId(d.employee_id, emp.id));
+    // คะแนน Individual Form
+    const realE   = REAL_EMPLOYEES.find(r => sameId(r.id, emp.id));
+    const hasInd  = realE?.competencies?.length > 0 && !isAdminType(emp.position_type||'staff');
+    const mgrInd  = hasInd ? allData.managerEvals.find(m => sameId(m.employee_id, emp.id) && m.form_type==='individual') : null;
+    const imd     = mgrInd?.individual_mgr_data || {};
     return [
       emp.name,
       emp.group        || '—',
@@ -4807,6 +4861,9 @@ function exportExcel() {
       emp.position_type|| '—',
       self ? 'กรอกแล้ว' : 'ยังไม่กรอก',
       mgr?.overall_grade ? (gradeMap[mgr.overall_grade] || mgr.overall_grade) : '—',
+      hasInd ? (imd.score1 ?? '—') : '—',
+      hasInd ? (imd.score2 ?? '—') : '—',
+      hasInd ? (imd.total  ?? '—') : '—',
       mgr?.recommendation ? (recMap[mgr.recommendation] || mgr.recommendation) : '—',
       exec?.decision  ? (recMap[exec.decision]  || exec.decision)  : '—',
       exec?.note      || '—',
@@ -4819,7 +4876,8 @@ function exportExcel() {
   // ปรับความกว้างคอลัมน์
   ws['!cols'] = [
     {wch:25}, {wch:8}, {wch:10}, {wch:30}, {wch:10},
-    {wch:12}, {wch:12}, {wch:22}, {wch:22}, {wch:30}
+    {wch:12}, {wch:12}, {wch:10}, {wch:10}, {wch:10},
+    {wch:22}, {wch:22}, {wch:30}
   ];
 
   XLSX.utils.book_append_sheet(wb, ws, grp||'ทั้งหมด');
