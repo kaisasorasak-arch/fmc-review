@@ -95,6 +95,10 @@
             <div class="stat-label">Manager Evaluation</div>
             <div class="stat-value" id="emp-mgr-status">รอประเมิน</div>
           </div>
+          <div class="stat-card">
+            <div class="stat-label">Grade</div>
+            <div class="stat-value" id="emp-grade">—</div>
+          </div>
         </div>
 
         <!-- Action card -->
@@ -173,7 +177,7 @@
             <select class="field-select" id="exec-filter-group" onchange="filterExecTable()">
               <option value="">ทุกกลุ่ม</option>
               <option>FMC</option><option>ISEC</option><option>PPP</option>
-              <option>BNT</option><option>NSP</option>
+              <option>BNT</option><option>NSP</option><option>SCA</option>
             </select>
             <select class="field-select" id="exec-filter-dept" onchange="filterExecTable()">
               <option value="">ทุกแผนก</option>
@@ -227,7 +231,7 @@
           <select class="field-select filter-select" id="admin-filter-group" onchange="renderAdminTable()">
             <option value="">ทุกกลุ่ม</option>
             <option>FMC</option><option>ISEC</option><option>PPP</option>
-            <option>BNT</option><option>NSP</option>
+            <option>BNT</option><option>NSP</option><option>SCA</option>
           </select>
           <select class="field-select filter-select" id="admin-filter-role" onchange="renderAdminTable()">
             <option value="">ทุก Role</option>
@@ -319,7 +323,7 @@
               <select class="field-select" id="pdf-group-select">
                 <option value="">ทุกกลุ่ม</option>
                 <option>FMC</option><option>ISEC</option><option>PPP</option>
-                <option>BNT</option><option>NSP</option>
+                <option>BNT</option><option>NSP</option><option>SCA</option>
               </select>
             </div>
             <button class="btn-primary btn-full mt-16" onclick="exportPDF()">พิมพ์ PDF</button>
@@ -333,7 +337,7 @@
               <select class="field-select" id="excel-group-select">
                 <option value="">ทุกกลุ่ม</option>
                 <option>FMC</option><option>ISEC</option><option>PPP</option>
-                <option>BNT</option><option>NSP</option>
+                <option>BNT</option><option>NSP</option><option>SCA</option>
               </select>
             </div>
             <button class="btn-primary btn-full mt-16" onclick="exportExcel()">ดาวน์โหลด Excel</button>
@@ -374,7 +378,7 @@
             <select id="modal-group" class="field-select" onchange="onModalGroupChange()">
               <option value="">— เลือกกลุ่ม —</option>
               <option>FMC</option><option>ISEC</option><option>PPP</option>
-              <option>BNT</option><option>NSP</option>
+              <option>BNT</option><option>NSP</option><option>SCA</option>
             </select>
           </div>
           <div class="form-field">
@@ -443,3 +447,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
