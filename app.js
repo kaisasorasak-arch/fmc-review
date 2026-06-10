@@ -204,6 +204,123 @@ const ADMIN_BEHAVIOR_LIST = [
     options:['ขวนขวายเรียนรู้เทคโนโลยีใหม่/ทักษะใหม่ตลอดเวลา (เช่น Smart Solutions, AI, เทคนิค Excel, ระบบ Automation) และนำมาปรับใช้จนงานเร็วและดีขึ้นอย่างเห็นได้ชัด','ชอบเรียนรู้สิ่งใหม่ๆ พัฒนาทักษะตัวเองอยู่เสมอ ยินดีรับฟังคำติชมจากหัวหน้าและเพื่อนร่วมงานเพื่อนำมาปรับปรุงตัวโดยไม่คิดมาก','เข้าร่วมการอบรมที่บริษัทจัดให้ตามหน้าที่ ยอมรับคำวิจารณ์ได้ แต่อาจจะยังไม่ได้ขวนขวายหาความรู้ภายนอกเพิ่มเติมด้วยตนเอง','ทำงานด้วยวิธีเดิมๆ ทำตามความคุ้นเคยเดิมๆ ไม่ค่อยเปิดรับเทคโนโลยีใหม่ และมักจะรู้สึกเสียหน้าหรือแก้ตัวเมื่อได้รับฟีดแบ็กเชิงลบ','ต่อต้านการเรียนรู้ ปฏิเสธการใช้เครื่องมือหรือเทคโนโลยีใหม่ๆ ดึงดันจะทำแบบเดิม แม้จะล้าหลังและช้า'] },
 ];
 
+// ========== Position Competencies — Finance Officer ==========
+const FINANCE_COMPETENCY_LIST = [
+  { key:'fin_knowledge', no:1, name:'ความรู้ด้านการเงิน',
+    question:'ท่านมีความเข้าใจในหลักการเงินองค์กร อย่างไร ?',
+    options:['มีความเชี่ยวชาญสูงและเป็นที่ปรึกษาให้ผู้อื่นได้','มีความรู้ดีมาก','มีความรู้ในระดับที่ทำงานได้','มีความรู้ไม่เพียงพอ','ต้องให้ผู้อื่นสอนตลอดเวลา'] },
+  { key:'fin_accuracy', no:2, name:'ความละเอียดรอบคอบ',
+    question:'ท่านมีความละเอียดรอบคอบในการตรวจสอบของเอกสาร (เช่น ใบแจ้งหนี้, ใบเสร็จรับเงิน, ใบขออนุมัติ) ก่อนทำการจ่ายเงิน อย่างไร ?',
+    options:['ถูกต้อง 100% มีระบบตรวจสอบซ้ำที่ชัดเจน','ถูกต้องแม่นยำ มีความละเอียดสูงมาก คัดกรองแก้ไขได้เองทั้งหมด','ได้ตามมาตรฐาน มีความผิดพลาดบ้างแต่แก้ไขทัน','ต้องให้ผู้อื่นช่วยตรวจแก้บ่อย มีความผิดบ่อยครั้ง','ผิดพลาดจนเกิดความเสียหาย'] },
+  { key:'fin_ethics', no:3, name:'การรักษาจรรยาบรรณวิชาชีพ',
+    question:'ท่านยึดมั่นในหลักจรรยาบรรณวิชาชีพ ความซื่อสัตย์สุจริต และนโยบายความโปร่งใสทางการเงินขององค์กรอย่างไร ?',
+    options:['รักษาความลับทางการเงินอย่างมิดชิด 100% และกล้าทักท้วง','แยกแยะเรื่องงานและเรื่องส่วนตัวชัดเจน ไม่นำข้อมูลสภาพคล่องของบริษัทไปพูดคุยนอกแผนก','มีความซื่อสัตย์สุจริตในการปฏิบัติหน้าที่','หย่อนยานในกฎระเบียบ วางเอกสารโอนเงินสำคัญทิ้งไว้บนโต๊ะให้คนอื่นเห็น','มีพฤติกรรมสุ่มเสี่ยงต่อการทุจริต นำเงินบริษัทไปหมุนใช้ส่วนตัว หรือนำความลับเรื่องเงินเดือน/สถานะการเงินไปปล่อยข่าวจนเกิดความวุ่นวาย'] },
+  { key:'fin_reporting', no:4, name:'การจัดทำรายงานสถานะทางการเงิน',
+    question:'คุณสามารถสรุปยอดเงินสดคงเหลือ หรือรายงานรับ-จ่ายรายสัปดาห์ เพื่อให้ทราบสถานะทางการเงินปัจจุบันได้ อย่างไร ?',
+    options:['เสร็จก่อนกำหนด และเตรียมข้อมูลล่วงหน้า ส่งอัปเดตทุกเช้าตรงเวลา','รายงานสรุปยอดรับ-จ่ายได้ครบถ้วน ชัดเจน เสร็จตรงตามกำหนดเวลาเสมอ','บันทึกและส่งรายงานการเงินตามรอบเวลา','ล่าช้าบ้างแต่ไม่กระทบภาพรวม','ล่าช้าจนเกิดปัญหาในระบบการเงิน'] },
+  { key:'fin_petty_cash', no:5, name:'การบริหารเงินสดย่อยและการเบิกจ่ายเงินทดรอง',
+    question:'สามารถบริหารจัดการวงเงินสดย่อย ตรวจสอบการเบิก-คืนเงินทดรองจ่าย และเคลียร์ยอดให้เป็นปัจจุบันได้ อย่างไร ?',
+    options:['ยอดเงินสดย่อยตรงกับเอกสาร 100% เสมอ ควบคุมและเร่งรัดให้พนักงานนำเอกสารมาเคลียร์เงินทดรองจ่ายตามเวลา','ทำรายงานเงินสดย่อยได้ถูกต้อง ตรวจเช็กเงินคงเหลือประจำสัปดาห์อย่างสม่ำเสมอ','ดูแลเงินสดย่อยได้ เบิกเติมเงินเมื่อใกล้หมด มีรายการเคลียร์เงินทดรองตามเกณฑ์ปกติ','ยอดเงินสดย่อยและเอกสารไม่ค่อยตรงกัน หรือปล่อยให้พนักงานค้างเคลียร์เงินทดรองจ่ายนาน','เงินสดย่อยขาดหายโดยไม่ทราบสาเหตุ'] },
+  { key:'fin_software', no:6, name:'การใช้ระบบและโปรแกรมทางการเงิน',
+    question:'ท่านสามารถใช้งานระบบ E-Banking โปรแกรมบัญชีสำเร็จรูป หรือโปรแกรม Excel ในการจัดการธุรกรรมทางการเงินได้ อย่างไร?',
+    options:['เชี่ยวชาญการใช้ทุกฟังก์ชั่น ผูกสูตรลดเวลาการคีย์ข้อมูลลดเวลาทำงานลงได้','ใช้งานระบบของธนาคาร โปรแกรมบัญชีการเงินของบริษัทได้ใช้งานได้ดี เรียนรู้ฟังก์ชันใหม่ๆ และแก้ไขปัญหาเบื้องต้นได้ด้วยตนเอง','ใช้งานพื้นฐานได้และแอปพลิเคชันธนาคาร คีย์ข้อมูลเข้าระบบได้ถูกต้อง','ใช้งานระบบดิจิทัลไม่ค่อยคล่อง มักทำรายการผิดพลาด','คีย์ข้อมูลระบบผิดพลาดบ่อยครั้ง ไม่เข้าใจวิธีใช้โปรแกรม'] },
+  { key:'fin_filing', no:7, name:'การจัดเก็บและบริหารคลังเอกสาร',
+    question:'ท่านจัดเก็บหลักฐานทางการเงิน (ใบเสร็จ, ใบกำกับภาษี, สัญญาต่างๆ) อย่างเป็นระบบ เพื่อรองรับการตรวจสอบ อย่างไร?',
+    options:['ระบบจัดเก็บดีเยี่ยม ค้นหาเจอภายใน 1 นาที','เป็นระเบียบเข้าแฟ้มอย่างเรียบร้อย ค้นหาง่าย','จัดเก็บได้ตามระบบ แต่อาจมีเอกสารกองรอคิวจัดเก็บบ้าง','จัดเก็บเอกสารล่าช้า ค้นหายาก','เอกสารสูญหาย หรือไม่เป็นระเบียบ หาไม่เจอ'] },
+  { key:'fin_payables', no:8, name:'การบริหารจัดการเจ้าหนี้การค้า',
+    question:'ท่านสามารถจัดทำแผนการจ่ายเงินให้กับซัพพลายเออร์ได้อย่างถูกต้อง และบริหารเครดิตเทอม อย่างไร ?',
+    options:['วางแผนตารางการจ่ายเงินล่วงหน้าได้อย่างมีประสิทธิภาพ เจรจายืดเวลาจ่ายเงินได้ในยามจำเป็นโดยซัพพลายเออร์ไม่เสียความรู้สึก','จัดสรรรอบการจ่ายเงินได้ตรงเวลา บริหารเงินหมุนเวียนได้ดี','ดำเนินการตั้งเบิกและจ่ายเช็ค/โอนเงินให้ซัพพลายเออร์ตามรอบดิวปกติอย่างถูกต้อง','จัดทำตารางจ่ายเงินตกหล่นบ่อยครั้ง ลืมจ่ายเจ้าหนี้บางรายจนโดนโทรทวงถาม ทำให้เสียดอกเบี้ยผลประโยชน','บริหารรอบจ่ายเงินล้มเหลว จ่ายช้ากว่ากำหนดเป็นประจำ'] },
+  { key:'fin_coordination', no:9, name:'การประสานงานและการให้บริการข้อมูลระหว่างแผนก',
+    question:'ในฐานะที่ต้องตรวจสอบเอกสารและให้ข้อมูลแก่แผนกอื่น ท่านให้บริการ อย่างไร ?',
+    options:['ประสานงานดีเยี่ยม ให้บริการข้อมูลรวดเร็วทันใจ อธิบายขั้นตอนเอกสารที่ถูกต้อง','ให้บริการข้อมูลดีและรวดเร็ว อธิบายกฎเกณฑ์และเหตุผลเพิ่มเติมชัดเจน','ประสานงานได้ตามหน้าที่ตรงไปตรงมา พูดจาสุภาพ','ข้อมูลไม่ชัดเจน เน้นการปฏิเสธโดยไม่ช่วยอธิบายวิธีแก้ไข','ไม่ให้ความร่วมมือ ดองเรื่องเอกสารของแผนกอื่นไว้'] },
+  { key:'fin_bank_rec', no:10, name:'การกระทบยอดเงินฝากธนาคาร',
+    question:'ท่านดำเนินการตรวจสอบยอดเงินฝากธนาคารกับสมุดบัญชี อย่างเป็นระบบได้ อย่างไร?',
+    options:['ทำกระทบยอดทันทีที่มีรายการเคลื่อนไหว ตรวจหารายการผิดปกติได้อย่างรวดเร็ว ตัวเลขตรงเป๊ะ 100% ไม่มีรายการค้างตรวจสอบเลย','ทำอย่างสม่ำเสมอ สามารถค้นหาและเคลียร์รายการเช็คค้างจ่าย หรือเงินโอนที่ไม่ทราบชื่อผู้โอนได้จนจบ','จัดทำงบกระทบยอดเงินฝากธนาคารประจำเดือนเสร็จสิ้นตามกำหนดเวลา','ทำงบกระทบยอดล่าช้า หรือสะสมรายการโอนที่ไม่รู้ชื่อไว้เยอะเกินไปจนข้ามเดือน','ละเลยการทำกระทบยอด ปล่อยให้ยอดในระบบและธนาคารไม่ตรงกันสะสมหลายเดือน'] },
+];
+
+// ========== Position Competencies — Account Officer ==========
+const ACCOUNT_COMPETENCY_LIST = [
+  { key:'acc_knowledge', no:1, name:'ความรู้ด้านบัญชี',
+    question:'ท่านมีความเข้าใจหลักการบัญชีที่ถูกต้อง และสามารถประยุกต์ใช้เพื่อแก้ปัญหาในหน้างานได้ อย่างไร ?',
+    options:['มีความเชี่ยวชาญสูงและเป็นที่ปรึกษาให้ผู้อื่นได้','มีความรู้ดีมาก','มีความรู้ในระดับที่ทำงานได้','มีความรู้ไม่เพียงพอ','ต้องให้ผู้อื่นสอนตลอดเวลา'] },
+  { key:'acc_accuracy', no:2, name:'ความละเอียดรอบคอบ',
+    question:'ท่านตรวจสอบตัวเลขและเอกสารก่อนบันทึกทุกครั้ง เพื่อให้มั่นใจว่าข้อมูลไม่มีข้อผิดพลาด อย่างไร ?',
+    options:['บันทึกบัญชีและตัวเลขถูกต้อง 100% ตรวจสอบซ้ำอย่างเป็นระบบ','ถูกต้องแม่นยำ มีความละเอียดสูงมาก คัดกรองแก้ไขได้เองทั้งหมด','บันทึกบัญชีเดบิต-เครดิต ได้ตามมาตรฐานการบัญชีทั่วไป มีความผิดพลาดบ้างแต่แก้ไขทัน','ต้องให้ผู้อื่นช่วยตรวจแก้บ่อย คีย์ข้อมูลผิดหรือลงหมวดหมู่บัญชีผิดบ่อยครั้ง','ผิดพลาดจนเกิดความเสียหาย'] },
+  { key:'acc_ethics', no:3, name:'จรรยาบรรณในวิชาชีพบัญชี',
+    question:'ท่านยึดมั่นในหลักจรรยาบรรณวิชาชีพนักบัญชี ความซื่อสัตย์สุจริต และนโยบายความโปร่งใสทางการเงินขององค์กรอย่างไร ?',
+    options:['ยึดมั่นจรรยาบรรณอย่างเคร่งครัดและกล้าทักท้วง','ตรวจสอบที่มาที่ไปของเงินและเอกสารทุกใบอย่างตรงไปตรงมา','มีความซื่อสัตย์สุจริตในการปฏิบัติหน้าที่','ลุ่มอล่วยกฎเกณฑ์มากเกินไปเพื่อความเกรงใจ','ละเลยการตรวจสอบ ละหลวมต่อระเบียบ'] },
+  { key:'acc_financial_stmt', no:4, name:'การจัดทำงบการเงิน',
+    question:'ท่านสามารถบริหารจัดการเวลา เพื่อปิดบัญชีประจำเดือน/ประจำปี ให้เสร็จสิ้น อย่างไร ?',
+    options:['ปิดบัญชีเสร็จก่อนกำหนดอย่างเป็นระบบทุกเดือน','ปิดบัญชีได้เสร็จตรงเวลาตามกำหนดของบริษัท','ปิดบัญชีได้ทันตามกำหนด แต่อาจต้องทำงานล่วงเวลา (OT) อย่างหนัก','ปิดบัญชีล่าช้ากว่ากำหนดเป็นบางครั้ง','ปิดบัญชีเลทเป็นประจำ'] },
+  { key:'acc_tax', no:5, name:'ความรู้ด้านภาษีอากร',
+    question:'ท่านมีความรอบรู้และอัปเดตข้อกฎหมายภาษีอากร เพื่อจัดทำและยื่นแบบภาษีต่างๆ (เช่น VAT, หัก ณ ที่จ่าย, ภ.ง.ด.) ได้ถูกต้องตามเกณฑ์สรรพากร อย่างไร ?',
+    options:['แม่นยำกฎหมาย ตรวจสอบสิทธิประโยชน์ทางภาษีใหม่ๆ ได้เชี่ยวชาญ ยื่นภาษีถูกต้อง 100%','มีความรู้กฎหมายภาษีดีเยี่ยม ตรวจสอบและคัดกรองใบกำกับภาษีซื้อ-ภาษีขาย ป้องกันความเสี่ยงให้บริษัทได้ดี','ยื่นแบบภาษีทุกประเภทได้ถูกต้องครบถ้วน ทันตามกำหนดเวลาในแต่ละเดือน','ต้องมีคนช่วยเตือนบ่อย คำนวณหรือกรอกข้อมูลผิดพลาดต้องยื่นปรับปรุงย้อนเพิ่มเติมอยู่บ่อยครั้ง','ไม่เข้าใจและคำนวณภาษีผิดพลาด หรือยื่นภาษีล่าช้าเป็นประจำ จนบริษัทต้องเสียเงินค่าปรับ'] },
+  { key:'acc_software', no:6, name:'ทักษะด้านเทคโนโลยีและซอฟต์แวร์',
+    question:'มีความเชี่ยวชาญในการใช้โปรแกรมบัญชีสำเร็จรูปของบริษัท และเครื่องมือสนับสนุน (เช่น Advanced Excel) อย่างไร ?',
+    options:['ใช้ฟังก์ชันขั้นสูงได้คล่อง ผูกสูตรลดเวลาการคีย์ข้อมูลลดเวลาทำงานลงได้','ใช้งานได้ดีมาก เรียนรู้ฟังก์ชันใหม่ๆ และแก้ไขปัญหาเบื้องต้นได้ด้วยตนเอง','ใช้งานพื้นฐานได้ คีย์ข้อมูลเข้าระบบได้ถูกต้อง','ต้องเรียนรู้อีกมากฟังก์ชันเดิมๆ ที่เคยสอน','คีย์ข้อมูลระบบผิดพลาดบ่อยครั้ง ไม่เข้าใจวิธีใช้โปรแกรม'] },
+  { key:'acc_filing', no:7, name:'การจัดเก็บและบริหารคลังเอกสารบัญชี',
+    question:'ท่านจัดเก็บและจำแนกเอกสารบัญชีอย่างเป็นระบบ สามารถสืบค้นข้อมูลย้อนหลังได้ทันทีเมื่อถูกร้องขอ อย่างไร ?',
+    options:['ระบบจัดเก็บดีเยี่ยม ค้นหาเจอภายใน 1 นาที และทำสแกนดิจิทัลสำรองไว้ 100%','เป็นระเบียบเข้าแฟ้มอย่างเรียบร้อย ค้นหาง่าย','จัดเก็บได้ตามระบบ แต่อาจมีเอกสารกองรอคิวจัดเก็บบ้าง','จัดเก็บเอกสารล่าช้า ค้นหายาก','เอกสารสูญหาย หรือไม่เป็นระเบียบ หาไม่เจอ'] },
+  { key:'acc_analysis', no:8, name:'การวิเคราะห์และรายงานข้อมูลทางบัญชี',
+    question:'ท่านสามารถวิเคราะห์ความผิดปกติของตัวเลขและสรุปรายงาน ให้เห็นภาพรวมได้ อย่างไร ?',
+    options:['ชี้จุดผิดปกติของค่าใช้จ่ายเชิงลึกและให้ข้อเสนอแนะได้ดีเยี่ยม ช่วยให้หัวหน้าวางแผนควบคุมงบได้','รายงานสรุปย่อที่อ่านง่าย มีคำอธิบายหมายเหตุประกอบงบที่ชัดเจน เป็นประโยชน์ต่อการนำไปใช้','จัดทำรายงานงบการเงินและรายละเอียดประกอบงบได้ครบถ้วนถูกต้องตามรูปแบบ','ยังต้องให้การช่วยเหลือผู้อื่น ข้อมูลนำไปวิเคราะห์ต่อยังไม่ได้','ไม่สามารถจัดทำรายงานสรุปได้'] },
+  { key:'acc_coordination', no:9, name:'การประสานงานและการให้บริการข้อมูลระหว่างแผนก',
+    question:'ในฐานะที่ต้องตรวจสอบเอกสารและให้ข้อมูลแก่แผนกอื่น ท่านให้บริการ อย่างไร ?',
+    options:['ประสานงานดีเยี่ยม ให้บริการข้อมูลรวดเร็วทันใจ อธิบายขั้นตอนเอกสารที่ถูกต้อง','ให้บริการข้อมูลดีและรวดเร็ว อธิบายกฎเกณฑ์และเหตุผลเพิ่มเติมชัดเจน','ประสานงานได้ตามหน้าที่ตรงไปตรงมา พูดจาสุภาพ','ข้อมูลไม่ชัดเจน เน้นการปฏิเสธโดยไม่ช่วยอธิบายวิธีแก้ไข','ไม่ให้ความร่วมมือ ดองเรื่องเอกสารของแผนกอื่นไว้'] },
+  { key:'acc_reconcile', no:10, name:'การตรวจสอบและกระทบยอดบัญชี',
+    question:'ท่านดำเนินการตรวจสอบและกระทบยอดรายการบัญชีต่างๆ อย่างเป็นระบบ เพื่อป้องกันความเสียหาย อย่างไร ?',
+    options:['กระทบยอดทุกบัญชีเสร็จสิ้นอย่างรวดเร็วเป็นประจำทุกสัปดาห์/ทุกเดือน เคลียร์รายการค้างได้อย่างรวดเร็ว ตัวเลขตรงเป๊ะ 100%','กระทบยอดแม่นยำสม่ำเสมอ ไม่มีรายการค้างสะสมนาน','ทำกระทบยอดบัญชีหลักๆ ได้เสร็จสิ้นตามรอบเวลาการปิดงบประจำเดือน','ทำกระทบยอดล่าช้า ค้างสะสมข้ามเดือน','ไม่ทำกระทบยอดบัญชีเลย ปล่อยให้ตัวเลขในระบบบัญชีกับสเตทเมนต์ธนาคารไม่ตรงกัน'] },
+];
+
+// ========== Position Competencies — HR Officer ==========
+const HR_COMPETENCY_LIST = [
+  { key:'hr_knowledge', no:1, name:'ความรู้ด้านการบริหารทรัพยากรบุคคล ระเบียบข้อบังคับบริษัท / กฎหมายแรงงาน',
+    question:'ท่านมีความรู้ ความเข้าใจในข้อบังคับบริษัท กฎหมายแรงงาน นำมาปฏิบัติอย่างถูกต้อง อย่างไร?',
+    options:['เป็นที่ปรึกษาด้านกฎระเบียบข้อบังคับ กฎหมายแรงงาน ได้อย่างยอดเยี่ยม','เข้าใจข้อบังคับเกี่ยวกับการทำงานอย่างถ่องแท้ และสามารถอธิบายให้เข้าใจถึงเหตุผลของการลงโทษได้','ปฏิบัติหน้าที่ ดูแลระเบียบวินัย ได้ตามคำสั่ง','ไม่แม่นในข้อบังคับเกี่ยวกับการทำงาน/กฎหมายแรงงาน','ไม่เข้าใจและปฏิบัติผิดพลาด'] },
+  { key:'hr_recruitment', no:2, name:'การสรรหาและคัดเลือกบุคลากร',
+    question:'ท่านสามารถสรรหา คัดกรองเรซูเม่ผู้สมัครที่มีคุณสมบัติกับความต้องการ และสัมภาษณ์เบื้องต้น อย่างไร?',
+    options:['ได้ผู้สมัครที่ศักยภาพสูงเสมอ และก่อนกำหนดเวลาเสมอ ใช้คำถามสัมภาษณ์ที่วัดพฤติกรรมได้','สรรหาได้ตรงตามคุณสมบัติ และนัดสัมภาษณ์ได้ตามเป้าหมาย ทำให้ได้ตัวเลือกที่ถูกใจเสมอ','สรรหาได้คนมาเติมตำแหน่งบ้าง','สรรหาล่าช้าหรือได้คนไม่ตรงความต้องการ','ไม่สามารถสรรหาบุคลากรได้'] },
+  { key:'hr_training', no:3, name:'การประสานงานการจัดฝึกอบรมและพัฒนาบุคลากร',
+    question:'ในการจัดปฐมนิเทศพนักงานใหม่ หรือจัดอบรมสัมมนา ความสามารถเตรียมเนื้อหา จัดการตารางเวลา และดูแลอำนวยความสะดวกได้ อย่างไร?',
+    options:['จัดกิจกรรมอบรมได้ราบรื่น และเป็นที่น่าประทับใจ มีการประเมินผลหลังอบรมชัดเจน 100%','จัดเตรียมสถานที่ เอกสาร และประสานงานวิทยากรได้อย่างมืออาชีพ อำนวยความสะดวกให้ผู้เข้าอบรมตลอดงานจนได้รับความพึงพอใจสูง','จัดดำเนินการ อำนวยความสะดวก ได้ตามคำสั่ง ตามวัตถุประสงค์','ดำเนินการขลุกขลัก ลืมเตรียมอุปกรณ์สำคัญบ่อยครั้ง ไม่เข้าใจในวัตถุประสงค์','ไม่สามารถอำนวยความสะดวกได้'] },
+  { key:'hr_engagement', no:4, name:'การจัดกิจกรรมและส่งเสริมความผูกพันองค์กร',
+    question:'ท่านมีส่วนร่วมในการคิดริเริ่ม จัดเตรียม หรือสนับสนุนกิจกรรม (เช่น งานปีใหม่, ท่องเที่ยว, สุขภาพ) เพื่อสร้างบรรยากาศในการทำงาน อย่างไร?',
+    options:['เป็นแกนนำที่เปี่ยมด้วยความสร้างสรรค์ คิดแคมเปญหรือกิจกรรมที่โดนใจ สร้างเสียงหัวเราะและร้อยเรียงความสามัคคีให้เกิดขึ้นทั่วทั้งองค์กรได้อย่างเห็นผลชัดเจน','จัดเตรียมและดูแลกิจกรรมต่างๆ ได้อย่างราบรื่น สนุกสนาน สามารถดึงดูดให้มาร่วมกิจกรรมได้เป็นจำนวนมาก','ช่วยเหลือและประสานงานจัดกิจกรรมตามได้คำสั่ง ดำเนินการสำเร็จลุล่วงด้วยดี','ประสานจัดกิจกรรมแบบตกหล่นและผิดพลาดบ่อยครั้ง','ไม่สนใจจัดกิจกรรมใดๆ'] },
+  { key:'hr_confidentiality', no:5, name:'การรักษาความลับและจรรยาบรรณวิชาชีพ',
+    question:'ในฐานะที่ท่านเข้าถึงข้อมูลพนักงาน ท่านการปกป้องหรือรักษาความลับข้อมูลประวัติส่วนตัวไม่ให้รั่วไหล อย่างไร ?',
+    options:['ปฏิบัติตามจรรยาบรรณอย่างสูงสุด ข้อมูลฐานเงินเดือน ข้อมูลประวัติ ไม่เคยรั่วไหล 100%','มีความตระหนักรู้สูง จัดเก็บเอกสารอย่างมิดชิด ไม่นำเรื่องส่วนตัวของพนักงานไปสนทนาในพื้นที่สาธารณะ','รักษาความลับได้ดี แต่อาจมีบางครั้งที่วางเอกสารทิ้งไว้ (แต่ยังไม่มีข้อมูลหลุด)','ขาดความระมัดระวัง เช่น เผลอพูดถึงฐานเงินเดือนของพนักงานใหม่ให้พนักงานเก่าฟัง หรือนำเรื่องร้องเรียนไปเล่าเป็นเรื่องตลกขบขัน','จงใจแพร่กระจาย นำข้อมูลเงินเดือน หรือความลับทางวินัยของพนักงานไปเผยแพร่จนเกิดการสูญเสียความเชื่อมั่นในแผนก HR'] },
+  { key:'hr_benefits', no:6, name:'ความรู้เกี่ยวกับสวัสดิการบริษัท และสิทธิประโยชน์ต่าง ๆ',
+    question:'ท่านมีความเข้าใจเกี่ยวกับสวัสดิการต่าง ๆ และติดตามเรื่องสิทธิประโยชน์ (เช่น ประกันสังคม ประกันกลุ่ม กองทุนสำรองเลี้ยงชีพ) อย่างไร?',
+    options:['อธิบายเรื่องสิทธิประโยชน์ที่ซับซ้อนให้เข้าใจง่ายด้วยความยิ้มแย้ม สุภาพ และติดตามเรื่องเบิกเคลมให้พนักงานจนได้รับเงินอย่างรวดเร็ว','ให้ข้อมูลสิทธิประกันสังคมและสวัสดิการต่างๆ ได้อย่างถูกต้องแม่นยำ พร้อมให้ความช่วยเหลือและอำนวยความสะดวกแก่พนักงานอย่างเต็มใจ','ตอบคำถามและให้แบบฟอร์มการเบิกสวัสดิการต่างๆ ได้ตามหน้าที่ปกติ พนักงานได้รับข้อมูลตามที่ต้องการ','ให้ข้อมูลสวัสดิการผิดพลาด ทำให้พนักงานเสียสิทธิประโยชน์ หรือตอบคำถามด้วยน้ำเสียงรำคาญเมื่อถูกพนักงานถามซ้ำ','ไม่มีความรู้และความเข้าใจที่ชัดเจน'] },
+  { key:'hr_software', no:7, name:'การใช้เทคโนโลยี และซอฟต์แวร์เกี่ยวกับงาน HR',
+    question:'ท่านมีความคล่องตัวในการใช้โปรแกรม เพื่อเพิ่มประสิทธิภาพงานบุคคล อย่างไร?',
+    options:['ใช้เทคโนโลยีช่วยลดขั้นตอนงานได้ดีเยี่ยม','ใช้งานระบบได้อย่างคล่องแคล่ว','ใช้งานระบบพื้นฐานได้ครบ','ใช้เวลานานในการเรียนรู้','ปฏิเสธการใช้เทคโนโลยี'] },
+  { key:'hr_reporting', no:8, name:'การวิเคราะห์และรายงานข้อมูลด้านทรัพยากรบุคคล',
+    question:'ท่านสามารถวิเคราะห์ข้อมูลและจัดทำรายงานได้อย่างไร ?',
+    options:['วิเคราะห์เชิงลึกและเสนอแนวทางพัฒนาได้','รายงานข้อมูลแม่นยำเข้าใจง่าย','รายงานผลได้ครบถ้วน','ต้องให้ผู้อื่นช่วยสรุป','รายงานไม่ตรงประเด็น'] },
+  { key:'hr_relations', no:9, name:'พนักงานสัมพันธ์และแรงงานสัมพันธ์',
+    question:'ท่านสามารถรับฟังและเป็นตัวกลางในการไกล่เกลี่ย ด้วยความเป็นกลางและเป็นธรรม อย่างไร?',
+    options:['ไกล่เกลี่ยได้สำเร็จและสร้างความเข้าใจที่ดี พนักงานไว้วางใจให้เป็นที่ปรึกษา','เข้าถึงง่าย รับฟังข้อร้องเรียนอย่างเป็นกลาง เสนอแนวทางแก้ปัญหาเบื้องต้นได้อย่างเหมาะสม','รับฟังปัญหาและรับเรื่องร้องเรียนตามหน้าที่ และนำเรื่องรายงานให้หัวหน้ารับทราบตามขั้นตอน','มักเข้าข้างฝ่ายใดฝ่ายหนึ่ง หรือรับฟังปัญหาแล้วนำไปพูดต่อ','ปฏิเสธการรับฟังปัญหา ไม่สามารถจัดการความขัดแย้งได้'] },
+  { key:'hr_service', no:10, name:'การประสานงานและการให้บริการพนักงาน',
+    question:'ท่านให้ข้อมูลและประสานงานกับพนักงานด้วยความเต็มใจ สื่อสารชัดเจน และเป็นที่ปรึกษาเบื้องต้นได้ อย่างไร?',
+    options:['เป็น "HR บริการด้วยใจ" ประสานงานดีเยี่ยม ทำให้พนักงานเกิดความเชื่อมั่น ได้รับคำชมเชยสม่ำเสมอ','มีจิตสำนึกบริการที่ดี ช่วยเหลืออย่างเต็มใจและจัดการคำขอต่าง ๆ ได้อย่างราบรื่น','ให้บริการตามหน้าที่ พูดจาสุภาพเรียบร้อย แต่อาจไม่ได้แสดงความกระตือรือร้นเพิ่มเติม','ให้บริการตามอารมณ์ สื่อสารไม่ชัดเจน','ปฏิเสธการให้บริการจนได้รับการร้องเรียนเกี่ยวกับพฤติกรรมการบริการ'] },
+];
+
+// คืนค่า competency list ตาม position_type (สำหรับ Method B — posType-based routing)
+function getPositionTypeCompetencies(posType) {
+  if (posType === 'finance')    return FINANCE_COMPETENCY_LIST;
+  if (posType === 'account')    return ACCOUNT_COMPETENCY_LIST;
+  if (posType === 'hr_officer') return HR_COMPETENCY_LIST;
+  return null;
+}
+
+// คืนค่า competency list ของพนักงาน — ใช้ per-employee competencies ก่อน, fallback posType constant
+function getEffectiveCompetencies(emp) {
+  if (!emp) return null;
+  if (emp.competencies && emp.competencies.length > 0) return emp.competencies;
+  return getPositionTypeCompetencies(emp.position_type) || null;
+}
+
 // state สำหรับ Admin Form multi-step
 let adminFormData = {};
 let adminFormStep = 1;
@@ -1202,8 +1319,8 @@ async function renderSelfEvalForm() {
   if (isManagerType(posType)) {
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Manager / Director Form)';
     renderOldSelfEvalLayout(layout);
-  } else if (currentUser.competencies && currentUser.competencies.length > 0) {
-    // Individual Form — ตรวจก่อน isAdminType เสมอ (competencies มีอยู่ = ใช้ Individual Form)
+  } else if (getEffectiveCompetencies(currentUser)) {
+    // Individual Form — ตรวจก่อน isAdminType เสมอ (competencies หรือ posType constant = ใช้ Individual Form)
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — 4 ส่วน (100 คะแนน)';
     individualFormData = {};
     individualFormStep = 1;
@@ -1683,12 +1800,13 @@ function renderIndividualInfoHeader(empId, readOnly) {
 
 function renderIndividualSelfEvalLayout(container, empId, readOnly) {
   const emp = getMockUsers().find(u => sameId(u.id, empId));
-  if (!emp || !emp.competencies) return;
+  const comps = getEffectiveCompetencies(emp);
+  if (!emp || !comps) return;
   const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId) && s.form_type === 'individual');
   if (existing && existing.individual_data) {
     Object.assign(individualFormData, existing.individual_data);
   }
-  renderIndividualStep(container, empId, readOnly, emp.competencies);
+  renderIndividualStep(container, empId, readOnly, comps);
 }
 
 function renderIndividualStep(container, empId, readOnly, competencies) {
@@ -1748,7 +1866,7 @@ function individualFormNav(toStep, empId, readOnly) {
   individualFormStep = toStep;
   const emp = getMockUsers().find(u => sameId(u.id, empId));
   const container = document.getElementById('self-eval-layout');
-  renderIndividualStep(container, empId, readOnly, emp ? emp.competencies : []);
+  renderIndividualStep(container, empId, readOnly, getEffectiveCompetencies(emp) || []);
 }
 
 function saveIndividualStepData(step) {
@@ -2650,7 +2768,7 @@ async function renderMgrEvalForm() {
   const realEmp = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
   // ใช้ position_type จาก REAL_EMPLOYEES ก่อน (อัปเดตล่าสุด) ถ้าไม่มีค่อยใช้จาก allData
   const effectivePosType = (realEmp && realEmp.position_type) ? realEmp.position_type : posType;
-  const hasIndividual = realEmp && realEmp.competencies && realEmp.competencies.length > 0 && !isAdminType(effectivePosType);
+  const hasIndividual = !!getEffectiveCompetencies(realEmp) && !isAdminType(effectivePosType);
 
   if (isManagerType(effectivePosType)) {
     renderOldMgrEvalLayout(layout, empId);
@@ -2664,7 +2782,7 @@ async function renderMgrEvalForm() {
     // โหลดข้อมูลที่หัวหน้าเคยบันทึกไว้แล้ว (ถ้ามี)
     const existingMgr = allData.managerEvals.find(m => sameId(m.employee_id, empId) && m.form_type === 'individual');
     if (existingMgr?.individual_mgr_data) Object.assign(individualMgrFormData, existingMgr.individual_mgr_data);
-    renderIndividualMgrStep(layout, empId, realEmp.competencies);
+    renderIndividualMgrStep(layout, empId, getEffectiveCompetencies(realEmp));
   } else {
     renderStaffSeniorMgrEvalLayout(layout, empId);
   }
@@ -2730,7 +2848,7 @@ function individualMgrFormNav(toStep, empId) {
   individualMgrFormStep = toStep;
   const realEmp = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
   const container = document.getElementById('mgr-eval-layout');
-  renderIndividualMgrStep(container, empId, realEmp ? realEmp.competencies : []);
+  renderIndividualMgrStep(container, empId, getEffectiveCompetencies(realEmp) || []);
 }
 
 function saveIndividualMgrStepData(step) {
@@ -3961,7 +4079,7 @@ async function renderReport() {
   // ถ้าเป็น Individual Form → ใช้ report แบบใหม่
   const realEmpR = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
   const effectivePosTypeR = realEmpR?.position_type || emp.position_type || 'staff';
-  if (realEmpR?.competencies?.length > 0 && !isAdminType(effectivePosTypeR)) {
+  if (getEffectiveCompetencies(realEmpR) && !isAdminType(effectivePosTypeR)) {
     renderIndividualReport(empId, emp, realEmpR);
     return;
   }
@@ -4173,7 +4291,7 @@ function renderIndividualReport(empId, emp, realEmp) {
   const gi       = mgrEval?.overall_grade ? GRADE_LIST.find(g => g.key === mgrEval.overall_grade) : null;
   const mgrName  = allData.employees.find(e => sameId(e.id, emp.manager_id))?.name
                 || REAL_EMPLOYEES.find(r => sameId(r.id, emp.manager_id))?.name || '—';
-  const comps    = realEmp.competencies || [];
+  const comps    = getEffectiveCompetencies(realEmp) || [];
   const score1   = mgrData.score1 ?? 0;
   const score2   = mgrData.score2 ?? 0;
   const total    = mgrData.total  ?? 0;
@@ -4850,7 +4968,7 @@ function exportExcel() {
     const exec    = allData.execDecisions.find(d => sameId(d.employee_id, emp.id));
     // คะแนน Individual Form
     const realE   = REAL_EMPLOYEES.find(r => sameId(r.id, emp.id));
-    const hasInd  = realE?.competencies?.length > 0 && !isAdminType(emp.position_type||'staff');
+    const hasInd  = !!getEffectiveCompetencies(realE) && !isAdminType(emp.position_type||'staff');
     const mgrInd  = hasInd ? allData.managerEvals.find(m => sameId(m.employee_id, emp.id) && m.form_type==='individual') : null;
     const imd     = mgrInd?.individual_mgr_data || {};
     return [
@@ -4946,7 +5064,7 @@ function mockApiPost(payload) {
 // ========== ข้อมูลพนักงานจริง 112 คน (Auto-generated จาก รายชื่อพนักงาน.xlsx) ==========
 const REAL_EMPLOYEES = [
   {"id":"BNT-004","username":"bnt-004","password":"1234","role":"executive","group":"BNT","name":"นาย ศุภกิจ รัตนรังสรรค์","position":"Account Director","position_type":"director","department":"ACS","manager_id":"FMC-001","nickname":"ซุป"},
-  {"id":"BNT-029","username":"bnt-029","password":"1234","role":"employee","group":"BNT","name":"นางสาว อรฤดี โสวรรณทิพย์","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"อร"},
+  {"id":"BNT-029","username":"bnt-029","password":"1234","role":"employee","group":"BNT","name":"นางสาว อรฤดี โสวรรณทิพย์","position":"Account Officer","position_type":"account","department":"ACS","manager_id":"BNT-004","nickname":"อร"},
   {"id":"BNT-044","username":"bnt-044","password":"1234","role":"manager","group":"BNT","name":"นางสาว ดาลัด ฐิติภาณุเวช","position":"Finance Manager","position_type":"manager","department":"FNS","manager_id":"FMC-001","nickname":"ดา"},
   {"id":"BNT-046","username":"bnt-046","password":"1234","role":"employee","group":"BNT","name":"นาง จำเรียง สุวรรณศร","position":"Maid","position_type":"staff","department":"CAS","manager_id":"BNT-097","nickname":"เล็ก"},
   {"id":"BNT-049","username":"bnt-049","password":"1234","role":"employee","group":"BNT","name":"นางสาว จินตณัฏฐ์ โชติมั่ง","position":"Senior General Affairs Officer","position_type":"senior","department":"CAS","manager_id":"BNT-097","nickname":"กระแต","competencies":[
@@ -4961,15 +5079,15 @@ const REAL_EMPLOYEES = [
     {key:'confidentiality',no:9,name:'การรักษาความลับและข้อมูลภายใน',question:'ในฐานะงานธุรการ ท่านมีความรอบคอบในการรักษาความลับขององค์กรและข้อมูลส่วนบุคคล อย่างไร ?',options:['รักษาความลับขั้นสูงสุด ปฏิบัติตามระบบความปลอดภัยอย่างเคร่งครัด ไม่เคยนำข้อมูลภายในไปพูดคุยภายนอก','มีความตระหนักเรื่องความลับสูง จัดเก็บเอกสารสำคัญอย่างมิดชิดและล็อกกุญแจ','รักษาความลับได้ดี แต่อาจมีบางครั้งที่ลืมคว่ำหน้าเอกสาร หรือลืมล็อกหน้าจอคอมพิวเตอร์ตอนลุกจากโต๊ะระยะสั้น','ขาดความระมัดระวัง เช่น วางเอกสารสำคัญทิ้งไว้ในพื้นที่ส่วนกลาง หรือหลุดปากพูดคุยเรื่องภายในออฟฟิศในที่สาธารณะ','ปล่อยปละละเลยข้อมูลความลับ นำข้อมูลภายในไปบอกเล่าหรือแชร์ให้บุคคลภายนอกฟัง']},
     {key:'accountability2',no:10,name:'ความรับผิดชอบและดูแลความเรียบร้อยของสำนักงาน',question:'ท่านมีความใส่ใจดูแลสภาพแวดล้อม ความสะอาด และความพร้อมใช้งานของพื้นที่ส่วนกลางในสำนักงาน อย่างไร ?',options:['สอดส่องดูแลสำนักงานอย่างเป็นระบบ พื้นที่ส่วนกลางพร้อมใช้ และตรวจความปลอดภัยครบถ้วน 100% ก่อนกลับบ้าน','มีความรับผิดชอบสูง คอยเดินตรวจความเรียบร้อยสม่ำเสมอ หากเจอจุดชำรุดจะรีบแจ้งซ่อมทันที','ดูแลความเรียบร้อยตามหน้าที่ สำนักงานมีความสะอาด','ละเลยการตรวจสอบ ปล่อยให้เครื่องใช้ในออฟฟิศชำรุดหลายวันจึงแจ้งซ่อม หรือบางครั้งลืมปิดไฟ / เครื่องปรับอากาศข้ามคืน','ไม่สนใจดูแลความเรียบร้อย ปล่อยให้พื้นที่สำนักงานรก ชำรุด หรือละเลย']}
   ]},
-  {"id":"BNT-070","username":"bnt-070","password":"1234","role":"employee","group":"BNT","name":"นางสาว สุดารัตน์ วราภรณ์วิมลชัย","position":"Senior Account Officer","position_type":"senior","department":"ACS","manager_id":"BNT-044","nickname":"เจี้ยบ"},
+  {"id":"BNT-070","username":"bnt-070","password":"1234","role":"employee","group":"BNT","name":"นางสาว สุดารัตน์ วราภรณ์วิมลชัย","position":"Senior Account Officer","position_type":"account","department":"ACS","manager_id":"BNT-044","nickname":"เจี้ยบ"},
   {"id":"BNT-091","username":"bnt-091","password":"1234","role":"manager","group":"BNT","name":"นางสาว กนกพร เหมรา","position":"Section HR Manager","position_type":"manager","department":"HRS","manager_id":"FMC-001","nickname":"เกด"},
   {"id":"BNT-097","username":"bnt-097","password":"1234","role":"manager","group":"BNT","name":"นางสาว เยาวพา จรูญโสภณสวัสดิ์","position":"General Office Manager","position_type":"manager","department":"CAS","manager_id":"FMC-001","nickname":"ป๋วย"},
-  {"id":"BNT-101","username":"bnt-101","password":"1234","role":"employee","group":"BNT","name":"นางสาว นงเยาว์ อุดมโพชน์","position":"Finance Officer","position_type":"staff","department":"FNS","manager_id":"BNT-044","nickname":"แพรว"},
-  {"id":"BNT-102","username":"bnt-102","password":"1234","role":"employee","group":"BNT","name":"นางสาว ศิริพร คะเนสม","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"นิว"},
-  {"id":"BNT-103","username":"bnt-103","password":"1234","role":"employee","group":"BNT","name":"นางสาว โสภิตารัตน์ สุริยัน","position":"HR.Officer","position_type":"staff","department":"HRS","manager_id":"BNT-091","nickname":"น้ำหวาน"},
-  {"id":"BNT-109","username":"bnt-109","password":"1234","role":"employee","group":"BNT","name":"นางสาว นัสรียา แมหะ","position":"Finance Officer","position_type":"staff","department":"ACS","manager_id":"BNT-044","nickname":"อันยา"},
-  {"id":"BNT-110","username":"bnt-110","password":"1234","role":"employee","group":"BNT","name":"นางสาว ไอรดา บัวใหญ่","position":"Finance Officer","position_type":"staff","department":"ACS","manager_id":"BNT-044","nickname":"ไอซ์"},
-  {"id":"BNT-112","username":"bnt-112","password":"1234","role":"employee","group":"BNT","name":"นางสาว อัมพวรรณ วิงวอน","position":"Account Officer","position_type":"staff","department":"ACS","manager_id":"BNT-004","nickname":"ใบหม่อน"},
+  {"id":"BNT-101","username":"bnt-101","password":"1234","role":"employee","group":"BNT","name":"นางสาว นงเยาว์ อุดมโพชน์","position":"Finance Officer","position_type":"finance","department":"FNS","manager_id":"BNT-044","nickname":"แพรว"},
+  {"id":"BNT-102","username":"bnt-102","password":"1234","role":"employee","group":"BNT","name":"นางสาว ศิริพร คะเนสม","position":"Account Officer","position_type":"account","department":"ACS","manager_id":"BNT-004","nickname":"นิว"},
+  {"id":"BNT-103","username":"bnt-103","password":"1234","role":"employee","group":"BNT","name":"นางสาว โสภิตารัตน์ สุริยัน","position":"HR.Officer","position_type":"hr_officer","department":"HRS","manager_id":"BNT-091","nickname":"น้ำหวาน"},
+  {"id":"BNT-109","username":"bnt-109","password":"1234","role":"employee","group":"BNT","name":"นางสาว นัสรียา แมหะ","position":"Finance Officer","position_type":"finance","department":"ACS","manager_id":"BNT-044","nickname":"อันยา"},
+  {"id":"BNT-110","username":"bnt-110","password":"1234","role":"employee","group":"BNT","name":"นางสาว ไอรดา บัวใหญ่","position":"Finance Officer","position_type":"finance","department":"ACS","manager_id":"BNT-044","nickname":"ไอซ์"},
+  {"id":"BNT-112","username":"bnt-112","password":"1234","role":"employee","group":"BNT","name":"นางสาว อัมพวรรณ วิงวอน","position":"Account Officer","position_type":"account","department":"ACS","manager_id":"BNT-004","nickname":"ใบหม่อน"},
   {"id":"BNT-113","username":"bnt-113","password":"1234","role":"employee","group":"BNT","name":"นาย นันทพงศ์ ศาลางาม","position":"Finance Officer","position_type":"staff","department":"AFD","manager_id":"BNT-044","nickname":"แพนด้า"},
   {"id":"BNT-114","username":"bnt-114","password":"1234","role":"employee","group":"BNT","name":"นาย กษิดิศ แดงหมื่นไวย","position":"Account Officer","position_type":"staff","department":"AFD","manager_id":"BNT-004","nickname":"เบ๊ค"},
   {"id":"FMC-001","username":"fmc-001","password":"1234","role":"executive","group":"FMC","name":"นาย พิชัย สีห์โสภณ","position":"Managing Director","position_type":"","department":"MDO","manager_id":"","nickname":"Zeed"},
@@ -5128,7 +5246,7 @@ const REAL_EMPLOYEES = [
     {key:'confidentiality',no:9,name:'การรักษาความลับและข้อมูลภายใน',question:'ในฐานะงานธุรการ ท่านมีความรอบคอบในการรักษาความลับขององค์กรและข้อมูลส่วนบุคคล อย่างไร ?',options:['รักษาความลับขั้นสูงสุด ปฏิบัติตามระบบความปลอดภัยอย่างเคร่งครัด ไม่เคยนำข้อมูลภายในไปพูดคุยภายนอก','มีความตระหนักเรื่องความลับสูง จัดเก็บเอกสารสำคัญอย่างมิดชิดและล็อกกุญแจ','รักษาความลับได้ดี แต่อาจมีบางครั้งที่ลืมคว่ำหน้าเอกสาร หรือลืมล็อกหน้าจอคอมพิวเตอร์ตอนลุกจากโต๊ะระยะสั้น','ขาดความระมัดระวัง เช่น วางเอกสารสำคัญทิ้งไว้ในพื้นที่ส่วนกลาง หรือหลุดปากพูดคุยเรื่องภายในออฟฟิศในที่สาธารณะ','ปล่อยปละละเลยข้อมูลความลับ นำข้อมูลภายในไปบอกเล่าหรือแชร์ให้บุคคลภายนอกฟัง']},
     {key:'accountability2',no:10,name:'ความรับผิดชอบและดูแลความเรียบร้อยของสำนักงาน',question:'ท่านมีความใส่ใจดูแลสภาพแวดล้อม ความสะอาด และความพร้อมใช้งานของพื้นที่ส่วนกลางในสำนักงาน อย่างไร ?',options:['สอดส่องดูแลสำนักงานอย่างเป็นระบบ พื้นที่ส่วนกลางพร้อมใช้ และตรวจความปลอดภัยครบถ้วน 100% ก่อนกลับบ้าน','มีความรับผิดชอบสูง คอยเดินตรวจความเรียบร้อยสม่ำเสมอ หากเจอจุดชำรุดจะรีบแจ้งซ่อมทันที','ดูแลความเรียบร้อยตามหน้าที่ สำนักงานมีความสะอาด','ละเลยการตรวจสอบ ปล่อยให้เครื่องใช้ในออฟฟิศชำรุดหลายวันจึงแจ้งซ่อม หรือบางครั้งลืมปิดไฟ / เครื่องปรับอากาศข้ามคืน','ไม่สนใจดูแลความเรียบร้อย ปล่อยให้พื้นที่สำนักงานรก ชำรุด หรือละเลย']}
   ]},
-  {"id":"PPP-031","username":"ppp-031","password":"1234","role":"employee","group":"PPP","name":"นางสาว กนกวรรณ จันทะคาม","position":"Admin. Accounting Officer","position_type":"staff","department":"PPP","manager_id":"PPP-003","nickname":"กิ๊ฟ"},
+  {"id":"PPP-031","username":"ppp-031","password":"1234","role":"employee","group":"PPP","name":"นางสาว กนกวรรณ จันทะคาม","position":"Admin. Accounting Officer","position_type":"account","department":"PPP","manager_id":"PPP-003","nickname":"กิ๊ฟ"},
   {"id":"PPP-033","username":"ppp-033","password":"1234","role":"employee","group":"PPP","name":"นางสาว ขนิษฐา เสียงเย็น","position":"Purchasing Officer","position_type":"staff","department":"PPP","manager_id":"PPP-040","nickname":"ปุ้มปุ้ย"},
   {"id":"PPP-034","username":"ppp-034","password":"1234","role":"employee","group":"PPP","name":"นาย สมปอง คำพ่วง","position":"Supervisor","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"ยุ้ย"},
   {"id":"PPP-035","username":"ppp-035","password":"1234","role":"employee","group":"PPP","name":"นาย สราวุธ สรณานุภาพ","position":"พนักงานเขียนแบบ","position_type":"staff","department":"มาบตาพุด","manager_id":"PPP-028","nickname":"โอ๋"},
@@ -5209,8 +5327,8 @@ function persistEmployees() {
 }
 
 function posTypeBadge(type) {
-  const map = { staff:'Staff', senior:'Senior', manager:'Manager', director:'Director', admin:'Admin' };
-  const cls = { staff:'pos-staff', senior:'pos-senior', manager:'pos-manager', director:'pos-manager', admin:'pos-admin' };
+  const map = { staff:'Staff', senior:'Senior', manager:'Manager', director:'Director', admin:'Admin', finance:'Finance', account:'Account', hr_officer:'HR Officer' };
+  const cls = { staff:'pos-staff', senior:'pos-senior', manager:'pos-manager', director:'pos-manager', admin:'pos-admin', finance:'pos-staff', account:'pos-staff', hr_officer:'pos-staff' };
   return `<span class="pos-badge ${cls[type]||''}">${map[type]||type||'—'}</span>`;
 }
 
