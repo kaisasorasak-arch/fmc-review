@@ -588,6 +588,19 @@ let currentEvalEmployeeId = null;
 
 // เปรียบ id แบบ case-insensitive (Sheet เก็บ lowercase, REAL_EMPLOYEES เก็บ uppercase)
 function sameId(a, b) { return String(a).toLowerCase() === String(b).toLowerCase(); }
+
+// Group Executive IDs ที่ใช้ 2-level decision (group → FMC-001 approve)
+const GROUP_EXEC_IDS = ['ISEC-121', 'PPP-015', 'BNT-004', 'OUTS-003'];
+
+// ตรวจว่าพนักงานนี้ต้องผ่าน 2-level decision
+// FMC/SCA → 1-level (FMC-001 ตัดสินใจตรง), group exec เอง → 1-level
+function needsTwoLevelDecision(emp) {
+  if (!emp) return false;
+  if (emp.group === 'FMC' || emp.group === 'SCA') return false;
+  if (GROUP_EXEC_IDS.some(id => sameId(emp.id, id))) return false;
+  return ['ISEC', 'PPP', 'BNT', 'NSP'].includes(emp.group);
+}
+
 let viewHistory        = [];
 let editingEmployeeId  = null;
 let allData = { employees: [], selfEvals: [], managerEvals: [], execDecisions: [] };
@@ -690,6 +703,14 @@ function renderSidebar() {
     navItems = [
       { icon:'◉', label:'Dashboard',          view:'exec-dashboard' },
       { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-dashboard' },
+      { icon:'↓', label:'Export',             view:'export' },
+    ];
+  } else if (u.role === 'executive') {
+    // Group Executive ทุกคน: Dashboard + ประเมินลูกน้อง + Self-Eval + Export
+    navItems = [
+      { icon:'◉', label:'Dashboard',          view:'exec-dashboard' },
+      { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-dashboard' },
+      { icon:'✎', label:'Self-Evaluation',    view:'self-eval' },
       { icon:'↓', label:'Export',             view:'export' },
     ];
   }
@@ -1030,10 +1051,23 @@ function renderExecTable(employees) {
     const gradeHtml = gi
       ? `<span style="font-size:12px;font-weight:600;color:${gi.color}">${gi.label}</span>`
       : '—';
-    const decLabel = { promote:'เลื่อน+ขึ้น', 'raise-high':'ขึ้นสูง', raise:'ขึ้นปกติ', hold:'ยังไม่ขึ้น', pip:'PIP' };
-    const execHtml = exec
-      ? `<span style="font-size:11px;font-weight:600;color:#10B981">✓ ${decLabel[exec.decision]||'—'}</span>`
-      : '<span style="font-size:11px;color:var(--text-3)">—</span>';
+    const decLabel  = { promote:'เลื่อน+ขึ้น', 'raise-high':'ขึ้นสูง', raise:'ขึ้นปกติ', hold:'ยังไม่ขึ้น', pip:'PIP' };
+    const realEDash = REAL_EMPLOYEES.find(r => sameId(r.id, emp.id));
+    const twoLvlDash = needsTwoLevelDecision(emp) || needsTwoLevelDecision(realEDash);
+    let execHtml;
+    if (twoLvlDash) {
+      const gDone = exec?.group_decision;
+      const oDone = exec?.decision;
+      execHtml = `<div style="font-size:11px;display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+        <span style="font-weight:600;color:${gDone?'#F59E0B':'var(--text-3)'}">กลุ่ม ${gDone?'✓':'—'}</span>
+        <span style="color:var(--text-3)">·</span>
+        <span style="font-weight:600;color:${oDone?'#10B981':'var(--text-3)'}">Owner ${oDone?'✓':'—'}</span>
+      </div>`;
+    } else {
+      execHtml = exec?.decision
+        ? `<span style="font-size:11px;font-weight:600;color:#10B981">✓ ${decLabel[exec.decision]||'—'}</span>`
+        : '<span style="font-size:11px;color:var(--text-3)">—</span>';
+    }
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -1047,7 +1081,7 @@ function renderExecTable(employees) {
       <td>${gradeHtml}</td>
       <td style="font-size:12px">${mgr?.recommendation ? (recMap[mgr.recommendation]||'—') : '—'}</td>
       <td>
-        ${currentUser.role !== 'hr' ? execHtml : ''}
+        ${execHtml}
         <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
           ${currentUser.role === 'executive' ? `<button class="btn-outline btn-sm" onclick="openReport('${emp.id}')">ดู / ตัดสินใจ</button>` : ''}
           ${currentUser.role === 'hr' && mgr ? `<button class="btn-outline btn-sm" onclick="openReport('${emp.id}')">รายงาน</button>` : ''}
@@ -4239,38 +4273,7 @@ async function renderReport() {
       }
     </div>
 
-    <!-- Director Decision — อ่านอย่างเดียวสำหรับ manager/employee -->
-    ${execDec && currentUser.role !== 'executive' ? `
-    <div class="form-card report-section" style="border-left:3px solid #10B981">
-      <div class="card-header-row">
-        <h3 class="card-section-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</h3>
-      </div>
-      <div style="font-size:18px;font-weight:700;color:#10B981">${recMap[execDec.decision]||'—'}</div>
-      ${execDec.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${execDec.note}</div>` : ''}
-    </div>` : ''}
-
-    <!-- Director Decision — กรอกได้สำหรับ executive -->
-    ${currentUser.role === 'executive' ? `
-    <div class="exec-decision-card">
-      <div class="exec-decision-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</div>
-      ${execDec ? `
-      <div style="padding:10px 14px;background:rgba(16,185,129,0.1);border-radius:var(--radius);margin-bottom:14px;font-size:14px;font-weight:600;color:#10B981">
-        ✓ ${recMap[execDec.decision]||'—'}${execDec.note?' — '+execDec.note:''}
-      </div>` : ''}
-      <div style="margin-bottom:10px">
-        <select class="field-select" id="exec-decision-select">
-          <option value="">— เลือกผลการตัดสินใจ —</option>
-          ${Object.entries(recMap).map(([v,l]) =>
-            `<option value="${v}" ${execDec?.decision===v?'selected':''}>${l}</option>`
-          ).join('')}
-        </select>
-      </div>
-      <div class="exec-decision-row">
-        <input type="text" class="exec-note-input" id="exec-note"
-          placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" value="${execDec?.note||''}">
-        <button class="btn-primary" onclick="submitExecDecision('${empId}')">บันทึก</button>
-      </div>
-    </div>` : ''}
+    ${renderDecisionHTML(empId, emp, execDec, recMap)}
   `;
 }
 
@@ -4331,7 +4334,9 @@ function renderIndividualReport(empId, emp, realEmp) {
     </div>`;
 
   // --- SCORE SUMMARY (4 cards) ---
-  const execLabel = execDec ? (recMap[execDec.decision] || execDec.decision) : null;
+  const twoLvlInd  = needsTwoLevelDecision(emp) || needsTwoLevelDecision(realEmp);
+  const execLabel  = execDec?.decision ? (recMap[execDec.decision] || execDec.decision)
+                   : (twoLvlInd && execDec?.group_decision) ? 'Group ✓ · รอ Owner' : null;
   const scoreHTML = mgrEval ? `
     <div class="score-summary-row">
       <div class="score-card">
@@ -4352,11 +4357,13 @@ function renderIndividualReport(empId, emp, realEmp) {
         <div class="score-card-max">/ 100</div>
         <div class="score-card-bar"><div style="width:${(total/100)*100}%;background:${sCol(total,100)};height:100%;border-radius:3px"></div></div>
       </div>
-      <div class="score-card score-card-director" style="${execDec?'border-color:#10B981':''}">
+      <div class="score-card score-card-director" style="${execDec?.decision?'border-color:#10B981':twoLvlInd&&execDec?.group_decision?'border-color:#F59E0B':''}">
         <div class="score-card-label">Director Decision</div>
-        ${execDec
+        ${execDec?.decision
           ? `<div style="font-size:13px;font-weight:700;color:#10B981;margin-top:8px">✓ ${execLabel}</div>
              ${execDec.note ? `<div style="font-size:11px;color:var(--text-3);margin-top:4px">${execDec.note}</div>` : ''}`
+          : (twoLvlInd && execDec?.group_decision)
+          ? `<div style="font-size:13px;font-weight:700;color:#F59E0B;margin-top:8px">Group ✓ · รอ Owner</div>`
           : `<div style="font-size:13px;color:var(--text-3);margin-top:8px">รอตัดสินใจ</div>`}
       </div>
     </div>` : '';
@@ -4511,29 +4518,7 @@ function renderIndividualReport(empId, emp, realEmp) {
         </div>` : ''}`
       : `<p style="color:var(--text-3);font-size:13px">หัวหน้ายังไม่ได้ประเมิน</p>`}
     </div>
-    ${execDec && currentUser.role !== 'executive' ? `
-    <div class="form-card report-section" style="border-left:3px solid #10B981">
-      <div class="card-header-row"><h3 class="card-section-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</h3></div>
-      <div style="font-size:18px;font-weight:700;color:#10B981">${recMap[execDec.decision]||execDec.decision}</div>
-      ${execDec.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${execDec.note}</div>` : ''}
-    </div>` : ''}
-    ${currentUser.role === 'executive' ? `
-    <div class="exec-decision-card">
-      <div class="exec-decision-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</div>
-      ${execDec ? `<div style="padding:10px 14px;background:rgba(16,185,129,0.1);border-radius:var(--radius);margin-bottom:14px;font-size:14px;font-weight:600;color:#10B981">
-        ✓ ${recMap[execDec.decision]||execDec.decision}${execDec.note?' — '+execDec.note:''}
-      </div>` : ''}
-      <div style="margin-bottom:10px">
-        <select class="field-select" id="exec-decision-select">
-          <option value="">— เลือกผลการตัดสินใจ —</option>
-          ${Object.entries(recMap).map(([v,l]) => `<option value="${v}" ${execDec?.decision===v?'selected':''}>${l}</option>`).join('')}
-        </select>
-      </div>
-      <div class="exec-decision-row">
-        <input type="text" class="exec-note-input" id="exec-note" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" value="${execDec?.note||''}">
-        <button class="btn-primary" onclick="submitExecDecision('${empId}')">บันทึก</button>
-      </div>
-    </div>` : ''}`;
+    ${renderDecisionHTML(empId, emp, execDec, recMap)}`;
 
   document.getElementById('report-content').innerHTML =
     headerHTML + scoreHTML + tabNavHTML +
@@ -4546,11 +4531,132 @@ function renderIndividualReport(empId, emp, realEmp) {
     </div>`;
 }
 
+// ========== renderDecisionHTML — ใช้ร่วมกันใน renderReport + renderIndividualReport ==========
+function renderDecisionHTML(empId, emp, execDec, recMap) {
+  const isOwner     = sameId(currentUser.id, 'FMC-001') || currentUser.id === '_admin';
+  const twoLevel    = needsTwoLevelDecision(emp);
+  const isGroupExec = !isOwner && currentUser.role === 'executive';
+
+  const mkSelect = (currentVal) => Object.entries(recMap)
+    .map(([v,l]) => `<option value="${v}" ${currentVal===v?'selected':''}>${l}</option>`).join('');
+
+  if (!twoLevel) {
+    // 1-level: FMC-001 ตัดสินใจโดยตรง (FMC group + ลูกน้องตรง FMC-001)
+    if (isOwner) {
+      return `<div class="exec-decision-card">
+        <div class="exec-decision-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</div>
+        ${execDec?.decision ? `<div style="padding:10px 14px;background:rgba(16,185,129,0.1);border-radius:var(--radius);margin-bottom:14px;font-size:14px;font-weight:600;color:#10B981">
+          ✓ ${recMap[execDec.decision]||execDec.decision}${execDec.note?' — '+execDec.note:''}
+        </div>` : ''}
+        <div style="margin-bottom:10px">
+          <select class="field-select" id="exec-decision-select">
+            <option value="">— เลือกผลการตัดสินใจ —</option>${mkSelect(execDec?.decision)}
+          </select>
+        </div>
+        <div class="exec-decision-row">
+          <input type="text" class="exec-note-input" id="exec-note"
+            placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" value="${execDec?.note||''}">
+          <button class="btn-primary" onclick="submitExecDecision('${empId}')">บันทึก</button>
+        </div>
+      </div>`;
+    }
+    if (execDec?.decision) {
+      return `<div class="form-card report-section" style="border-left:3px solid #10B981">
+        <div class="card-header-row"><h3 class="card-section-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</h3></div>
+        <div style="font-size:18px;font-weight:700;color:#10B981">${recMap[execDec.decision]||'—'}</div>
+        ${execDec.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${execDec.note}</div>` : ''}
+      </div>`;
+    }
+    return '';
+  }
+
+  // 2-level: Group Executive ตัดสินใจก่อน → FMC-001 Approve
+  let html = '';
+
+  // --- ส่วนที่ 1: Group Decision ---
+  if (isGroupExec) {
+    html += `<div class="exec-decision-card">
+      <div class="exec-decision-title">◈ Group — ตัดสินใจระดับกลุ่ม</div>
+      ${execDec?.group_decision ? `<div style="padding:10px 14px;background:rgba(245,158,11,0.1);border-radius:var(--radius);margin-bottom:14px;font-size:14px;font-weight:600;color:#F59E0B">
+        ✓ ${recMap[execDec.group_decision]||execDec.group_decision}${execDec.group_note?' — '+execDec.group_note:''}
+      </div>` : ''}
+      <div style="margin-bottom:10px">
+        <select class="field-select" id="exec-decision-select">
+          <option value="">— เลือกผลการตัดสินใจ —</option>${mkSelect(execDec?.group_decision)}
+        </select>
+      </div>
+      <div class="exec-decision-row">
+        <input type="text" class="exec-note-input" id="exec-note"
+          placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" value="${execDec?.group_note||''}">
+        <button class="btn-primary" onclick="submitExecDecision('${empId}')">บันทึก</button>
+      </div>
+    </div>`;
+  } else if (execDec?.group_decision) {
+    html += `<div class="form-card report-section" style="border-left:3px solid #F59E0B">
+      <div class="card-header-row"><h3 class="card-section-title">◈ Group — ผลการตัดสินใจระดับกลุ่ม</h3></div>
+      <div style="font-size:16px;font-weight:700;color:#F59E0B">${recMap[execDec.group_decision]||'—'}</div>
+      ${execDec.group_note ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${execDec.group_note}</div>` : ''}
+    </div>`;
+  } else {
+    html += `<div class="form-card report-section" style="border-left:3px solid var(--border)">
+      <div class="card-header-row"><h3 class="card-section-title">◈ Group — รอตัดสินใจระดับกลุ่ม</h3></div>
+      <div style="font-size:13px;color:var(--text-3)">รอ Group Executive ตัดสินใจก่อน</div>
+    </div>`;
+  }
+
+  // --- ส่วนที่ 2: Owner Approval (FMC-001) ---
+  if (isOwner) {
+    if (execDec?.group_decision) {
+      html += `<div class="exec-decision-card">
+        <div class="exec-decision-title">◈ Owner — ผลการตัดสินใจขั้นสุดท้าย</div>
+        ${execDec?.decision ? `<div style="padding:10px 14px;background:rgba(16,185,129,0.1);border-radius:var(--radius);margin-bottom:14px;font-size:14px;font-weight:600;color:#10B981">
+          ✓ ${recMap[execDec.decision]||execDec.decision}${execDec.note?' — '+execDec.note:''}
+        </div>` : ''}
+        <div style="margin-bottom:10px">
+          <select class="field-select" id="exec-decision-select">
+            <option value="">— เลือกผลการตัดสินใจ —</option>${mkSelect(execDec?.decision)}
+          </select>
+        </div>
+        <div class="exec-decision-row">
+          <input type="text" class="exec-note-input" id="exec-note"
+            placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)" value="${execDec?.note||''}">
+          <button class="btn-primary" onclick="submitExecDecision('${empId}')">Approve</button>
+        </div>
+      </div>`;
+    } else {
+      html += `<div class="form-card report-section" style="border-left:3px solid var(--border)">
+        <div class="card-header-row"><h3 class="card-section-title">◈ Owner — รอ Group ตัดสินใจก่อน</h3></div>
+        <div style="font-size:13px;color:var(--text-3)">รอ Group Executive ตัดสินใจก่อน FMC-001 จึงจะ Approve ได้</div>
+      </div>`;
+    }
+  } else if (execDec?.decision) {
+    html += `<div class="form-card report-section" style="border-left:3px solid #10B981">
+      <div class="card-header-row"><h3 class="card-section-title">◈ Director — ผลการตัดสินใจขั้นสุดท้าย</h3></div>
+      <div style="font-size:18px;font-weight:700;color:#10B981">${recMap[execDec.decision]||'—'}</div>
+      ${execDec.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${execDec.note}</div>` : ''}
+    </div>`;
+  } else if (execDec?.group_decision) {
+    html += `<div class="form-card report-section" style="border-left:3px solid var(--border)">
+      <div class="card-header-row"><h3 class="card-section-title">◈ Director — รอ Owner Approve</h3></div>
+      <div style="font-size:13px;color:var(--text-3)">รอ FMC-001 Approve ขั้นสุดท้าย</div>
+    </div>`;
+  }
+
+  return html;
+}
+
 async function submitExecDecision(empId) {
   const decision = document.getElementById('exec-decision-select').value;
   if (!decision) { showToast('กรุณาเลือกผลการตัดสินใจ', 'error'); return; }
+
+  // ตรวจว่าเป็น owner (FMC-001) หรือ group exec → กำหนด decision_type อัตโนมัติ
+  const isOwner = sameId(currentUser.id, 'FMC-001') || currentUser.id === '_admin';
+  const empObj  = [...allData.employees, ...REAL_EMPLOYEES].find(e => sameId(e.id, empId));
+  const decisionType = (isOwner || !needsTwoLevelDecision(empObj)) ? 'owner' : 'group';
+
   const payload = {
     action:'submitExecDecision', exec_id:currentUser.id, employee_id:empId,
+    decision_type: decisionType,
     decision, note:document.getElementById('exec-note').value.trim(),
     year:getCurrentPeriod().year, quarter:getCurrentPeriod().quarter,
   };
