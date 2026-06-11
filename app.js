@@ -1097,6 +1097,75 @@ function renderAdminView() {
   renderAdminTable();
   // โหลด manager list สำหรับ dropdown ใน modal
   populateManagerDropdown();
+  // แสดง Reset section เฉพาะ admin + hr
+  renderResetSection();
+}
+
+// ========== Reset Period Data ==========
+function renderResetSection() {
+  const isAdminOrHR = currentUser.id === '_admin' || currentUser.role === 'hr';
+  const container = document.getElementById('reset-section');
+  if (!container) return;
+  if (!isAdminOrHR) { container.innerHTML = ''; return; }
+
+  const p = getCurrentPeriod();
+  container.innerHTML = `
+    <div class="form-card" style="border:2px solid #E02020;margin-top:32px">
+      <div class="card-header-row">
+        <h3 class="card-section-title" style="color:#E02020">⚠ ล้างข้อมูลการประเมิน</h3>
+      </div>
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">
+        ลบข้อมูลใน SelfEval · ManagerEval · ExecDecision — <strong>ไม่กระทบข้อมูลพนักงาน (Users)</strong>
+      </p>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
+        <div>
+          <label class="field-label">ปี</label>
+          <select class="field-select" id="reset-year" style="width:100px">
+            <option value="2025" ${p.year===2025?'selected':''}>2025</option>
+            <option value="2026" ${p.year===2026?'selected':''}>2026</option>
+            <option value="2027" ${p.year===2027?'selected':''}>2027</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">ไตรมาส</label>
+          <select class="field-select" id="reset-quarter" style="width:100px">
+            <option value="Q1" ${p.quarter==='Q1'?'selected':''}>Q1</option>
+            <option value="Q2" ${p.quarter==='Q2'?'selected':''}>Q2</option>
+          </select>
+        </div>
+        <button class="btn-outline" style="border-color:#E02020;color:#E02020"
+          onclick="confirmResetData(false)">
+          ล้างข้อมูล Period นี้
+        </button>
+        <button class="btn-outline" style="border-color:#7F1D1D;color:#7F1D1D"
+          onclick="confirmResetData(true)">
+          ล้างทั้งหมด (ทุก Period)
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+async function confirmResetData(resetAll) {
+  const year    = document.getElementById('reset-year')?.value;
+  const quarter = document.getElementById('reset-quarter')?.value;
+  const msg = resetAll
+    ? 'ยืนยันล้างข้อมูลการประเมินทั้งหมดทุก Period?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้'
+    : `ยืนยันล้างข้อมูลการประเมิน ${quarter} / ${year}?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`;
+  if (!confirm(msg)) return;
+
+  const payload = {
+    action: 'resetPeriodData',
+    year, quarter,
+    resetAll: !!resetAll,
+  };
+  showLoading(true);
+  try {
+    const res = await apiPost(payload);
+    await loadAllData();
+    showToast(`ล้างข้อมูลสำเร็จ (${res?.deleted ?? 0} รายการ)`, 'success');
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
 }
 
 function renderAdminTable() {
