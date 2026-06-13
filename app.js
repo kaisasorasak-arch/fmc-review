@@ -736,6 +736,11 @@ async function loadAllData() {
     const cached = sessionStorage.getItem('apex_data');
     if (cached) allData = JSON.parse(cached);
   }
+  // โหลด settings แยก — ใช้กับทุก role เพื่อเช็ควันหมดเวลาประเมิน
+  try {
+    const s = await apiGet({ action:'getSettings' });
+    if (s && !s.error) allData.settings = s;
+  } catch { /* ใช้ค่าเดิมหากโหลดไม่ได้ */ }
   if (allData) sessionStorage.setItem('apex_data', JSON.stringify(allData));
   updateProgressBar();
 }
@@ -1105,7 +1110,8 @@ function renderAdminView() {
   renderAdminTable();
   // โหลด manager list สำหรับ dropdown ใน modal
   populateManagerDropdown();
-  // แสดง Reset section เฉพาะ admin + hr
+  // แสดง Settings section (กำหนดวันหมดเวลา) + Reset section เฉพาะ admin + hr
+  renderSettingsSection();
   renderResetSection();
 }
 
@@ -1152,6 +1158,61 @@ function renderResetSection() {
       </div>
     </div>
   `;
+}
+
+// ========== Settings Section (กำหนดวันสิ้นสุดการประเมิน) ==========
+function renderSettingsSection() {
+  const isAdminOrHR = currentUser.id === '_admin' || currentUser.role === 'hr';
+  const container   = document.getElementById('settings-section');
+  if (!container) return;
+  if (!isAdminOrHR) { container.innerHTML = ''; return; }
+
+  const currentEnd = allData.settings?.eval_end_date || '';
+  container.innerHTML = `
+    <div class="form-card" style="margin-top:24px">
+      <div class="card-header-row">
+        <h3 class="card-section-title">⏱ กำหนดวันสิ้นสุดการประเมิน</h3>
+      </div>
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">
+        พนักงานจะไม่สามารถกรอกแบบประเมินได้หลังวันที่กำหนด — ถ้าไม่ตั้งค่า ระบบเปิดตลอด
+      </p>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div>
+          <label class="field-label">วันสิ้นสุด (วัน/เดือน/ปี)</label>
+          <input type="date" class="field-input" id="eval-end-date-input" value="${currentEnd}" style="width:180px">
+        </div>
+        <button class="btn-primary" onclick="saveEvalSettings()">บันทึก</button>
+        ${currentEnd ? `<button class="btn-outline" onclick="clearEvalEndDate()" style="color:#E02020;border-color:#E02020">ล้างวันหมดเวลา</button>` : ''}
+      </div>
+      ${currentEnd ? `<p style="font-size:12px;color:var(--text-2);margin-top:8px">ตั้งค่าอยู่: <strong>${new Date(currentEnd).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</strong></p>` : ''}
+    </div>
+  `;
+}
+
+async function saveEvalSettings() {
+  const val = document.getElementById('eval-end-date-input')?.value || '';
+  showLoading(true);
+  try {
+    await apiPost({ action:'saveSettings', settings:{ eval_end_date: val } });
+    if (!allData.settings) allData.settings = {};
+    allData.settings.eval_end_date = val;
+    renderSettingsSection();
+    showToast('บันทึกวันหมดเวลาสำเร็จ', 'success');
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
+}
+
+async function clearEvalEndDate() {
+  if (!confirm('ยืนยันล้างวันหมดเวลา? พนักงานจะกรอกแบบประเมินได้ตลอดเวลา')) return;
+  showLoading(true);
+  try {
+    await apiPost({ action:'saveSettings', settings:{ eval_end_date: '' } });
+    if (!allData.settings) allData.settings = {};
+    allData.settings.eval_end_date = '';
+    renderSettingsSection();
+    showToast('ล้างวันหมดเวลาแล้ว', 'success');
+  } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+  finally  { showLoading(false); }
 }
 
 async function confirmResetData(resetAll) {
@@ -1426,6 +1487,23 @@ async function renderSelfEvalForm() {
   finally { showLoading(false); }
   const posType = currentUser.position_type || 'staff';
   const layout  = document.getElementById('self-eval-layout');
+
+  // ตรวจสอบวันหมดเวลาประเมิน — ถ้าเกินกำหนดให้หยุดที่นี่
+  const evalEndDate = allData.settings?.eval_end_date || '';
+  if (evalEndDate) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const endD  = new Date(evalEndDate); endD.setHours(0,0,0,0);
+    if (today > endD) {
+      const endTh = endD.toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+      layout.innerHTML = `
+        <div style="background:#FEF2F2;border:2px solid #FECACA;border-radius:var(--radius);padding:24px 28px;text-align:center;max-width:480px;margin:40px auto">
+          <div style="font-size:32px;margin-bottom:8px">🔒</div>
+          <h3 style="color:#991B1B;margin:0 0 8px">หมดเวลาประเมินแล้ว</h3>
+          <p style="color:#B91C1C;font-size:13px;margin:0">วันสิ้นสุดการประเมิน: <strong>${endTh}</strong><br>หากมีข้อสงสัยกรุณาติดต่อ HR</p>
+        </div>`;
+      return;
+    }
+  }
 
   // ตรวจสอบสถานะ — ล็อกถาวรเมื่อหัวหน้าประเมินแล้ว
   const selfEval   = allData.selfEvals.find(s => sameId(s.employee_id, currentUser.id));
@@ -5392,6 +5470,9 @@ function mockApi(params) {
       execDecisions: JSON.parse(localStorage.getItem('mock_execDecisions')||'[]'),
     };
   }
+  if (params.action === 'getSettings') {
+    return JSON.parse(localStorage.getItem('fmc_settings') || '{}');
+  }
   return null;
 }
 
@@ -5406,9 +5487,11 @@ function mockApiPost(payload) {
     if (idx>=0) arr[idx]=rec; else arr.push(rec);
     localStorage.setItem(key, JSON.stringify(arr));
   }
-  // Admin CRUD — เก็บใน mock employees (sessionStorage)
-  if (['addEmployee','updateEmployee','deleteEmployee'].includes(payload.action)) {
-    updateSyncStatus('บันทึก local ✓');
+  // Settings — เก็บใน localStorage
+  if (payload.action === 'saveSettings') {
+    const existing = JSON.parse(localStorage.getItem('fmc_settings') || '{}');
+    Object.assign(existing, payload.settings || {});
+    localStorage.setItem('fmc_settings', JSON.stringify(existing));
   }
   updateSyncStatus('บันทึก local ✓');
   return { ok:true };
