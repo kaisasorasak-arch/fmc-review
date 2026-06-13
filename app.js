@@ -135,6 +135,7 @@ const INDIVIDUAL_BEHAVIOR_LIST = [
 // state สำหรับ Individual Form multi-step
 let individualFormData = {};
 let individualFormStep = 1;
+let individualFormNoticeBanner = ''; // เก็บ notice banner ระหว่าง navigate steps
 
 // ========== Admin Form — ส่วนที่ 1: Position Competencies (10 หัวข้อ) ==========
 const ADMIN_COMPETENCY_LIST = [
@@ -1048,8 +1049,19 @@ function renderExecTable(employees) {
       ? `<span style="font-size:12px;font-weight:600;color:${gi.color}">${gi.label}</span>`
       : '—';
     const decLabel  = { promote:'เลื่อน+ขึ้น', 'raise-high':'ขึ้นสูง', raise:'ขึ้นปกติ', hold:'ยังไม่ขึ้น', pip:'PIP' };
-    const realEDash = REAL_EMPLOYEES.find(r => sameId(r.id, emp.id));
+    const realEDash  = REAL_EMPLOYEES.find(r => sameId(r.id, emp.id));
     const twoLvlDash = needsTwoLevelDecision(emp) || needsTwoLevelDecision(realEDash);
+
+    // ข้อเสนอแนะ — Individual Form ใช้ dev_plan, form อื่นใช้ recommendation
+    const mgrIndData = mgr?.individual_mgr_data || {};
+    const hasInd     = !!getEffectiveCompetencies(realEDash || emp);
+    let recCell;
+    if (hasInd && mgrIndData.dev_plan) {
+      const dp = mgrIndData.dev_plan;
+      recCell = `<span title="${dp.replace(/"/g,'&quot;')}" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:default">${dp}</span>`;
+    } else {
+      recCell = mgr?.recommendation ? (recMap[mgr.recommendation] || '—') : '—';
+    }
     let execHtml;
     if (twoLvlDash) {
       const gDone = exec?.group_decision;
@@ -1075,7 +1087,7 @@ function renderExecTable(employees) {
       <td class="${self ? 'status-done':'status-pending'}">${self ? '✓':'—'}</td>
       <td class="${mgr  ? 'status-done':'status-pending'}">${mgr  ? '✓':'—'}</td>
       <td>${gradeHtml}</td>
-      <td style="font-size:12px">${mgr?.recommendation ? (recMap[mgr.recommendation]||'—') : '—'}</td>
+      <td style="font-size:12px;max-width:160px">${recCell}</td>
       <td>
         ${execHtml}
         <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
@@ -1415,26 +1427,44 @@ async function renderSelfEvalForm() {
   const posType = currentUser.position_type || 'staff';
   const layout  = document.getElementById('self-eval-layout');
 
+  // ตรวจสอบสถานะ — ล็อกถาวรเมื่อหัวหน้าประเมินแล้ว
+  const selfEval   = allData.selfEvals.find(s => sameId(s.employee_id, currentUser.id));
+  const hasMgrEval = allData.managerEvals.some(m => sameId(m.employee_id, currentUser.id));
+  const isLocked   = !!(selfEval && hasMgrEval);
+
+  // banner แสดงสถานะก่อน layout
+  const noticeBanner = isLocked
+    ? `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;font-size:13px;color:#991B1B;display:flex;align-items:center;gap:8px">
+         🔒 <strong>หัวหน้าประเมินแล้ว</strong> — ไม่สามารถแก้ไขได้
+       </div>`
+    : selfEval
+    ? `<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;font-size:13px;color:#92400E;display:flex;align-items:center;gap:8px">
+         📝 <strong>ส่งแบบประเมินแล้ว</strong> — แก้ไขและส่งใหม่ได้จนกว่าหัวหน้าจะประเมิน
+       </div>`
+    : '';
+
   if (isManagerType(posType)) {
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Manager / Director Form)';
-    renderOldSelfEvalLayout(layout);
+    renderOldSelfEvalLayout(layout, isLocked, noticeBanner);
   } else if (getEffectiveCompetencies(currentUser)) {
     // Individual Form — ตรวจก่อน isAdminType เสมอ (competencies หรือ posType constant = ใช้ Individual Form)
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — 4 ส่วน';
     individualFormData = {};
     individualFormStep = 1;
-    renderIndividualSelfEvalLayout(layout, currentUser.id, false);
+    individualFormNoticeBanner = noticeBanner;
+    if (selfEval && selfEval.individual_data) Object.assign(individualFormData, selfEval.individual_data);
+    renderIndividualSelfEvalLayout(layout, currentUser.id, isLocked, noticeBanner);
   } else if (isAdminType(posType)) {
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Admin Form)';
-    renderAdminSelfEvalLayout(layout, currentUser.id, false, 1);
+    renderAdminSelfEvalLayout(layout, currentUser.id, isLocked, 1, noticeBanner);
   } else {
     document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — ส่วนที่ 1–3';
-    renderStaffSeniorSelfEvalLayout(layout, currentUser.id, false);
+    renderStaffSeniorSelfEvalLayout(layout, currentUser.id, isLocked, noticeBanner);
   }
 }
 
 // ========== Staff/Senior Self-Eval Layout ==========
-function renderStaffSeniorSelfEvalLayout(container, empId, readOnly) {
+function renderStaffSeniorSelfEvalLayout(container, empId, readOnly, noticeBanner) {
   const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId));
   const d = existing || {};
   const missions = d.missions || [{},{},{}];
@@ -1444,6 +1474,7 @@ function renderStaffSeniorSelfEvalLayout(container, empId, readOnly) {
   const isOwn     = !readOnly;
 
   container.innerHTML = `
+    ${noticeBanner || ''}
     <div class="eval-layout">
       <div class="eval-form-col" id="ss-form-col">
 
@@ -1897,7 +1928,7 @@ function renderIndividualInfoHeader(empId, readOnly) {
   `;
 }
 
-function renderIndividualSelfEvalLayout(container, empId, readOnly) {
+function renderIndividualSelfEvalLayout(container, empId, readOnly, noticeBanner) {
   const emp = getMockUsers().find(u => sameId(u.id, empId));
   const comps = getEffectiveCompetencies(emp);
   if (!emp || !comps) return;
@@ -1905,10 +1936,10 @@ function renderIndividualSelfEvalLayout(container, empId, readOnly) {
   if (existing && existing.individual_data) {
     Object.assign(individualFormData, existing.individual_data);
   }
-  renderIndividualStep(container, empId, readOnly, comps);
+  renderIndividualStep(container, empId, readOnly, comps, noticeBanner || '');
 }
 
-function renderIndividualStep(container, empId, readOnly, competencies) {
+function renderIndividualStep(container, empId, readOnly, competencies, noticeBanner) {
   const step = individualFormStep;
   const stepTitles = [
     'ส่วนที่ 1 — สมรรถนะตามตำแหน่งงาน (Position Competencies)',
@@ -1943,6 +1974,7 @@ function renderIndividualStep(container, empId, readOnly, competencies) {
   const infoHeader = renderIndividualInfoHeader(empId, readOnly);
 
   container.innerHTML = `
+    ${noticeBanner || ''}
     <div class="form-card">
       ${infoHeader}
       ${progressHTML}
@@ -1965,7 +1997,7 @@ function individualFormNav(toStep, empId, readOnly) {
   individualFormStep = toStep;
   const emp = getMockUsers().find(u => sameId(u.id, empId));
   const container = document.getElementById('self-eval-layout');
-  renderIndividualStep(container, empId, readOnly, getEffectiveCompetencies(emp) || []);
+  renderIndividualStep(container, empId, readOnly, getEffectiveCompetencies(emp) || [], individualFormNoticeBanner);
 }
 
 function saveIndividualStepData(step) {
@@ -3847,7 +3879,7 @@ function renderOldMgrEvalLayout(container, empId) {
 }
 
 // ========== Manager Self-Eval Form (5 ส่วน ตาม PDF จริง) ==========
-function renderOldSelfEvalLayout(container) {
+function renderOldSelfEvalLayout(container, readOnly, noticeBanner) {
   const empId    = currentUser.id;
   const existing = allData.selfEvals.find(s => sameId(s.employee_id, empId));
   const d        = existing || {};
@@ -3860,6 +3892,7 @@ function renderOldSelfEvalLayout(container) {
   document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง (Manager Form) — ส่วนที่ 1–4';
 
   container.innerHTML = `
+    ${noticeBanner || ''}
     <div class="eval-layout">
       <div class="eval-form-col" id="mgr-self-form-col">
 
@@ -4537,13 +4570,15 @@ function renderIndividualReport(empId, emp, realEmp) {
         const disp = mgrScore || empScore;
         const col = sCol(disp, 5);
         const optText = empScore > 0 ? (c.options[5 - empScore] || '') : '';
+        const evidence = indData[`icomp_ev_${c.key}`] || '';
         return `
-          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;${idx<comps.length-1?'border-bottom:1px solid var(--border)':''}">
-            <div style="width:22px;text-align:center;font-size:11px;color:var(--text-3);flex-shrink:0">${c.no||idx+1}</div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;${idx<comps.length-1?'border-bottom:1px solid var(--border)':''}">
+            <div style="width:22px;text-align:center;font-size:11px;color:var(--text-3);flex-shrink:0;padding-top:2px">${c.no||idx+1}</div>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600">${c.name}</div>
               ${optText ? `<div style="font-size:11px;color:var(--text-2);margin-top:2px">${optText}</div>` : ''}
               ${hasOverride ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${mgrScore} / พนักงานเลือก ${empScore}</div>` : ''}
+              ${evidence ? `<div style="font-size:11px;color:var(--text-2);margin-top:4px;padding:4px 8px;background:var(--bg);border-radius:4px;border-left:2px solid rgba(224,32,32,0.3)">📝 ${evidence}</div>` : ''}
             </div>
             ${hasOverride ? `
             <div style="display:flex;flex-direction:column;gap:4px;min-width:110px;flex-shrink:0">
@@ -4586,12 +4621,14 @@ function renderIndividualReport(empId, emp, realEmp) {
         const hasOverride = mgrScore && mgrScore !== empScore;
         const disp = mgrScore || empScore;
         const col = sCol(disp, 5);
+        const evidence = indData[`ibeh_ev_${b.key}`] || '';
         return `
-          <div class="report-behavior-row" style="align-items:center">
-            <span class="report-behavior-no">${b.no||idx+1}</span>
+          <div class="report-behavior-row" style="align-items:flex-start">
+            <span class="report-behavior-no" style="padding-top:2px">${b.no||idx+1}</span>
             <div style="flex:1;min-width:0">
               <span class="report-behavior-name">${b.name}</span>
               ${hasOverride ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${mgrScore} / พนักงานเลือก ${empScore}</div>` : ''}
+              ${evidence ? `<div style="font-size:11px;color:var(--text-2);margin-top:4px;padding:4px 8px;background:var(--bg);border-radius:4px;border-left:2px solid rgba(224,32,32,0.3)">📝 ${evidence}</div>` : ''}
             </div>
             ${hasOverride ? `
             <div style="display:flex;flex-direction:column;gap:4px;min-width:110px;flex-shrink:0">
