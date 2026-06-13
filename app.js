@@ -558,11 +558,9 @@ function updatePeriodUI() {
   document.querySelectorAll('[id$="-period-badge"]').forEach(el => {
     el.textContent = periodLabel();
   });
-  // อัปเดต period selector buttons
-  const btnQ1 = document.getElementById('btn-q1');
-  const btnQ2 = document.getElementById('btn-q2');
-  if (btnQ1) btnQ1.classList.toggle('active', p.quarter === 'Q1');
-  if (btnQ2) btnQ2.classList.toggle('active', p.quarter === 'Q2');
+  // อัปเดต quarter dropdown (แทน buttons เดิม)
+  const qSel = document.getElementById('period-quarter-select');
+  if (qSel) qSel.value = p.quarter;
   // อัปเดต year dropdown
   const sel = document.getElementById('period-year-select');
   if (sel) sel.value = p.year;
@@ -886,9 +884,7 @@ function renderMgrDashboard() {
       <td>${emp.position || '—'}</td>
       <td>${posTypeBadge(emp.position_type)}</td>
       <td class="${selfEval ? 'status-done' : 'status-pending'}">${selfEval ? '✓' : '—'}</td>
-      <td class="${hasDoc ? 'status-done' : 'status-pending'}">${hasDoc ? '📎' : '—'}</td>
       <td class="${mgrEval ? 'status-done' : 'status-pending'}">${mgrEval ? '✓' : '—'}</td>
-      <td>${gradeChip}</td>
       <td style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn-outline btn-sm" onclick="openMgrEval('${emp.id}')">ประเมิน</button>
         ${mgrEval ? `<button class="btn-outline btn-sm" onclick="openReport('${emp.id}')">รายงาน</button>` : ''}
@@ -1424,7 +1420,7 @@ async function renderSelfEvalForm() {
     renderOldSelfEvalLayout(layout);
   } else if (getEffectiveCompetencies(currentUser)) {
     // Individual Form — ตรวจก่อน isAdminType เสมอ (competencies หรือ posType constant = ใช้ Individual Form)
-    document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — 4 ส่วน (100 คะแนน)';
+    document.getElementById('self-eval-subtitle').textContent = 'ประเมินผลงานของตัวเอง — 4 ส่วน';
     individualFormData = {};
     individualFormStep = 1;
     renderIndividualSelfEvalLayout(layout, currentUser.id, false);
@@ -1973,6 +1969,11 @@ function individualFormNav(toStep, empId, readOnly) {
 }
 
 function saveIndividualStepData(step) {
+  // บันทึกค่าการลาจาก header ทุกครั้ง (input อยู่ใน header ทุก step)
+  ['sick','personal','vacation'].forEach(t => {
+    const el = document.getElementById(`ileave_${t}`);
+    if (el) individualFormData[`leave_${t}`] = el.value;
+  });
   if (step === 1) {
     // บันทึก Competency ส่วนที่ 1
     document.querySelectorAll('.individual-comp-radio').forEach(input => {
@@ -2970,7 +2971,7 @@ function saveIndividualMgrStepData(step) {
     if (el) individualMgrFormData.support_note = el.value;
   } else if (step === 5) {
     // บันทึกสรุปผล, recommendation, career, dev_plan
-    ['overall_comment','dev_plan'].forEach(f => {
+    ['comment_comp','comment_beh','overall_comment','dev_plan'].forEach(f => {
       const e = document.getElementById(`imgr_${f}`);
       if (e) individualMgrFormData[f] = e.value;
     });
@@ -2986,6 +2987,11 @@ function saveIndividualMgrStepData(step) {
     if (subOther2) individualMgrFormData.rec_sub_other2 = subOther2.value;
     const career = document.querySelector('input[name="imgr_career"]:checked');
     if (career) individualMgrFormData.career = career.value;
+    // บันทึก input เพิ่มเติมของ promote / transfer
+    ['career_position','career_company','career_dept','career_transfer_position'].forEach(f => {
+      const el = document.getElementById(`imgr_${f}`);
+      if (el) individualMgrFormData[f] = el.value;
+    });
   }
 }
 
@@ -3312,16 +3318,29 @@ function renderIndividualMgrStep5(empId, selfData, competencies) {
       </table>
     </div>
 
-    <!-- 1. สรุปความเห็นภาพรวม -->
+    <!-- 1. สรุปความเห็นแยกส่วนที่ 1 และ 2 -->
     <div class="form-field">
-      <label class="field-label" style="font-weight:700">1. สรุปความเห็นภาพรวมการปฏิบัติงาน</label>
-      <textarea id="imgr_overall_comment" class="field-textarea" rows="4"
-        placeholder="กรอกสรุปความเห็นภาพรวม...">${individualMgrFormData.overall_comment||''}</textarea>
+      <label class="field-label" style="font-weight:700">1. สรุปความเห็นด้านสมรรถนะตามตำแหน่งงาน (ส่วนที่ 1)</label>
+      <textarea id="imgr_comment_comp" class="field-textarea" rows="3"
+        placeholder="สรุปความเห็นด้านสมรรถนะตามตำแหน่งงาน...">${individualMgrFormData.comment_comp||''}</textarea>
     </div>
 
-    <!-- 2. เสนอปรับเงินเดือน -->
     <div class="form-field">
-      <label class="field-label" style="font-weight:700">2. เสนอเพื่อการปรับอัตราตอบแทน (โปรดทำเครื่องหมายในช่องที่ต้องการเพียง 1 ข้อ)</label>
+      <label class="field-label" style="font-weight:700">2. สรุปความเห็นด้านพฤติกรรมหลัก (ส่วนที่ 2)</label>
+      <textarea id="imgr_comment_beh" class="field-textarea" rows="3"
+        placeholder="สรุปความเห็นด้านพฤติกรรมหลัก...">${individualMgrFormData.comment_beh||''}</textarea>
+    </div>
+
+    <!-- 3. ภาพรวมการปฏิบัติงาน -->
+    <div class="form-field">
+      <label class="field-label" style="font-weight:700">3. ภาพรวมการปฏิบัติงาน</label>
+      <textarea id="imgr_overall_comment" class="field-textarea" rows="4"
+        placeholder="สรุปภาพรวมการปฏิบัติงานโดยรวม...">${individualMgrFormData.overall_comment||''}</textarea>
+    </div>
+
+    <!-- 4. เสนอปรับเงินเดือน -->
+    <div class="form-field">
+      <label class="field-label" style="font-weight:700">4. เสนอเพื่อการปรับอัตราตอบแทน (โปรดทำเครื่องหมายในช่องที่ต้องการเพียง 1 ข้อ)</label>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
         <div style="border:1px solid var(--border);border-radius:8px;padding:12px">
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px">
@@ -3330,7 +3349,7 @@ function renderIndividualMgrStep5(empId, selfData, competencies) {
             <input type="number" id="imgr_merit_pct" min="0" max="100" step="0.5"
               value="${individualMgrFormData.merit_pct||''}" placeholder="0"
               style="width:56px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px;text-align:center">
-            %
+            % ของฐานเงินเดือน
           </label>
           <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px">
             <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
@@ -3372,11 +3391,57 @@ function renderIndividualMgrStep5(empId, selfData, competencies) {
 
     <!-- 3. เสนอปรับตำแหน่ง -->
     <div class="form-field">
-      <label class="field-label" style="font-weight:700">3. เสนอเพื่อการปรับตำแหน่งงาน / การขยายขอบเขตหน้าที่ (โปรดทำเครื่องหมายในช่องที่ต้องการเพียง 1 ข้อ)</label>
+      <label class="field-label" style="font-weight:700">5. เสนอเพื่อการปรับตำแหน่งงาน / การขยายขอบเขตหน้าที่ (โปรดทำเครื่องหมายในช่องที่ต้องการเพียง 1 ข้อ)</label>
       <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-        ${careerOptions.map(o => `
-          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;padding:8px 12px;border:1px solid var(--border);border-radius:6px;${individualMgrFormData.career===o.value?'border-color:var(--primary);background:rgba(224,32,32,0.04)':''}">
-            <input type="radio" name="imgr_career" value="${o.value}" ${individualMgrFormData.career===o.value?'checked':''} style="margin-top:2px;flex-shrink:0">
+
+        <!-- promote — แสดง input ตำแหน่งใหม่ -->
+        <div style="border:1px solid ${individualMgrFormData.career==='promote'?'var(--primary)':'var(--border)'};border-radius:6px;overflow:hidden">
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;padding:8px 12px;${individualMgrFormData.career==='promote'?'background:rgba(224,32,32,0.04)':''}">
+            <input type="radio" name="imgr_career" value="promote" ${individualMgrFormData.career==='promote'?'checked':''} style="margin-top:2px;flex-shrink:0"
+              onclick="document.getElementById('imgr_promote_inputs').style.display='block';document.getElementById('imgr_transfer_inputs').style.display='none'">
+            เสนอปรับเลื่อนตำแหน่ง
+          </label>
+          <div id="imgr_promote_inputs" style="display:${individualMgrFormData.career==='promote'?'block':'none'};padding:0 12px 12px 12px;border-top:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:4px;margin-top:8px">ระบุตำแหน่งใหม่</div>
+            <input type="text" id="imgr_career_position" value="${individualMgrFormData.career_position||''}" placeholder="ตำแหน่งใหม่..."
+              style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+          </div>
+        </div>
+
+        <!-- transfer — แสดง input บริษัท + แผนก + ตำแหน่งใหม่ -->
+        <div style="border:1px solid ${individualMgrFormData.career==='transfer'?'var(--primary)':'var(--border)'};border-radius:6px;overflow:hidden">
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;padding:8px 12px;${individualMgrFormData.career==='transfer'?'background:rgba(224,32,32,0.04)':''}">
+            <input type="radio" name="imgr_career" value="transfer" ${individualMgrFormData.career==='transfer'?'checked':''} style="margin-top:2px;flex-shrink:0"
+              onclick="document.getElementById('imgr_transfer_inputs').style.display='grid';document.getElementById('imgr_promote_inputs').style.display='none'">
+            เสนอโยกย้าย / เปลี่ยนแปลงตำแหน่งจากเดิม
+          </label>
+          <div id="imgr_transfer_inputs" style="display:${individualMgrFormData.career==='transfer'?'grid':'none'};grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 12px 12px 12px;border-top:1px solid var(--border)">
+            <div style="margin-top:8px">
+              <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">บริษัท</div>
+              <input type="text" id="imgr_career_company" value="${individualMgrFormData.career_company||''}" placeholder="บริษัท..."
+                style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+            </div>
+            <div style="margin-top:8px">
+              <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">แผนก</div>
+              <input type="text" id="imgr_career_dept" value="${individualMgrFormData.career_dept||''}" placeholder="แผนก..."
+                style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+            </div>
+            <div style="margin-top:8px">
+              <div style="font-size:12px;color:var(--text-3);margin-bottom:4px">ตำแหน่งใหม่</div>
+              <input type="text" id="imgr_career_transfer_position" value="${individualMgrFormData.career_transfer_position||''}" placeholder="ตำแหน่งใหม่..."
+                style="width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px">
+            </div>
+          </div>
+        </div>
+
+        <!-- enrich + maintain — ไม่มี input เพิ่มเติม -->
+        ${[
+          { value:'enrich',   label:'เสนอปรับขยายขอบเขตความรับผิดชอบ คงตำแหน่งเดิม แต่เพิ่มความท้าทายหรือมอบหมายให้ดูแลโครงการ / ระบบงานที่สำคัญมากขึ้น' },
+          { value:'maintain', label:'เสนอให้ปฏิบัติหน้าที่ในตำแหน่งเดิมต่อไป' },
+        ].map(o => `
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;padding:8px 12px;border:1px solid ${individualMgrFormData.career===o.value?'var(--primary)':'var(--border)'};border-radius:6px;${individualMgrFormData.career===o.value?'background:rgba(224,32,32,0.04)':''}">
+            <input type="radio" name="imgr_career" value="${o.value}" ${individualMgrFormData.career===o.value?'checked':''} style="margin-top:2px;flex-shrink:0"
+              onclick="document.getElementById('imgr_promote_inputs').style.display='none';document.getElementById('imgr_transfer_inputs').style.display='none'">
             ${o.label}
           </label>
         `).join('')}
@@ -3385,7 +3450,7 @@ function renderIndividualMgrStep5(empId, selfData, competencies) {
 
     <!-- 4. แผนพัฒนา -->
     <div class="form-field">
-      <label class="field-label" style="font-weight:700">4. แผนการพัฒนาและเตรียมความพร้อม (6 เดือนข้างหน้า)</label>
+      <label class="field-label" style="font-weight:700">6. แผนการพัฒนาและเตรียมความพร้อม (6 เดือนข้างหน้า)</label>
       <textarea id="imgr_dev_plan" class="field-textarea" rows="4"
         placeholder="ระบุแผนพัฒนาที่ชัดเจน...">${individualMgrFormData.dev_plan||''}</textarea>
     </div>
@@ -4367,6 +4432,10 @@ function renderIndividualReport(empId, emp, realEmp) {
   const score1   = mgrData.score1 ?? 0;
   const score2   = mgrData.score2 ?? 0;
   const total    = mgrData.total  ?? 0;
+  // คะแนนที่พนักงานตอบเอง (ก่อนหัวหน้า override)
+  const empScore1 = comps.reduce((s, c) => s + (indData[`icomp_${c.key}`] || 0), 0);
+  const empScore2 = INDIVIDUAL_BEHAVIOR_LIST.reduce((s, b) => s + (indData[`ibeh_${b.key}`] || 0), 0);
+  const empTotal  = empScore1 + empScore2;
   const recMap   = { merit:'เสนอปรับขึ้น', hold:'ยังไม่ขึ้นเงินเดือน', pip:'ต้องพัฒนา (PIP)', promote:'เลื่อนตำแหน่ง + ขึ้นเงินเดือน', 'raise-high':'ขึ้นเงินเดือน (สูง)', raise:'ขึ้นเงินเดือน (ปกติ)' };
   const careerMap = { promote:'เสนอปรับเลื่อนตำแหน่ง', transfer:'เสนอโยกย้าย / เปลี่ยนตำแหน่ง', enrich:'เสนอขยายขอบเขตความรับผิดชอบ', maintain:'เสนอให้ปฏิบัติหน้าที่เดิมต่อไป' };
   const sCol = (s, max) => s/max >= 0.8 ? '#10B981' : s/max >= 0.6 ? 'var(--primary)' : '#F59E0B';
@@ -4380,10 +4449,6 @@ function renderIndividualReport(empId, emp, realEmp) {
         <div style="font-size:12px;color:var(--sidebar-muted);margin-top:4px">รหัส: ${emp.id} · หัวหน้า: ${mgrName}</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px">
-        ${gi ? `<div style="text-align:center">
-          <div style="font-size:32px;font-weight:800;color:${gi.color}">${gi.label}</div>
-          <div style="font-size:10px;color:var(--sidebar-muted);text-transform:uppercase;letter-spacing:0.07em">ผลการประเมิน</div>
-        </div>` : `<div style="font-size:13px;color:var(--sidebar-muted)">รอประเมิน</div>`}
         <button class="btn-outline no-print" onclick="window.print()" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.2)">🖨 PDF</button>
         <button class="btn-outline no-print" onclick="goBack()" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.2)">← กลับ</button>
       </div>
@@ -4422,9 +4487,20 @@ function renderIndividualReport(empId, emp, realEmp) {
       </div>
       <div class="score-card score-card-total">
         <div class="score-card-label">คะแนนรวม</div>
-        <div class="score-card-num" style="color:${sCol(total,100)};font-size:36px">${total}</div>
-        <div class="score-card-max">/ 100</div>
-        <div class="score-card-bar"><div style="width:${(total/100)*100}%;background:${sCol(total,100)};height:100%;border-radius:3px"></div></div>
+        <div style="display:flex;gap:12px;justify-content:center;align-items:flex-end;margin-top:4px">
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:2px">หัวหน้า</div>
+            <div style="font-size:32px;font-weight:800;color:${sCol(total,100)};line-height:1">${total}</div>
+            <div style="font-size:11px;color:var(--text-3)">/ 100</div>
+          </div>
+          <div style="font-size:16px;color:var(--text-3);padding-bottom:8px">vs</div>
+          <div style="text-align:center">
+            <div style="font-size:10px;color:var(--text-3);margin-bottom:2px">พนักงาน</div>
+            <div style="font-size:24px;font-weight:700;color:${sCol(empTotal,100)};line-height:1">${empTotal}</div>
+            <div style="font-size:11px;color:var(--text-3)">/ 100</div>
+          </div>
+        </div>
+        <div class="score-card-bar" style="margin-top:8px"><div style="width:${(total/100)*100}%;background:${sCol(total,100)};height:100%;border-radius:3px"></div></div>
       </div>
       <div class="score-card score-card-director" style="${execDec?.decision?'border-color:#10B981':twoLvlInd&&execDec?.group_decision?'border-color:#F59E0B':''}">
         <div class="score-card-label">Director Decision</div>
@@ -4457,6 +4533,7 @@ function renderIndividualReport(empId, emp, realEmp) {
       ${comps.map((c, idx) => {
         const empScore = indData[`icomp_${c.key}`] || 0;
         const mgrScore = mgrData[`mgr_icomp_${c.key}`];
+        const hasOverride = mgrScore && mgrScore !== empScore;
         const disp = mgrScore || empScore;
         const col = sCol(disp, 5);
         const optText = empScore > 0 ? (c.options[5 - empScore] || '') : '';
@@ -4466,14 +4543,32 @@ function renderIndividualReport(empId, emp, realEmp) {
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600">${c.name}</div>
               ${optText ? `<div style="font-size:11px;color:var(--text-2);margin-top:2px">${optText}</div>` : ''}
-              ${(mgrScore && mgrScore!==empScore) ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${empScore}→${mgrScore}</div>` : ''}
+              ${hasOverride ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${mgrScore} / พนักงานเลือก ${empScore}</div>` : ''}
             </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            ${hasOverride ? `
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:110px;flex-shrink:0">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:10px;font-weight:600;color:var(--primary);width:26px;flex-shrink:0">หน.</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                  <div style="width:${(mgrScore/5)*100}%;height:100%;background:${sCol(mgrScore,5)};border-radius:3px"></div>
+                </div>
+                <span style="font-size:14px;font-weight:800;color:${sCol(mgrScore,5)};width:14px;text-align:right">${mgrScore}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:10px;color:var(--text-3);width:26px;flex-shrink:0">พนง.</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                  <div style="width:${(empScore/5)*100}%;height:100%;background:#94A3B8;border-radius:3px"></div>
+                </div>
+                <span style="font-size:14px;font-weight:700;color:#94A3B8;width:14px;text-align:right">${empScore}</span>
+              </div>
+            </div>` :
+            `<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
               <div style="width:64px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
                 <div style="width:${(disp/5)*100}%;height:100%;background:${col};border-radius:3px"></div>
               </div>
               <span style="font-size:16px;font-weight:800;color:${col};width:18px;text-align:right">${disp||'—'}</span>
-            </div>
+            </div>`
+            }
           </div>`;
       }).join('')}
     </div>`;
@@ -4488,15 +4583,38 @@ function renderIndividualReport(empId, emp, realEmp) {
       ${INDIVIDUAL_BEHAVIOR_LIST.map((b, idx) => {
         const empScore = indData[`ibeh_${b.key}`] || 0;
         const mgrScore = mgrData[`mgr_ibeh_${b.key}`];
+        const hasOverride = mgrScore && mgrScore !== empScore;
         const disp = mgrScore || empScore;
         const col = sCol(disp, 5);
         return `
-          <div class="report-behavior-row">
+          <div class="report-behavior-row" style="align-items:center">
             <span class="report-behavior-no">${b.no||idx+1}</span>
-            <span class="report-behavior-name">${b.name}</span>
-            <div class="report-bar-wrap"><div class="report-bar-fill" style="width:${(disp/5)*100}%;background:${col}"></div></div>
-            <span class="report-behavior-val" style="color:${col}">${disp||'—'}</span>
-            ${(mgrScore && mgrScore!==empScore) ? `<span style="font-size:10px;color:var(--primary);margin-left:4px" title="Manager ปรับ">M</span>` : ''}
+            <div style="flex:1;min-width:0">
+              <span class="report-behavior-name">${b.name}</span>
+              ${hasOverride ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${mgrScore} / พนักงานเลือก ${empScore}</div>` : ''}
+            </div>
+            ${hasOverride ? `
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:110px;flex-shrink:0">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:10px;font-weight:600;color:var(--primary);width:26px;flex-shrink:0">หน.</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                  <div style="width:${(mgrScore/5)*100}%;height:100%;background:${sCol(mgrScore,5)};border-radius:3px"></div>
+                </div>
+                <span style="font-size:14px;font-weight:800;color:${sCol(mgrScore,5)};width:14px;text-align:right">${mgrScore}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:10px;color:var(--text-3);width:26px;flex-shrink:0">พนง.</span>
+                <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+                  <div style="width:${(empScore/5)*100}%;height:100%;background:#94A3B8;border-radius:3px"></div>
+                </div>
+                <span style="font-size:14px;font-weight:700;color:#94A3B8;width:14px;text-align:right">${empScore}</span>
+              </div>
+            </div>` :
+            `<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <div class="report-bar-wrap"><div class="report-bar-fill" style="width:${(disp/5)*100}%;background:${col}"></div></div>
+              <span class="report-behavior-val" style="color:${col}">${disp||'—'}</span>
+            </div>`
+            }
           </div>`;
       }).join('')}
     </div>`;
@@ -4606,8 +4724,16 @@ function renderDecisionHTML(empId, emp, execDec, recMap) {
   const twoLevel    = needsTwoLevelDecision(emp);
   const isGroupExec = !isOwner && currentUser.role === 'executive';
 
-  const mkSelect = (currentVal) => Object.entries(recMap)
-    .map(([v,l]) => `<option value="${v}" ${currentVal===v?'selected':''}>${l}</option>`).join('');
+  // Director ตัดสินใจแค่ 2 ตัวเลือก: Approved / Not Approved
+  const approveOpts = [
+    { value: 'approved',     label: '✅ Approved — อนุมัติ' },
+    { value: 'not_approved', label: '❌ Not Approved — ไม่อนุมัติ' },
+  ];
+  const mkSelect = (currentVal) => approveOpts
+    .map(o => `<option value="${o.value}" ${currentVal===o.value?'selected':''}>${o.label}</option>`).join('');
+  // เพิ่ม label ใน recMap เพื่อ display read-only
+  recMap['approved']     = '✅ Approved — อนุมัติ';
+  recMap['not_approved'] = '❌ Not Approved — ไม่อนุมัติ';
 
   if (!twoLevel) {
     // 1-level: FMC-001 ตัดสินใจโดยตรง (FMC group + ลูกน้องตรง FMC-001)
@@ -5106,9 +5232,23 @@ function buildReportHTML(empId) {
   `;
 }
 
+function rebuildExportDept(prefix) {
+  // rebuild dept dropdown ตาม group ที่เลือก
+  const grp  = document.getElementById(`${prefix}-group-select`).value;
+  const sel  = document.getElementById(`${prefix}-dept-select`);
+  if (!sel) return;
+  const depts = [...new Set(
+    allData.employees
+      .filter(e => (e.role==='employee'||e.role==='manager') && (!grp||e.group===grp) && e.department)
+      .map(e => e.department)
+  )].sort();
+  sel.innerHTML = '<option value="">ทุกแผนก</option>' + depts.map(d=>`<option value="${d}">${d}</option>`).join('');
+}
+
 function exportPDF() {
   const grp  = document.getElementById('pdf-group-select').value;
-  const emps = allData.employees.filter(e => (e.role==='employee'||e.role==='manager') && (!grp||e.group===grp));
+  const dept = document.getElementById('pdf-dept-select')?.value || '';
+  const emps = allData.employees.filter(e => (e.role==='employee'||e.role==='manager') && (!grp||e.group===grp) && (!dept||e.department===dept));
   if (!emps.length) { showToast('ไม่มีข้อมูล', 'error'); return; }
 
   // สร้าง HTML ทุกคนในกลุ่ม แต่ละคนขึ้นหน้าใหม่
@@ -5124,7 +5264,8 @@ function exportPDF() {
 
 function exportExcel() {
   const grp  = document.getElementById('excel-group-select').value;
-  const emps = allData.employees.filter(e => (e.role==='employee' || e.role==='manager') && (!grp||e.group===grp));
+  const dept = document.getElementById('excel-dept-select')?.value || '';
+  const emps = allData.employees.filter(e => (e.role==='employee' || e.role==='manager') && (!grp||e.group===grp) && (!dept||e.department===dept));
   if (!emps.length) { showToast('ไม่มีข้อมูล', 'error'); return; }
 
   const recMap = { promote:'เลื่อนตำแหน่ง+ขึ้นเงินเดือน', 'raise-high':'ขึ้นเงินเดือน(สูง)', raise:'ขึ้นเงินเดือน(ปกติ)', hold:'ยังไม่ขึ้น', pip:'ต้องพัฒนา(PIP)' };
