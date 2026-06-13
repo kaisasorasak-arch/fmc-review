@@ -738,7 +738,7 @@ async function loadAllData() {
   }
   // โหลด settings แยก — ใช้กับทุก role เพื่อเช็ควันหมดเวลาประเมิน
   try {
-    const s = await apiGet({ action:'getSettings' });
+    const s = await apiGet({ action:'getSettings', _t: Date.now() }); // _t ป้องกัน browser cache
     if (s && !s.error) allData.settings = s;
   } catch { /* ใช้ค่าเดิมหากโหลดไม่ได้ */ }
   if (allData) sessionStorage.setItem('apex_data', JSON.stringify(allData));
@@ -1178,7 +1178,7 @@ function renderSettingsSection() {
       </p>
       <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
         <div>
-          <label class="field-label">วันสิ้นสุด (วัน/เดือน/ปี)</label>
+          <label class="field-label">วันสิ้นสุด</label>
           <input type="date" class="field-input" id="eval-end-date-input" value="${currentEnd}" style="width:180px">
         </div>
         <button class="btn-primary" onclick="saveEvalSettings()">บันทึก</button>
