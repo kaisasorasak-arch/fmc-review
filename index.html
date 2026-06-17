@@ -132,6 +132,27 @@
             <div class="stat-value text-warn" id="mgr-pending">—</div>
           </div>
         </div>
+        <!-- สถานะ Self-Eval ของหัวหน้าเอง -->
+        <div id="mgr-self-status-section">
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-label">SELF-EVALUATION (ของคุณ)</div>
+              <div class="stat-value" id="mgr-own-self-status">ยังไม่กรอก</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">MANAGER EVALUATION (ของคุณ)</div>
+              <div class="stat-value" id="mgr-own-mgr-status">รอประเมิน</div>
+            </div>
+          </div>
+          <div class="action-card" id="mgr-own-action-card">
+            <div class="action-card-text">
+              <div class="action-card-title" id="mgr-own-action-title">กรอก Self-Evaluation</div>
+              <div class="action-card-desc" id="mgr-own-action-desc">ยังไม่ได้ประเมินตัวเอง — กรุณากรอกก่อนวันสิ้นสุดรอบ</div>
+            </div>
+            <button class="btn-primary" id="mgr-own-action-btn">เริ่มประเมิน</button>
+          </div>
+        </div>
+
         <div class="table-card">
           <div class="table-header-row">
             <h3 class="table-title">รายชื่อพนักงาน</h3>
