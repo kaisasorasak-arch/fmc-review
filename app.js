@@ -3530,20 +3530,11 @@ function renderIndividualMgrStep5(empId, selfData, competencies, behaviors) {
             % ของฐานเงินเดือน
           </label>
           <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px">
-            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
-              <input type="radio" name="imgr_rec_sub" value="merit_outstanding" ${individualMgrFormData.rec_sub==='merit_outstanding'?'checked':''} style="margin-top:2px">
-              ด้วยผลงานโดดเด่น เกินเป้าหมายอย่างชัดเจน และแสดงออกด้านพฤติกรรมที่สอดคล้องกับค่านิยม
-            </label>
-            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
-              <input type="radio" name="imgr_rec_sub" value="merit_standard" ${individualMgrFormData.rec_sub==='merit_standard'?'checked':''} style="margin-top:2px">
-              จากผลการปฏิบัติงานบรรลุเป้าหมาย เป็นไปตามหน้าที่ของแต่ละตำแหน่งที่กำหนดไว้
-            </label>
-            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
-              <input type="radio" name="imgr_rec_sub" value="merit_other" ${individualMgrFormData.rec_sub==='merit_other'?'checked':''} style="margin-top:2px">
-              อื่นๆ ระบุ:
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px">
+              <span style="white-space:nowrap">หมายเหตุ</span>
               <input type="text" id="imgr_rec_sub_other" value="${individualMgrFormData.rec_sub_other||''}" placeholder="ระบุ..."
                 style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px">
-            </label>
+            </div>
           </div>
         </div>
         <div style="border:1px solid var(--border);border-radius:8px;padding:12px">
@@ -3552,16 +3543,11 @@ function renderIndividualMgrStep5(empId, selfData, competencies, behaviors) {
             ยังไม่ปรับขึ้น
           </label>
           <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px">
-            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
-              <input type="radio" name="imgr_rec_sub" value="hold_below" ${individualMgrFormData.rec_sub==='hold_below'?'checked':''} style="margin-top:2px">
-              เนื่องจากผลงานยังไม่บรรลุเป้าหมายหรือพฤติกรรมบางประการยังต้องได้รับการปรับปรุง
-            </label>
-            <label style="display:flex;align-items:flex-start;gap:6px;font-size:12px;cursor:pointer">
-              <input type="radio" name="imgr_rec_sub" value="hold_other" ${individualMgrFormData.rec_sub==='hold_other'?'checked':''} style="margin-top:2px">
-              อื่นๆ ระบุ:
+            <div style="display:flex;align-items:center;gap:6px;font-size:12px">
+              <span style="white-space:nowrap">หมายเหตุ</span>
               <input type="text" id="imgr_rec_sub_other2" value="${individualMgrFormData.rec_sub_other2||''}" placeholder="ระบุ..."
                 style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px">
-            </label>
+            </div>
           </div>
         </div>
       </div>
