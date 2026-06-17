@@ -859,7 +859,11 @@ function renderEmpDashboard() {
 }
 
 // ========== MANAGER DASHBOARD ==========
-function renderMgrDashboard() {
+async function renderMgrDashboard() {
+  // โหลดข้อมูลใหม่ทุกครั้ง — เพื่อให้สถานะ self-eval ของหัวหน้าตัวเองถูกต้องเสมอ
+  showLoading(true);
+  try { await loadAllData(); } catch(e) {}
+  finally { showLoading(false); }
   // FMC-001 มีลูกน้องตรงที่เป็น executive ด้วย — รวม executive เข้าในทีม
   const isMD = sameId(currentUser.id, 'FMC-001');
   const seen = new Set(allData.employees.map(e => e.id.toLowerCase()));
