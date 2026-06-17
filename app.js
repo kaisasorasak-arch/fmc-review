@@ -708,6 +708,11 @@ function renderSidebar() {
   let navItems = (navDefs[u.role] || []).filter(item =>
     !(sameId(u.id, 'FMC-001') && item.view === 'self-eval')
   );
+  // ซ่อน Self-Evaluation สำหรับ manager ที่กรอกแล้ว — เข้าดูได้แค่ผ่านปุ่ม "ดูข้อมูลที่กรอก"
+  if (u.role === 'manager') {
+    const hasSelfEval = allData.selfEvals.some(s => sameId(s.employee_id, u.id));
+    if (hasSelfEval) navItems = navItems.filter(item => item.view !== 'self-eval');
+  }
   if (sameId(u.id, 'FMC-001')) {
     navItems = [
       { icon:'◉', label:'Dashboard',          view:'exec-dashboard' },
@@ -864,6 +869,7 @@ async function renderMgrDashboard() {
   showLoading(true);
   try { await loadAllData(); } catch(e) {}
   finally { showLoading(false); }
+  renderSidebar(); // รีเฟรช sidebar — ซ่อน Self-Eval ถ้ากรอกแล้ว
   // FMC-001 มีลูกน้องตรงที่เป็น executive ด้วย — รวม executive เข้าในทีม
   const isMD = sameId(currentUser.id, 'FMC-001');
   const seen = new Set(allData.employees.map(e => e.id.toLowerCase()));
