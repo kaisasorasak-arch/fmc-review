@@ -136,6 +136,8 @@ const INDIVIDUAL_BEHAVIOR_LIST = [
 let individualFormData = {};
 let individualFormStep = 1;
 let individualFormNoticeBanner = ''; // เก็บ notice banner ระหว่าง navigate steps
+// flag บังคับ read-only เมื่อหัวหน้ากด "ดูข้อมูลที่กรอก" จาก Manager Dashboard
+let selfEvalForceReadOnly = false;
 
 // ========== Admin Form — ส่วนที่ 1: Position Competencies (10 หัวข้อ) ==========
 const ADMIN_COMPETENCY_LIST = [
@@ -871,6 +873,34 @@ function renderMgrDashboard() {
   document.getElementById('mgr-done').textContent    = done.length;
   document.getElementById('mgr-pending').textContent = myTeam.length - done.length;
 
+  // การ์ดสถานะ Self-Eval ของหัวหน้าเอง — ซ่อนสำหรับ FMC-001 (ไม่ต้องประเมินตัวเอง)
+  const selfStatusSection = document.getElementById('mgr-self-status-section');
+  if (selfStatusSection) {
+    if (isMD) {
+      selfStatusSection.style.display = 'none';
+    } else {
+      selfStatusSection.style.display = '';
+      const ownSelf = allData.selfEvals.find(s => sameId(s.employee_id, currentUser.id));
+      const ownMgr  = allData.managerEvals.find(m => sameId(m.employee_id, currentUser.id));
+      document.getElementById('mgr-own-self-status').textContent = ownSelf ? '✓ กรอกแล้ว' : 'ยังไม่กรอก';
+      document.getElementById('mgr-own-mgr-status').textContent  = ownMgr  ? '✓ ประเมินแล้ว' : 'รอประเมิน';
+      const actionTitle = document.getElementById('mgr-own-action-title');
+      const actionDesc  = document.getElementById('mgr-own-action-desc');
+      const actionBtn   = document.getElementById('mgr-own-action-btn');
+      if (ownSelf) {
+        actionTitle.textContent = 'ดูข้อมูลที่กรอก';
+        actionDesc.textContent  = 'ดูข้อมูลที่ส่งแล้ว (อ่านได้อย่างเดียว ไม่สามารถแก้ไขได้)';
+        actionBtn.textContent   = 'ดูข้อมูลที่กรอก';
+        actionBtn.onclick       = viewMgrOwnSelfEval;
+      } else {
+        actionTitle.textContent = 'กรอก Self-Evaluation';
+        actionDesc.textContent  = 'ยังไม่ได้ประเมินตัวเอง — กรุณากรอกก่อนวันสิ้นสุดรอบ';
+        actionBtn.textContent   = 'เริ่มประเมิน';
+        actionBtn.onclick       = () => showView('self-eval');
+      }
+    }
+  }
+
   const tbody = document.getElementById('mgr-employee-list');
   const empty = document.getElementById('mgr-empty');
   tbody.innerHTML = '';
@@ -914,6 +944,8 @@ function renderMgrDashboard() {
 
 function openMgrEval(empId) { currentEvalEmployeeId = empId; showView('mgr-eval'); }
 function openReport(empId)  { currentEvalEmployeeId = empId; showView('report'); }
+// เปิด Self-Eval ของหัวหน้าเองแบบ read-only
+function viewMgrOwnSelfEval() { selfEvalForceReadOnly = true; showView('self-eval'); }
 
 // ========== แบบฟอร์มของ Manager เอง (download + upload) ==========
 function renderMgrSelfFormSection() {
@@ -1516,10 +1548,12 @@ async function renderSelfEvalForm() {
     }
   }
 
-  // ตรวจสอบสถานะ — ล็อกถาวรเมื่อหัวหน้าประเมินแล้ว
+  // ตรวจสอบสถานะ — ล็อกถาวรเมื่อหัวหน้าประเมินแล้ว หรือเมื่อหัวหน้ากด "ดูข้อมูลที่กรอก"
+  const forceReadOnly = selfEvalForceReadOnly;
+  selfEvalForceReadOnly = false; // reset ทันทีหลังอ่าน
   const selfEval   = allData.selfEvals.find(s => sameId(s.employee_id, currentUser.id));
   const hasMgrEval = allData.managerEvals.some(m => sameId(m.employee_id, currentUser.id));
-  const isLocked   = !!(selfEval && hasMgrEval);
+  const isLocked   = !!(selfEval && hasMgrEval) || forceReadOnly;
 
   // banner แสดงสถานะก่อน layout
   const noticeBanner = isLocked
