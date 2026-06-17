@@ -2176,6 +2176,7 @@ body {
 .admin-radio-label.admin-radio-selected .admin-radio-score { background: var(--primary); color: #fff; }
 .admin-radio-text { line-height: 1.5; }
 .admin-evidence-wrap { margin-top: 8px; }
+.admin-evidence-wrap .field-label { color: #374151; }
 .admin-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
 .admin-group-header { font-size: 13px; font-weight: 700; color: var(--primary); background: rgba(224,32,32,0.06); padding: 10px 14px; border-radius: var(--radius); margin: 16px 0 12px; }
 .admin-mission-block { padding: 16px 0; }
