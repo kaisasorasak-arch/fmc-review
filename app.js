@@ -718,7 +718,7 @@ function renderSidebar() {
   if (sameId(u.id, 'FMC-001')) {
     navItems = [
       { icon:'◉', label:'Dashboard',          view:'exec-dashboard' },
-      { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-dashboard' },
+      { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-team' },
       { icon:'↓', label:'Export',             view:'export' },
     ];
   } else if (u.role === 'executive') {
@@ -726,9 +726,11 @@ function renderSidebar() {
     // ISEC-121, PPP-015, OUTS-003 — ไม่ต้องประเมินตัวเอง ซ่อน Self-Evaluation
     const noSelfEvalExecs = ['ISEC-121', 'PPP-015', 'OUTS-003'];
     const isNoSelfEval = noSelfEvalExecs.some(id => sameId(u.id, id));
+    // BNT-004 ใช้ mgr-dashboard เดิม (ไม่เปลี่ยน) — exec อื่นใช้ mgr-team เพื่อแสดงปุ่มประเมิน
+    const mgrView = sameId(u.id, 'BNT-004') ? 'mgr-dashboard' : 'mgr-team';
     navItems = [
       { icon:'◉', label:'Dashboard',          view:'exec-dashboard' },
-      { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-dashboard' },
+      { icon:'👥', label:'ประเมินลูกน้อง',    view: mgrView },
       ...(!isNoSelfEval ? [{ icon:'✎', label:'Self-Evaluation', view:'self-eval' }] : []),
       { icon:'↓', label:'Export',             view:'export' },
     ];
