@@ -3283,7 +3283,7 @@ function renderIndividualMgrStep1(empId, selfData, competencies) {
 
     return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
               <div style="font-weight:600;font-size:13px;margin-bottom:8px">${c.no}. ${c.name}</div>
-              ${evidence ? `<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;padding:5px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
+              ${evidence ? `<div style="font-size:13px;color:#1D4ED8;margin-bottom:8px;padding:5px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
               ${optsHTML}
             </div>`;
   }).join('');
@@ -3347,7 +3347,7 @@ function renderIndividualMgrStep2(empId, selfData, behaviors) {
 
       return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
                 <div style="font-weight:600;font-size:13px;margin-bottom:8px">${b.no}. ${b.name}</div>
-                ${evidence ? `<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;padding:5px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
+                ${evidence ? `<div style="font-size:13px;color:#1D4ED8;margin-bottom:8px;padding:5px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--border)">ตัวอย่างเหตุการณ์จริง: ${evidence}</div>` : ''}
                 ${optsHTML}
               </div>`;
     }).join('');
