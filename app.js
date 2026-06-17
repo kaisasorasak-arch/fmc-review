@@ -138,6 +138,7 @@ let individualFormStep = 1;
 let individualFormNoticeBanner = ''; // เก็บ notice banner ระหว่าง navigate steps
 // flag บังคับ read-only เมื่อหัวหน้ากด "ดูข้อมูลที่กรอก" จาก Manager Dashboard
 let selfEvalForceReadOnly = false;
+let mgrTeamOnly = false; // true เมื่อเข้าผ่าน "ประเมินลูกน้อง" — ซ่อน self-status section
 
 // ========== Admin Form — ส่วนที่ 1: Position Competencies (10 หัวข้อ) ==========
 const ADMIN_COMPETENCY_LIST = [
@@ -686,8 +687,9 @@ function renderSidebar() {
       { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
     ],
     manager:   [
-      { icon:'◉', label:'Dashboard',       view:'mgr-dashboard' },
-      { icon:'✎', label:'Self-Evaluation', view:'self-eval' },
+      { icon:'◉', label:'Dashboard',          view:'mgr-dashboard' },
+      { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-team' },
+      { icon:'✎', label:'Self-Evaluation',    view:'self-eval' },
     ],
     executive: [
       { icon:'◉', label:'Dashboard',       view:'exec-dashboard' },
@@ -776,8 +778,10 @@ function updateProgressBar() {
 
 // ========== VIEW ROUTING ==========
 function showView(viewName, options = {}) {
+  // mgr-team reuses view-mgr-dashboard element (ไม่มี view ใหม่ใน HTML)
+  const domName = viewName === 'mgr-team' ? 'mgr-dashboard' : viewName;
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const el = document.getElementById(`view-${viewName}`);
+  const el = document.getElementById(`view-${domName}`);
   if (!el) return;
   el.classList.remove('hidden');
   el.classList.add('active');
@@ -791,6 +795,7 @@ function showView(viewName, options = {}) {
   const renders = {
     'emp-dashboard':  renderEmpDashboard,
     'mgr-dashboard':  renderMgrDashboard,
+    'mgr-team':       () => { mgrTeamOnly = true; renderMgrDashboard(); },
     'exec-dashboard': renderExecDashboard,
     'self-eval':      () => renderSelfEvalForm(options),
     'mgr-eval':       () => renderMgrEvalForm(options),
@@ -883,10 +888,12 @@ async function renderMgrDashboard() {
   document.getElementById('mgr-done').textContent    = done.length;
   document.getElementById('mgr-pending').textContent = myTeam.length - done.length;
 
-  // การ์ดสถานะ Self-Eval ของหัวหน้าเอง — ซ่อนสำหรับ FMC-001 (ไม่ต้องประเมินตัวเอง)
+  // การ์ดสถานะ Self-Eval ของหัวหน้าเอง — ซ่อนสำหรับ FMC-001 และเมื่อเข้าจาก "ประเมินลูกน้อง"
+  const isTeamOnly = mgrTeamOnly;
+  mgrTeamOnly = false; // reset ทันทีหลังอ่าน
   const selfStatusSection = document.getElementById('mgr-self-status-section');
   if (selfStatusSection) {
-    if (isMD) {
+    if (isMD || isTeamOnly) {
       selfStatusSection.style.display = 'none';
     } else {
       selfStatusSection.style.display = '';
@@ -943,7 +950,7 @@ async function renderMgrDashboard() {
       <td class="${selfEval ? 'status-done' : 'status-pending'}">${selfEval ? '✓' : '—'}</td>
       <td class="${mgrEval ? 'status-done' : 'status-pending'}">${mgrEval ? '✓' : '—'}</td>
       <td style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-outline btn-sm" onclick="openMgrEval('${emp.id}')">ประเมิน</button>
+        ${isTeamOnly ? `<button class="btn-outline btn-sm" onclick="openMgrEval('${emp.id}')">ประเมิน</button>` : ''}
         ${mgrEval ? `<button class="btn-outline btn-sm" onclick="openReport('${emp.id}')">รายงาน</button>` : ''}
       </td>
     `;
