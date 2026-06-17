@@ -714,10 +714,13 @@ function renderSidebar() {
     ];
   } else if (u.role === 'executive') {
     // Group Executive ทุกคน: Dashboard + ประเมินลูกน้อง + Self-Eval + Export
+    // ISEC-121, PPP-015, OUTS-003 — ไม่ต้องประเมินตัวเอง ซ่อน Self-Evaluation
+    const noSelfEvalExecs = ['ISEC-121', 'PPP-015', 'OUTS-003'];
+    const isNoSelfEval = noSelfEvalExecs.some(id => sameId(u.id, id));
     navItems = [
       { icon:'◉', label:'Dashboard',          view:'exec-dashboard' },
       { icon:'👥', label:'ประเมินลูกน้อง',    view:'mgr-dashboard' },
-      { icon:'✎', label:'Self-Evaluation',    view:'self-eval' },
+      ...(!isNoSelfEval ? [{ icon:'✎', label:'Self-Evaluation', view:'self-eval' }] : []),
       { icon:'↓', label:'Export',             view:'export' },
     ];
   }
