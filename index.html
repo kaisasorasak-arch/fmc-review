@@ -475,6 +475,30 @@
     </div>
   </div>
 
+  <!-- ===== MODAL: บังคับเปลี่ยนรหัสผ่าน ===== -->
+  <div class="modal-overlay hidden" id="modal-force-password">
+    <div class="modal-card" style="max-width:400px">
+      <div class="modal-header">
+        <h3 class="modal-title">🔒 กรุณาเปลี่ยนรหัสผ่าน</h3>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">รหัสผ่านเริ่มต้น <strong>1234</strong> ต้องเปลี่ยนก่อนเข้าใช้งาน</p>
+        <div class="form-field">
+          <label class="field-label">รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร) *</label>
+          <input type="password" id="force-new-password" class="field-input" placeholder="รหัสผ่านใหม่">
+        </div>
+        <div class="form-field">
+          <label class="field-label">ยืนยันรหัสผ่านใหม่ *</label>
+          <input type="password" id="force-confirm-password" class="field-input" placeholder="กรอกรหัสผ่านอีกครั้ง">
+        </div>
+        <p id="force-pwd-error" class="hidden" style="color:var(--red);font-size:12px;margin-top:4px"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="submitForceChangePassword()">บันทึกรหัสผ่านใหม่</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
