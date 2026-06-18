@@ -1617,12 +1617,12 @@ async function renderSelfEvalForm() {
   selfEvalForceReadOnly = false; // reset ทันทีหลังอ่าน
   const selfEval   = allData.selfEvals.find(s => sameId(s.employee_id, currentUser.id));
   const hasMgrEval = allData.managerEvals.some(m => sameId(m.employee_id, currentUser.id));
-  const isLocked   = !!(selfEval && hasMgrEval) || forceReadOnly;
+  const isLocked   = !!selfEval || forceReadOnly;
 
   // banner แสดงสถานะก่อน layout
   const noticeBanner = isLocked
     ? `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;font-size:13px;color:#991B1B;display:flex;align-items:center;gap:8px">
-         🔒 <strong>หัวหน้าประเมินแล้ว</strong> — ไม่สามารถแก้ไขได้
+         🔒 <strong>ส่งแบบประเมินแล้ว</strong> — ไม่สามารถแก้ไขได้
        </div>`
     : selfEval
     ? `<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;font-size:13px;color:#92400E;display:flex;align-items:center;gap:8px">
