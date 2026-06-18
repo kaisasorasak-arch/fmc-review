@@ -641,6 +641,8 @@ async function handleLogin(e) {
     if (localEmp && localEmp.competencies) user.competencies = localEmp.competencies;
     if (localEmp && localEmp.behaviors)    user.behaviors    = localEmp.behaviors;
     currentUser = user;
+    // ตรวจว่าต้องบังคับเปลี่ยนรหัสไหม (manager/executive ที่ยังใช้ 1234)
+    currentUser._mustChangePwd = (password === '1234' && (user.role === 'manager' || user.role === 'executive'));
     sessionStorage.setItem('apex_user', JSON.stringify(user));
     enterApp();
   } catch {
@@ -671,6 +673,48 @@ async function enterApp() {
   await loadAllData();
   showLoading(false);
   goDashboard();
+  checkForceChangePassword();
+}
+
+// ========== FORCE CHANGE PASSWORD ==========
+function checkForceChangePassword() {
+  if (!currentUser || !currentUser._mustChangePwd) return;
+  document.getElementById('modal-force-password').classList.remove('hidden');
+}
+
+async function submitForceChangePassword() {
+  const newPwd     = document.getElementById('force-new-password').value;
+  const confirmPwd = document.getElementById('force-confirm-password').value;
+  const errEl      = document.getElementById('force-pwd-error');
+  errEl.classList.add('hidden');
+
+  if (newPwd.length < 6) {
+    errEl.textContent = 'รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร'; errEl.classList.remove('hidden'); return;
+  }
+  if (newPwd === '1234') {
+    errEl.textContent = 'ไม่สามารถใช้รหัส 1234 ได้'; errEl.classList.remove('hidden'); return;
+  }
+  if (newPwd !== confirmPwd) {
+    errEl.textContent = 'รหัสผ่านไม่ตรงกัน กรุณากรอกอีกครั้ง'; errEl.classList.remove('hidden'); return;
+  }
+  try {
+    await apiPost({ action: 'changePassword', userId: currentUser.id, newPassword: newPwd });
+    currentUser._mustChangePwd = false;
+    document.getElementById('modal-force-password').classList.add('hidden');
+    showToast('เปลี่ยนรหัสผ่านสำเร็จ', 'success');
+  } catch {
+    errEl.textContent = 'เกิดข้อผิดพลาด กรุณาลองใหม่'; errEl.classList.remove('hidden');
+  }
+}
+
+async function resetEmployeePassword(empId, empName) {
+  if (!confirm(`รีเซ็ตรหัสผ่านของ "${empName}" กลับเป็น 1234?`)) return;
+  try {
+    await apiPost({ action: 'resetPassword', userId: empId });
+    showToast(`รีเซ็ตรหัสผ่าน ${empName} เป็น 1234 สำเร็จ`, 'success');
+  } catch {
+    showToast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
+  }
 }
 
 function renderSidebar() {
@@ -1339,6 +1383,7 @@ function renderAdminTable() {
       <td style="font-size:12px;color:var(--text-2)">${mgr ? mgr.name : '—'}</td>
       <td style="display:flex;gap:6px">
         <button class="btn-outline btn-sm" onclick="openEmployeeModal('${emp.id}')">แก้ไข</button>
+        ${currentUser.role === 'hr' ? `<button class="btn-outline btn-sm" style="color:#D97706;border-color:#D97706" onclick="resetEmployeePassword('${emp.id}','${emp.name.replace(/'/g,"\\'")}')">Reset รหัส</button>` : ''}
         <button class="btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="deleteEmployee('${emp.id}')">ลบ</button>
       </td>
     `;
@@ -5523,7 +5568,11 @@ async function apiPost(payload) {
 // ========== MOCK API ==========
 function mockApi(params) {
   if (params.action === 'login') {
-    const user = getMockUsers().find(u => u.username===params.username && u.password===params.password);
+    const overrides = JSON.parse(localStorage.getItem('fmc_pwd_overrides') || '{}');
+    const user = getMockUsers().find(u => {
+      const effectivePwd = overrides[(u.id||'').toLowerCase()] || u.password;
+      return u.username === params.username && effectivePwd === params.password;
+    });
     if (!user) throw new Error('invalid');
     const { password, ...safe } = user;
     return safe;
@@ -5552,6 +5601,17 @@ function mockApiPost(payload) {
     const rec = { ...payload, submitted_at:new Date().toISOString() };
     if (idx>=0) arr[idx]=rec; else arr.push(rec);
     localStorage.setItem(key, JSON.stringify(arr));
+  }
+  // Password management — เก็บ override ใน localStorage
+  if (payload.action === 'changePassword') {
+    const overrides = JSON.parse(localStorage.getItem('fmc_pwd_overrides') || '{}');
+    overrides[payload.userId.toLowerCase()] = payload.newPassword;
+    localStorage.setItem('fmc_pwd_overrides', JSON.stringify(overrides));
+  }
+  if (payload.action === 'resetPassword') {
+    const overrides = JSON.parse(localStorage.getItem('fmc_pwd_overrides') || '{}');
+    delete overrides[payload.userId.toLowerCase()];
+    localStorage.setItem('fmc_pwd_overrides', JSON.stringify(overrides));
   }
   // Settings — เก็บใน localStorage
   if (payload.action === 'saveSettings') {
