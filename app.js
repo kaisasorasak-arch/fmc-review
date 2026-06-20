@@ -1198,6 +1198,8 @@ function renderExecTable(employees) {
       <td class="${self ? 'status-done':'status-pending'}">${self ? '✓':'—'}</td>
       <td class="${mgr  ? 'status-done':'status-pending'}">${mgr  ? '✓':'—'}</td>
       <td>${gradeHtml}</td>
+      <td style="font-size:12px;max-width:180px;color:var(--text-1)">${mgrIndData.comment_comp ? `<span title="${(mgrIndData.comment_comp||'').replace(/"/g,'&quot;')}" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:default">${mgrIndData.comment_comp}</span>` : '<span style="color:var(--text-3)">—</span>'}</td>
+      <td style="font-size:12px;max-width:180px;color:var(--text-1)">${mgrIndData.comment_beh ? `<span title="${(mgrIndData.comment_beh||'').replace(/"/g,'&quot;')}" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:default">${mgrIndData.comment_beh}</span>` : '<span style="color:var(--text-3)">—</span>'}</td>
       <td style="font-size:12px;max-width:160px">${recCell}</td>
       <td>
         ${execHtml}
@@ -3571,15 +3573,15 @@ function renderIndividualMgrStep5(empId, selfData, competencies, behaviors) {
           <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px">
             <input type="radio" name="imgr_recommendation" value="merit" ${individualMgrFormData.recommendation==='merit'?'checked':''} style="margin-top:2px">
             เสนอปรับขึ้น
-            <input type="number" id="imgr_merit_pct" min="0" max="100" step="0.5"
+            <input type="number" id="imgr_merit_pct" min="0" max="100" step="any"
               value="${individualMgrFormData.merit_pct||''}" placeholder="0"
               style="width:56px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px;text-align:center">
             % ของฐานเงินเดือน
           </label>
           <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px">
             <div style="display:flex;align-items:center;gap:6px;font-size:12px">
-              <span style="white-space:nowrap">หมายเหตุ</span>
-              <input type="text" id="imgr_rec_sub_other" value="${individualMgrFormData.rec_sub_other||''}" placeholder="ระบุ..."
+              <span style="white-space:nowrap;font-weight:600;color:var(--text-1)">กรอกเหตุผล</span>
+              <input type="text" id="imgr_rec_sub_other" value="${individualMgrFormData.rec_sub_other||''}" placeholder="ระบุเหตุผล..."
                 style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px">
             </div>
           </div>
@@ -3591,8 +3593,8 @@ function renderIndividualMgrStep5(empId, selfData, competencies, behaviors) {
           </label>
           <div style="display:flex;flex-direction:column;gap:6px;padding-left:20px">
             <div style="display:flex;align-items:center;gap:6px;font-size:12px">
-              <span style="white-space:nowrap">หมายเหตุ</span>
-              <input type="text" id="imgr_rec_sub_other2" value="${individualMgrFormData.rec_sub_other2||''}" placeholder="ระบุ..."
+              <span style="white-space:nowrap;font-weight:600;color:var(--text-1)">กรอกเหตุผล</span>
+              <input type="text" id="imgr_rec_sub_other2" value="${individualMgrFormData.rec_sub_other2||''}" placeholder="ระบุเหตุผล..."
                 style="flex:1;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px">
             </div>
           </div>
@@ -3671,10 +3673,30 @@ function renderIndividualMgrStep5(empId, selfData, competencies, behaviors) {
 async function submitIndividualMgrEval(empId) {
   saveIndividualMgrStepData(5);
 
-  // ตรวจสอบว่าเลือก recommendation แล้ว
+  // ตรวจสอบว่ากรอกครบทุกข้อในส่วนที่ 5 ก่อนบันทึก
+  if (!individualMgrFormData.comment_comp?.trim()) {
+    showToast('กรุณากรอก ข้อ 1: สรุปความเห็นด้านสมรรถนะตามตำแหน่งงาน', 'error'); return;
+  }
+  if (!individualMgrFormData.comment_beh?.trim()) {
+    showToast('กรุณากรอก ข้อ 2: สรุปความเห็นด้านพฤติกรรมหลัก', 'error'); return;
+  }
+  if (!individualMgrFormData.overall_comment?.trim()) {
+    showToast('กรุณากรอก ข้อ 3: ภาพรวมการปฏิบัติงาน', 'error'); return;
+  }
   if (!individualMgrFormData.recommendation) {
-    showToast('กรุณาเลือกข้อเสนอแนะการปรับอัตราตอบแทน (ข้อ 2) ก่อนบันทึก', 'error');
-    return;
+    showToast('กรุณาเลือก ข้อ 4: เสนอเพื่อการปรับอัตราตอบแทน', 'error'); return;
+  }
+  if (individualMgrFormData.recommendation === 'merit' && !individualMgrFormData.rec_sub_other?.trim()) {
+    showToast('กรุณากรอกเหตุผล ข้อ 4: ฝั่งเสนอปรับขึ้น', 'error'); return;
+  }
+  if (individualMgrFormData.recommendation === 'hold' && !individualMgrFormData.rec_sub_other2?.trim()) {
+    showToast('กรุณากรอกเหตุผล ข้อ 4: ฝั่งยังไม่ปรับขึ้น', 'error'); return;
+  }
+  if (!individualMgrFormData.career) {
+    showToast('กรุณาเลือก ข้อ 5: เสนอเพื่อการปรับตำแหน่งงาน', 'error'); return;
+  }
+  if (!individualMgrFormData.dev_plan?.trim()) {
+    showToast('กรุณากรอก ข้อ 6: แผนการพัฒนาและเตรียมความพร้อม', 'error'); return;
   }
 
   // คำนวณคะแนนอัตโนมัติจาก selfEval ของพนักงาน
