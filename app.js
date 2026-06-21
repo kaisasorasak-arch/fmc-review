@@ -4931,12 +4931,22 @@ function renderIndividualReport(empId, emp, realEmp) {
           <div>
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">ข้อเสนอแนะ</div>
             <div style="font-size:14px;font-weight:600">${recLabel}</div>
+            ${(mgrData.recommendation === 'merit' && mgrData.rec_sub_other) ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${mgrData.rec_sub_other}</div>` : ''}
+            ${(mgrData.recommendation === 'hold' && mgrData.rec_sub_other2) ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">${mgrData.rec_sub_other2}</div>` : ''}
           </div>
           ${mgrData.career ? `<div>
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">การปรับตำแหน่ง</div>
             <div style="font-size:13px;font-weight:600">${careerMap[mgrData.career]||mgrData.career}</div>
           </div>` : ''}
         </div>
+        ${mgrData.comment_comp ? `<div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border);margin-bottom:10px">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">สรุปความเห็นด้านสมรรถนะตามตำแหน่งงาน (ส่วนที่ 1)</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin:0">${mgrData.comment_comp}</p>
+        </div>` : ''}
+        ${mgrData.comment_beh ? `<div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border);margin-bottom:10px">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">สรุปความเห็นด้านพฤติกรรมหลัก (ส่วนที่ 2)</div>
+          <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin:0">${mgrData.comment_beh}</p>
+        </div>` : ''}
         ${mgrData.overall_comment ? `<div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border);margin-bottom:10px">
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">สรุปความเห็น</div>
           <p style="font-size:13px;color:var(--text-2);font-style:italic;line-height:1.6;margin:0">"${mgrData.overall_comment}"</p>
