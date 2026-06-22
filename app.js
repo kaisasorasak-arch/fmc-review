@@ -768,10 +768,11 @@ function renderSidebar() {
   let navItems = (navDefs[u.role] || []).filter(item =>
     !(sameId(u.id, 'FMC-001') && item.view === 'self-eval')
   );
-  // ซ่อน Self-Evaluation สำหรับ manager ที่กรอกแล้ว — เข้าดูได้แค่ผ่านปุ่ม "ดูข้อมูลที่กรอก"
+  // ซ่อน Self-Evaluation สำหรับ manager ที่กรอกแล้ว — ยกเว้นถ้าปลดล็อกอยู่
   if (u.role === 'manager') {
-    const hasSelfEval = allData.selfEvals.some(s => sameId(s.employee_id, u.id));
-    if (hasSelfEval) navItems = navItems.filter(item => item.view !== 'self-eval');
+    const ownSelfEval = allData.selfEvals.find(s => sameId(s.employee_id, u.id));
+    const selfLocked  = ownSelfEval && !(ownSelfEval.is_unlocked === true || ownSelfEval.is_unlocked === 'true');
+    if (selfLocked) navItems = navItems.filter(item => item.view !== 'self-eval');
   }
   if (sameId(u.id, 'FMC-001')) {
     navItems = [
@@ -965,10 +966,18 @@ async function renderMgrDashboard() {
       const actionDesc  = document.getElementById('mgr-own-action-desc');
       const actionBtn   = document.getElementById('mgr-own-action-btn');
       if (ownSelf) {
-        actionTitle.textContent = 'ดูข้อมูลที่กรอก';
-        actionDesc.textContent  = 'ดูข้อมูลที่ส่งแล้ว (อ่านได้อย่างเดียว ไม่สามารถแก้ไขได้)';
-        actionBtn.textContent   = 'ดูข้อมูลที่กรอก';
-        actionBtn.onclick       = viewMgrOwnSelfEval;
+        const selfUnlocked = ownSelf.is_unlocked === true || ownSelf.is_unlocked === 'true';
+        if (selfUnlocked) {
+          actionTitle.textContent = 'แก้ไข Self-Evaluation';
+          actionDesc.textContent  = 'ปลดล็อกแล้ว — แก้ไขและส่งใหม่ได้';
+          actionBtn.textContent   = 'แก้ไข Self-Eval';
+          actionBtn.onclick       = () => showView('self-eval');
+        } else {
+          actionTitle.textContent = 'ดูข้อมูลที่กรอก';
+          actionDesc.textContent  = 'ดูข้อมูลที่ส่งแล้ว (อ่านได้อย่างเดียว ไม่สามารถแก้ไขได้)';
+          actionBtn.textContent   = 'ดูข้อมูลที่กรอก';
+          actionBtn.onclick       = viewMgrOwnSelfEval;
+        }
       } else {
         actionTitle.textContent = 'กรอก Self-Evaluation';
         actionDesc.textContent  = 'ยังไม่ได้ประเมินตัวเอง — กรุณากรอกก่อนวันสิ้นสุดรอบ';
