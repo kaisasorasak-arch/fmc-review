@@ -707,6 +707,20 @@ async function submitForceChangePassword() {
   }
 }
 
+async function unlockEval(type, empId, empName) {
+  const label = type === 'self' ? 'Self-Eval' : 'Manager Eval';
+  if (!confirm(`ปลดล็อก ${label} ของ "${empName}" ให้แก้ไขได้?`)) return;
+  try {
+    const p = getCurrentPeriod();
+    await apiPost({ action: 'unlockEval', type, employee_id: empId, year: p.year, quarter: p.quarter });
+    await loadAllData();
+    renderAdminTable();
+    showToast(`ปลดล็อก ${label} ของ ${empName} สำเร็จ`, 'success');
+  } catch {
+    showToast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
+  }
+}
+
 async function resetEmployeePassword(empId, empName) {
   if (!confirm(`รีเซ็ตรหัสผ่านของ "${empName}" กลับเป็น 1234?`)) return;
   try {
@@ -1385,7 +1399,17 @@ function renderAdminTable() {
       <td style="font-size:12px;color:var(--text-2)">${mgr ? mgr.name : '—'}</td>
       <td style="display:flex;gap:6px">
         <button class="btn-outline btn-sm" onclick="openEmployeeModal('${emp.id}')">แก้ไข</button>
-        ${currentUser.role === 'hr' ? `<button class="btn-outline btn-sm" style="color:#D97706;border-color:#D97706" onclick="resetEmployeePassword('${emp.id}','${emp.name.replace(/'/g,"\\'")}')">Reset รหัส</button>` : ''}
+        ${currentUser.role === 'hr' ? (() => {
+          const selfE = allData.selfEvals.find(s => sameId(s.employee_id, emp.id));
+          const mgrE  = allData.managerEvals.find(m => sameId(m.employee_id, emp.id));
+          const selfUnlocked = selfE?.is_unlocked === true || selfE?.is_unlocked === 'true';
+          const mgrUnlocked  = mgrE?.is_unlocked  === true || mgrE?.is_unlocked  === 'true';
+          return `
+            <button class="btn-outline btn-sm" style="color:#D97706;border-color:#D97706" onclick="resetEmployeePassword('${emp.id}','${emp.name.replace(/'/g,"\\'")}')">Reset รหัส</button>
+            ${selfE && !selfUnlocked ? `<button class="btn-outline btn-sm" style="color:#0369A1;border-color:#0369A1" onclick="unlockEval('self','${emp.id}','${emp.name.replace(/'/g,"\\'")}')">🔓 Self-Eval</button>` : ''}
+            ${mgrE  && !mgrUnlocked  ? `<button class="btn-outline btn-sm" style="color:#0369A1;border-color:#0369A1" onclick="unlockEval('mgr','${emp.id}','${emp.name.replace(/'/g,"\\'")}')">🔓 Mgr-Eval</button>`  : ''}
+          `;
+        })() : ''}
         <button class="btn-outline btn-sm" style="color:var(--red);border-color:var(--red)" onclick="deleteEmployee('${emp.id}')">ลบ</button>
       </td>
     `;
@@ -1619,16 +1643,17 @@ async function renderSelfEvalForm() {
   selfEvalForceReadOnly = false; // reset ทันทีหลังอ่าน
   const selfEval   = allData.selfEvals.find(s => sameId(s.employee_id, currentUser.id));
   const hasMgrEval = allData.managerEvals.some(m => sameId(m.employee_id, currentUser.id));
-  const isLocked   = !!selfEval || forceReadOnly;
+  const isUnlocked = selfEval?.is_unlocked === true || selfEval?.is_unlocked === 'true';
+  const isLocked   = (!!selfEval && !isUnlocked) || forceReadOnly;
 
   // banner แสดงสถานะก่อน layout
   const noticeBanner = isLocked
     ? `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;font-size:13px;color:#991B1B;display:flex;align-items:center;gap:8px">
          🔒 <strong>ส่งแบบประเมินแล้ว</strong> — ไม่สามารถแก้ไขได้
        </div>`
-    : selfEval
+    : (selfEval && isUnlocked)
     ? `<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;font-size:13px;color:#92400E;display:flex;align-items:center;gap:8px">
-         📝 <strong>ส่งแบบประเมินแล้ว</strong> — แก้ไขและส่งใหม่ได้จนกว่าหัวหน้าจะประเมิน
+         🔓 <strong>ปลดล็อกแล้ว</strong> — แก้ไขและส่งใหม่ได้
        </div>`
     : '';
 
@@ -3089,6 +3114,16 @@ async function renderMgrEvalForm() {
   document.getElementById('mgr-eval-emp-name').textContent = emp.name;
   const layout  = document.getElementById('mgr-eval-layout');
   const posType = emp.position_type || 'staff';
+
+  // ตรวจสอบ lock — ถ้า mgrEval มีอยู่แล้วและยังไม่ปลดล็อก → แสดง locked banner
+  const existingMgrLock = allData.managerEvals.find(m => sameId(m.employee_id, empId));
+  const mgrIsUnlocked   = existingMgrLock?.is_unlocked === true || existingMgrLock?.is_unlocked === 'true';
+  if (existingMgrLock && !mgrIsUnlocked) {
+    layout.innerHTML = `<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius);padding:16px;font-size:13px;color:#991B1B;display:flex;align-items:center;gap:8px;margin-top:12px">
+      🔒 <strong>บันทึกการประเมินแล้ว</strong> — ไม่สามารถแก้ไขได้ กรุณาติดต่อ HR เพื่อปลดล็อก
+    </div>`;
+    return;
+  }
 
   // หาข้อมูลพนักงานจาก REAL_EMPLOYEES เพื่อเช็ค competencies และ position_type ที่ถูกต้อง
   const realEmp = REAL_EMPLOYEES.find(r => sameId(r.id, empId));
@@ -5644,6 +5679,13 @@ function mockApiPost(payload) {
     const overrides = JSON.parse(localStorage.getItem('fmc_pwd_overrides') || '{}');
     delete overrides[payload.userId.toLowerCase()];
     localStorage.setItem('fmc_pwd_overrides', JSON.stringify(overrides));
+  }
+  // Unlock Eval — ปลดล็อก self/mgr eval รายคน
+  if (payload.action === 'unlockEval') {
+    const key = payload.type === 'self' ? 'mock_selfEvals' : 'mock_managerEvals';
+    const arr = JSON.parse(localStorage.getItem(key)||'[]');
+    const idx = arr.findIndex(r => r.employee_id === payload.employee_id);
+    if (idx >= 0) { arr[idx].is_unlocked = true; localStorage.setItem(key, JSON.stringify(arr)); }
   }
   // Settings — เก็บใน localStorage
   if (payload.action === 'saveSettings') {
