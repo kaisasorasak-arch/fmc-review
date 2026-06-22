@@ -4827,7 +4827,8 @@ function renderIndividualReport(empId, emp, realEmp) {
             <div style="width:22px;text-align:center;font-size:11px;color:var(--text-3);flex-shrink:0;padding-top:2px">${c.no||idx+1}</div>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600">${c.name}</div>
-              ${optText ? `<div style="font-size:11px;color:var(--text-2);margin-top:2px">${optText}</div>` : ''}
+              ${c.question ? `<div style="font-size:12px;color:var(--text-2);margin-top:2px">${c.question}</div>` : ''}
+              ${optText ? `<div style="font-size:11px;color:var(--text-2);margin-top:2px;font-style:italic">→ ${optText}</div>` : ''}
               ${hasOverride ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${mgrScore} / พนักงานเลือก ${empScore}</div>` : ''}
               ${evidence ? `<div style="font-size:11px;color:var(--text-2);margin-top:4px;padding:4px 8px;background:var(--bg);border-radius:4px;border-left:2px solid rgba(224,32,32,0.3)">📝 ${evidence}</div>` : ''}
             </div>
@@ -4873,11 +4874,14 @@ function renderIndividualReport(empId, emp, realEmp) {
         const disp = mgrScore || empScore;
         const col = sCol(disp, 5);
         const evidence = indData[`ibeh_ev_${b.key}`] || '';
+        const behOptText = empScore > 0 ? (b.options[5 - empScore] || '') : '';
         return `
           <div class="report-behavior-row" style="align-items:flex-start">
             <span class="report-behavior-no" style="padding-top:2px">${b.no||idx+1}</span>
             <div style="flex:1;min-width:0">
               <span class="report-behavior-name">${b.name}</span>
+              ${b.question ? `<div style="font-size:12px;color:var(--text-2);margin-top:2px">${b.question}</div>` : ''}
+              ${behOptText ? `<div style="font-size:11px;color:var(--text-2);margin-top:2px;font-style:italic">→ ${behOptText}</div>` : ''}
               ${hasOverride ? `<div style="font-size:11px;color:var(--primary);margin-top:2px">หัวหน้าปรับ ${mgrScore} / พนักงานเลือก ${empScore}</div>` : ''}
               ${evidence ? `<div style="font-size:11px;color:var(--text-2);margin-top:4px;padding:4px 8px;background:var(--bg);border-radius:4px;border-left:2px solid rgba(224,32,32,0.3)">📝 ${evidence}</div>` : ''}
             </div>
