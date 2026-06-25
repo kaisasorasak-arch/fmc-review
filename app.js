@@ -4987,6 +4987,12 @@ function renderIndividualReport(empId, emp, realEmp) {
           ${mgrData.career ? `<div>
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px">การปรับตำแหน่ง</div>
             <div style="font-size:13px;font-weight:600">${careerMap[mgrData.career]||mgrData.career}</div>
+            ${mgrData.career === 'promote' && mgrData.career_position ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px">ตำแหน่งใหม่: <span style="font-weight:600;color:var(--text-1)">${mgrData.career_position}</span></div>` : ''}
+            ${mgrData.career === 'transfer' ? `<div style="font-size:12px;color:var(--text-2);margin-top:4px;display:flex;gap:16px;flex-wrap:wrap">
+              ${mgrData.career_company ? `<span>บริษัท: <span style="font-weight:600;color:var(--text-1)">${mgrData.career_company}</span></span>` : ''}
+              ${mgrData.career_dept ? `<span>แผนก: <span style="font-weight:600;color:var(--text-1)">${mgrData.career_dept}</span></span>` : ''}
+              ${mgrData.career_transfer_position ? `<span>ตำแหน่งใหม่: <span style="font-weight:600;color:var(--text-1)">${mgrData.career_transfer_position}</span></span>` : ''}
+            </div>` : ''}
           </div>` : ''}
         </div>
         ${mgrData.comment_comp ? `<div style="padding:12px;background:var(--bg);border-radius:var(--radius);border-left:3px solid var(--border);margin-bottom:10px">
